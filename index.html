@@ -1,0 +1,512 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#160d07">
+<title>اتاق جعبه‌ابزار</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #160d07;
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+}
+
+body {
+    position: fixed;
+    inset: 0;
+}
+
+/* کل صفحه کتابخانه */
+.scene {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+
+    background-color: #291709;
+    background-image: url("library-bg.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+
+    overflow: hidden;
+}
+
+/* کتاب‌ها */
+.book {
+    position: absolute;
+    display: block;
+    padding: 0;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background .2s, border .2s, transform .2s;
+}
+
+.book:hover {
+    background: rgba(255, 215, 140, .13);
+    border-color: rgba(255, 220, 160, .6);
+}
+
+.book:active {
+    background: rgba(255, 220, 150, .25);
+    transform: scale(.96);
+}
+
+.book:focus-visible {
+    outline: 2px solid #ffdfa1;
+}
+
+/* ردیف اول */
+.b1  { left: 20.5%; top: 13.8%; width: 12%; height: 20%; }
+.b2  { left: 35.5%; top: 13.8%; width: 11%; height: 20%; }
+.b3  { left: 48.5%; top: 13.8%; width: 12%; height: 20%; }
+.b4  { left: 61.5%; top: 13.8%; width: 12%; height: 20%; }
+.b5  { left: 74.5%; top: 13.8%; width: 12%; height: 20%; }
+
+/* ردیف دوم */
+.b6  { left: 21.5%; top: 38.5%; width: 12%; height: 20%; }
+.b7  { left: 35.5%; top: 38.5%; width: 12%; height: 20%; }
+.b8  { left: 49%; top: 38.5%; width: 12%; height: 20%; }
+.b9  { left: 62%; top: 38.5%; width: 12%; height: 20%; }
+.b10 { left: 75%; top: 38.5%; width: 12%; height: 20%; }
+
+/* ردیف سوم */
+.b11 { left: 26%; top: 63.5%; width: 12%; height: 21%; }
+.b12 { left: 40%; top: 63.5%; width: 12%; height: 21%; }
+.b13 { left: 54.5%; top: 63.5%; width: 12%; height: 21%; }
+.b14 { left: 68%; top: 63.5%; width: 12%; height: 21%; }
+
+/* دکمه‌های بالای تصویر */
+.top-button {
+    position: absolute;
+    top: 1.2%;
+    height: 6.5%;
+    border: 0;
+    border-radius: 30px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.list-button {
+    right: 15.5%;
+    width: 17%;
+}
+
+.about-button {
+    right: 1.5%;
+    width: 14%;
+}
+
+/* پنجره برنامه */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0,0,0,.88);
+    backdrop-filter: blur(7px);
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 1150px;
+    height: 94%;
+    background: #21150d;
+    border: 1px solid #9b7040;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 15px 60px #000;
+}
+
+.modal-header {
+    min-height: 55px;
+    padding: 7px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg,#53341c,#241307);
+    border-bottom: 1px solid #9b7040;
+}
+
+.modal-title {
+    color: #ffe0a8;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.modal-actions button,
+.modal-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #a77b49;
+    background: #684522;
+    color: #fff0d4;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.close-button {
+    background: #8b2e20 !important;
+    border-color: #c66c55 !important;
+}
+
+.app-frame {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: white;
+}
+
+/* پنجره‌های اطلاعاتی */
+.info-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(0,0,0,.85);
+}
+
+.info-overlay.show {
+    display: flex;
+}
+
+.info-box {
+    width: 100%;
+    max-width: 400px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 22px;
+    text-align: center;
+    border: 1px solid #b58a55;
+    border-radius: 15px;
+    background: linear-gradient(145deg,#50331d,#211309);
+    box-shadow: 0 15px 50px #000;
+}
+
+.info-box h2 {
+    color: #ffdda3;
+    margin: 0 0 18px;
+    font-size: 20px;
+}
+
+.info-box p {
+    color: #f1dfc6;
+    line-height: 2.2;
+    font-size: 14px;
+}
+
+.info-box button {
+    border: 0;
+    border-radius: 8px;
+    padding: 9px 25px;
+    background: #a8753e;
+    color: white;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.book-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin: 15px 0;
+}
+
+.book-list button {
+    background: #382314;
+    border: 1px solid #8d6539;
+    color: #ffe2b5;
+    padding: 11px 5px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+/* نمایشگرهای کوچک */
+@media(max-width:600px) {
+    .modal {
+        padding: 4px;
+    }
+
+    .modal-box {
+        height: 98%;
+        border-radius: 9px;
+    }
+
+    .modal-header {
+        min-height: 46px;
+        padding: 5px 7px;
+    }
+
+    .modal-title {
+        font-size: 11px;
+    }
+
+    .modal-actions {
+        gap: 4px;
+    }
+
+    .modal-actions button,
+    .modal-actions a {
+        padding: 6px 7px;
+        font-size: 9px;
+    }
+
+    .info-box {
+        padding: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="scene">
+
+    <!-- ردیف اول -->
+    <button class="book b1" aria-label="قرعه کشی" onclick="openApp(0)"></button>
+    <button class="book b2" aria-label="ماشین حساب" onclick="openApp(1)"></button>
+    <button class="book b3" aria-label="اطلس خودشناسی" onclick="openApp(2)"></button>
+    <button class="book b4" aria-label="عدد خوان" onclick="openApp(3)"></button>
+    <button class="book b5" aria-label="تاس دیجیتال" onclick="openApp(4)"></button>
+
+    <!-- ردیف دوم -->
+    <button class="book b6" aria-label="استودیو QR Code" onclick="openApp(5)"></button>
+    <button class="book b7" aria-label="استودیو رنگ" onclick="openApp(6)"></button>
+    <button class="book b8" aria-label="استخراج متن از عکس" onclick="openApp(7)"></button>
+    <button class="book b9" aria-label="مترجم چند زبانه" onclick="openApp(8)"></button>
+    <button class="book b10" aria-label="زبان‌های رمزی" onclick="openApp(9)"></button>
+
+    <!-- ردیف سوم -->
+    <button class="book b11" aria-label="آب و هوا" onclick="openApp(10)"></button>
+    <button class="book b12" aria-label="دانشنامه جهان شناسی" onclick="openApp(11)"></button>
+    <button class="book b13" aria-label="مرکز زمان" onclick="openApp(12)"></button>
+    <button class="book b14" aria-label="فاصله یاب" onclick="openApp(13)"></button>
+
+    <!-- دکمه‌های روی تصویر -->
+    <button class="top-button list-button" onclick="showList()" aria-label="فهرست کتاب‌ها"></button>
+    <button class="top-button about-button" onclick="showAbout()" aria-label="درباره من"></button>
+
+</main>
+
+<!-- پنجره برنامه‌ها -->
+<div class="modal" id="appModal">
+    <div class="modal-box">
+
+        <header class="modal-header">
+            <div class="modal-title" id="appTitle">برنامه</div>
+
+            <div class="modal-actions">
+                <a id="externalLink" href="#" target="_blank" rel="noopener">
+                    صفحه جدید ↗
+                </a>
+
+                <button class="close-button" onclick="closeApp()">
+                    بستن ✕
+                </button>
+            </div>
+        </header>
+
+        <iframe
+            id="appFrame"
+            class="app-frame"
+            src="about:blank"
+            allow="fullscreen; clipboard-read; clipboard-write; geolocation"
+            allowfullscreen>
+        </iframe>
+
+    </div>
+</div>
+
+<!-- درباره من -->
+<div class="info-overlay" id="aboutModal" onclick="outsideClose(event,'aboutModal')">
+    <div class="info-box">
+        <h2>درباره من</h2>
+
+        <p>
+            به اتاق جعبه‌ابزار خوش آمدید.
+            <br>
+            مجموعه‌ای از ابزارها و برنامه‌های کاربردی در یک کتابخانه.
+            <br><br>
+            <strong>Developer: Masoud delavar</strong>
+        </p>
+
+        <button onclick="closeInfo('aboutModal')">بستن</button>
+    </div>
+</div>
+
+<!-- فهرست کتاب‌ها -->
+<div class="info-overlay" id="listModal" onclick="outsideClose(event,'listModal')">
+    <div class="info-box">
+        <h2>فهرست کتاب‌ها</h2>
+        <div class="book-list" id="bookList"></div>
+        <button onclick="closeInfo('listModal')">بستن</button>
+    </div>
+</div>
+
+<script>
+const apps = [
+    {
+        name: "قرعه کشی",
+        url: "https://masoud73d.github.io/ghoree-keshi/"
+    },
+    {
+        name: "ماشین حساب",
+        url: "https://masoud73d.github.io/calculator/"
+    },
+    {
+        name: "اطلس خودشناسی",
+        url: "https://masoud73d.github.io/Khodshenasi-va-taghvim/"
+    },
+    {
+        name: "عدد خوان",
+        url: "https://masoud73d.github.io/adad-khan/"
+    },
+    {
+        name: "تاس دیجیتال",
+        url: "https://masoud73d.github.io/Taas/"
+    },
+    {
+        name: "استودیو QR Code",
+        url: "https://masoud73d.github.io/Qr.Code/"
+    },
+    {
+        name: "استودیو رنگ",
+        url: "https://masoud73d.github.io/Colors/"
+    },
+    {
+        name: "استخراج متن از عکس",
+        url: "https://masoud73d.github.io/Text-reader/"
+    },
+    {
+        name: "مترجم چند زبانه",
+        url: "https://masoud73d.github.io/dictionary/"
+    },
+    {
+        name: "زبان‌های رمزی",
+        url: "https://masoud73d.github.io/motarjeme-ramzi/"
+    },
+    {
+        name: "آب‌وهوا",
+        url: "https://masoud73d.github.io/weather/"
+    },
+    {
+        name: "دانشنامه جهان‌شناسی",
+        url: "https://masoud73d.github.io/Jaahaan-shenasi/"
+    },
+    {
+        name: "مرکز زمان",
+        url: "https://masoud73d.github.io/markaz-zaman/"
+    },
+    {
+        name: "فاصله‌یاب",
+        url: "https://masoud73d.github.io/fasle-yab/"
+    }
+];
+
+function openApp(index) {
+    const app = apps[index];
+
+    if (!app) return;
+
+    document.getElementById("appTitle").textContent = app.name;
+    document.getElementById("externalLink").href = app.url;
+    document.getElementById("appFrame").src = app.url;
+
+    document.getElementById("appModal").classList.add("show");
+}
+
+function closeApp() {
+    document.getElementById("appModal").classList.remove("show");
+    document.getElementById("appFrame").src = "about:blank";
+}
+
+function showAbout() {
+    document.getElementById("aboutModal").classList.add("show");
+}
+
+function showList() {
+    const container = document.getElementById("bookList");
+    container.innerHTML = "";
+
+    apps.forEach((app, index) => {
+        const button = document.createElement("button");
+        button.textContent = app.name;
+
+        button.addEventListener("click", () => {
+            closeInfo("listModal");
+            openApp(index);
+        });
+
+        container.appendChild(button);
+    });
+
+    document.getElementById("listModal").classList.add("show");
+}
+
+function closeInfo(id) {
+    document.getElementById(id).classList.remove("show");
+}
+
+function outsideClose(event, id) {
+    if (event.target.id === id) {
+        closeInfo(id);
+    }
+}
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+        closeApp();
+        closeInfo("aboutModal");
+        closeInfo("listModal");
+    }
+});
+</script>
+
+</body>
+</html>
+
