@@ -4,1411 +4,337 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#101827">
-<title>اتاق جعبه‌ابزار | Masoud</title>
+<meta name="theme-color" content="#160a06">
+<title>اتاق جعبه‌ابزار | مسعود</title>
 
 <style>
-:root{
- --gold:#d8b477;
- --ink:#f4eee3;
- --night:#0a111d;
-}
-
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
-
 body{
- margin:0;
- background:#0a111d;
- color:var(--ink);
- font-family:Tahoma,"Segoe UI",sans-serif;
- overflow-x:hidden;
+  margin:0;background:#160a06;color:#f8e4bd;
+  font-family:Tahoma,Arial,sans-serif;overflow-x:hidden
+}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.page{
+  width:100%;min-height:100vh;display:flex;
+  justify-content:center;align-items:flex-start;background:#160a06
+}
+.scene{
+  position:relative;width:100%;max-width:1024px;
+  line-height:0;overflow:hidden;isolation:isolate
+}
+.scene-image{
+  display:block;width:100%;height:auto;user-select:none;
+  -webkit-user-drag:none;pointer-events:none
+}
+.hotspot{
+  position:absolute;display:block;padding:0;margin:0;
+  border:0;border-radius:5px;background:transparent;
+  appearance:none;-webkit-appearance:none;
+  touch-action:manipulation;z-index:5;line-height:normal
+}
+.hotspot:focus-visible{
+  outline:2px solid #ffe3a1;background:#ffffff12
 }
 
-button,input{font:inherit}
-button{cursor:pointer}
+/* ردیف اول */
+.book-1{left:12.8%;top:23.7%;width:14.1%;height:12.3%}
+.book-2{left:27.4%;top:23.7%;width:14%;height:12.3%}
+.book-3{left:42.2%;top:23.6%;width:14.8%;height:12.4%}
+.book-4{left:57.6%;top:23.7%;width:15%;height:12.3%}
+.book-5{left:73.7%;top:23.7%;width:15.2%;height:12.3%}
 
-/* نوار بالایی */
+/* ردیف دوم */
+.book-6{left:10.7%;top:41.5%;width:15.7%;height:13.2%}
+.book-7{left:27.2%;top:41.5%;width:15.5%;height:13.2%}
+.book-8{left:43.4%;top:41.5%;width:14.8%;height:13.2%}
+.book-9{left:58.7%;top:41.5%;width:16%;height:13.2%}
+.book-10{left:75.5%;top:41.5%;width:14.2%;height:13.2%}
 
-.topbar{
- position:sticky;
- top:0;
- z-index:30;
- min-height:72px;
- padding:10px clamp(12px,3vw,34px);
- display:flex;
- align-items:center;
- justify-content:space-between;
- gap:12px;
- background:linear-gradient(180deg,#101b2b,#0e1928f2);
- border-bottom:1px solid #c5a16a55;
- box-shadow:0 7px 25px #0006;
+/* ردیف سوم */
+.book-11{left:18.4%;top:59.8%;width:14.8%;height:13%}
+.book-12{left:35.2%;top:59.8%;width:14.5%;height:13%}
+.book-13{left:52%;top:59.8%;width:15.2%;height:13%}
+.book-14{left:69.1%;top:59.8%;width:14.9%;height:13%}
+
+/* دکمه‌های تصویر */
+.list-hotspot{
+  left:65.5%;top:7.7%;width:21%;height:4.8%;border-radius:20px
+}
+.about-hotspot{
+  left:87.6%;top:7.8%;width:11%;height:6.2%;border-radius:20px
 }
 
-.brand{
- display:flex;
- align-items:center;
- gap:11px;
- min-width:0;
+/* پنجره‌ها */
+.overlay{
+  position:fixed;inset:0;z-index:100;display:none;
+  align-items:center;justify-content:center;padding:12px;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(8px)
 }
-
-.brand-mark{
- width:43px;
- height:43px;
- flex:none;
- display:grid;
- place-items:center;
- border-radius:12px;
- background:linear-gradient(145deg,#40536a,#182638);
- border:1px solid #e2c18a;
- font-size:22px;
+.overlay.show{display:flex}
+.dialog{
+  width:min(100%,1100px);max-height:94vh;
+  display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid #bd8a43;border-radius:14px;
+  background:#20130d;box-shadow:0 20px 70px #000
 }
-
-.brand strong{
- font-size:15px;
- display:block;
- white-space:nowrap;
+.dialog-head{
+  min-height:52px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;padding:9px 13px;
+  background:linear-gradient(90deg,#553018,#24150d);
+  border-bottom:1px solid #a8793e
 }
-
-.brand small{
- display:block;
- color:#c7b28e;
- font-size:10px;
- margin-top:4px;
+.dialog-title{font-size:14px;font-weight:bold;color:#ffe0a1}
+.actions{display:flex;gap:7px}
+.action-btn{
+  border:1px solid #c39755;border-radius:8px;padding:8px 11px;
+  color:#ffe9c2;background:#58371d;font-size:11px
 }
-
-.top-actions{
- display:flex;
- align-items:center;
- gap:8px;
- flex:none;
-}
-
-.top-actions button{
- border:1px solid #d7b77b88;
- border-radius:10px;
- padding:9px 12px;
- background:linear-gradient(145deg,#263a52,#142237);
- color:#f6e7ca;
- font-size:11px;
-}
-
-/* فضای اصلی */
-
-.hero{
- position:relative;
- min-height:calc(100svh - 72px);
- padding:18px 12px 24px;
- display:flex;
- align-items:center;
- justify-content:center;
- overflow:hidden;
- background:radial-gradient(ellipse at 50% 34%,#34465c 0,#1b2a3c 42%,#0b1421 82%);
-}
-
-.hero:before{
- content:"";
- position:absolute;
- inset:0;
- background:
- radial-gradient(ellipse at 50% 15%,#d5b77b14,transparent 45%),
- linear-gradient(90deg,#050a1266,transparent 18%,transparent 82%,#050a1266);
- pointer-events:none;
-}
-
-.room{
- position:relative;
- width:min(1180px,98vw);
- height:min(760px,83svh);
- min-height:570px;
- perspective:1400px;
- transform-style:preserve-3d;
- transition:transform .25s ease;
- filter:drop-shadow(0 28px 32px #0009);
-}
-
-.room-shell{
- position:absolute;
- inset:2% 1% 11%;
- transform-style:preserve-3d;
- transform:rotateY(-1deg);
-}
-
-.backwall{
- position:absolute;
- inset:0;
- background:linear-gradient(105deg,#263a50,#30455b 46%,#1d3045);
- border:12px solid #172334;
- box-shadow:inset 0 0 0 2px #b5c2d022,inset 0 -30px 45px #07101dcc;
- transform:translateZ(-100px);
-}
-
-.backwall:before{
- content:"";
- position:absolute;
- inset:0;
- background:repeating-linear-gradient(0deg,transparent 0 84px,#ffffff05 85px 86px);
-}
-
-.crown{
- position:absolute;
- left:0;
- right:0;
- top:0;
- height:15px;
- background:linear-gradient(#d4b17b,#805b38 45%,#3e2a1d);
- transform:translateZ(-85px);
-}
-
-.baseboard{
- position:absolute;
- left:0;
- right:0;
- bottom:0;
- height:24px;
- background:linear-gradient(#c49a62,#6d482b 45%,#3c281c);
- transform:translateZ(-75px);
-}
-
-.wall-title{
- position:absolute;
- top:4%;
- left:50%;
- transform:translateX(-50%) translateZ(2px);
- text-align:center;
- white-space:nowrap;
- text-shadow:0 3px 9px #000b;
-}
-
-.wall-title b{
- font-size:clamp(22px,3vw,35px);
- color:#f1d39b;
-}
-
-.wall-title small{
- display:block;
- color:#d5dbe3;
- font-size:11px;
- margin-top:8px;
-}
-
-/* پنجره */
-
-.window{
- position:absolute;
- left:5%;
- top:17%;
- width:22%;
- height:38%;
- border:10px solid #65432c;
- outline:3px solid #c59b5e;
- background:linear-gradient(145deg,#8faebc,#526f85 70%,#30475c);
- box-shadow:inset 0 0 25px #e4f1ff66,0 12px 25px #000a;
- transform:translateZ(12px);
-}
-
-.window:before{
- content:"";
- position:absolute;
- top:0;
- bottom:0;
- left:50%;
- width:8px;
- background:linear-gradient(90deg,#3e281d,#b17b49,#4b2e1d);
-}
-
-.window:after{
- content:"";
- position:absolute;
- left:0;
- right:0;
- top:50%;
- height:8px;
- background:linear-gradient(#3e281d,#b17b49,#4b2e1d);
-}
-
-.curtain{
- position:absolute;
- top:-8px;
- bottom:-8px;
- width:18%;
- background:repeating-linear-gradient(90deg,#51232a 0 8px,#813c40 9px 17px,#5d2930 18px 25px);
- z-index:2;
-}
-
-.curtain.l{left:-4%}
-.curtain.r{right:-4%}
-
-/* قفسه‌ها */
-
-.shelf-unit{
- position:absolute;
- right:4%;
- top:16%;
- width:62%;
- height:69%;
- display:grid;
- grid-template-rows:repeat(3,1fr);
- gap:14px;
- transform:translateZ(34px);
- filter:drop-shadow(0 16px 14px #0009);
-}
-
-.shelf-row{
- position:relative;
- display:flex;
- align-items:flex-end;
- justify-content:space-evenly;
- gap:clamp(3px,.65vw,9px);
- padding:12px 13px 15px;
- background:linear-gradient(180deg,#875a39 0%,#573720 75%,#3c271c 100%);
- border:7px solid #3b291f;
- border-top:9px solid #a8794b;
- border-bottom:15px solid #4a2e1d;
- box-shadow:
- inset 0 5px 12px #f0c58a22,
- inset 0 -8px 12px #140b08,
- 0 7px 0 #241811,
- 0 12px 15px #0008;
- transform:translateZ(12px);
-}
-
-.shelf-row:after{
- content:"";
- position:absolute;
- left:-4px;
- right:-4px;
- bottom:-16px;
- height:8px;
- background:linear-gradient(#d1a46a,#76502f);
- box-shadow:0 4px 7px #0008;
- pointer-events:none;
-}
-
-/*
- اصلاح اصلی:
- دکمه کتاب دیگر flex:1 نیست.
- عرض هر دکمه مستقل است و فضای خالی قفسه را نمی‌پوشاند.
-*/
-
-.book{
- --book:#55758b;
-
- appearance:none;
- -webkit-appearance:none;
-
- position:relative;
- isolation:isolate;
-
- flex:0 0 clamp(34px,7.5vw,88px);
- width:clamp(34px,7.5vw,88px);
- max-width:100px;
- min-width:0;
-
- height:82%;
- align-self:flex-end;
-
- margin:0;
- padding:6px 4px 8px;
-
- border:1px solid #ffffff55;
- border-radius:4px 7px 3px 3px;
-
- color:#fff4dd;
-
- background:
- linear-gradient(90deg,#0008 0%,#0002 9%,#ffffff26 17%,transparent 29%,#0002 85%,#0007 100%),
- var(--book);
-
- box-shadow:
- inset 2px 0 2px #ffffff55,
- inset -3px 0 5px #0006,
- 4px 5px 8px #000a;
-
- display:flex;
- align-items:center;
- justify-content:center;
-
- transform:translateZ(10px);
- transform-origin:bottom center;
- transition:transform .28s,filter .25s;
-
- overflow:hidden;
- touch-action:manipulation;
-}
-
-.book:before{
- content:"";
- position:absolute;
- left:7px;
- right:7px;
- top:7px;
- height:2px;
- background:#f4dba0a6;
- pointer-events:none;
-}
-
-.book:after{
- content:"";
- position:absolute;
- left:7px;
- right:7px;
- bottom:7px;
- height:2px;
- background:#f4dba0a6;
- pointer-events:none;
-}
-
-.book span{
- pointer-events:none;
- writing-mode:vertical-rl;
- text-orientation:mixed;
- font-size:clamp(10px,1.05vw,14px);
- line-height:1.2;
- font-weight:800;
- max-height:100%;
- white-space:normal;
- overflow:hidden;
- text-align:center;
- text-shadow:0 2px 3px #000a;
-}
-
-.book:hover,
-.book:focus-visible{
- transform:translateY(-15px) translateZ(24px) rotateY(-5deg) scale(1.06);
- filter:brightness(1.25);
- outline:2px solid #f2d69c;
- z-index:5;
-}
-
-.book.selected{
- animation:pullBook .85s cubic-bezier(.2,.8,.2,1) forwards;
- z-index:10;
-}
-
-@keyframes pullBook{
- 0%{transform:translateY(0) translateZ(12px) scale(1)}
- 45%{transform:translateY(-34px) translateZ(110px) rotateY(-13deg) scale(1.18)}
- 100%{transform:translateY(-48px) translateZ(190px) rotateY(-24deg) scale(1.38);opacity:0}
-}
-
-/* وسایل اتاق */
-
-.floor{
- position:absolute;
- left:-2%;
- right:-2%;
- bottom:-9%;
- height:24%;
- transform-origin:top;
- transform:rotateX(68deg) translateZ(-60px);
- background:repeating-linear-gradient(90deg,#4c3021 0 110px,#67432b 111px 115px);
- border-top:10px solid #a77b4d;
-}
-
-.rug{
- position:absolute;
- width:46%;
- height:19%;
- left:29%;
- bottom:-2%;
- transform:rotateX(68deg) translateZ(-10px);
- border:7px solid #a77d4e;
- background:repeating-linear-gradient(45deg,#253e56 0 13px,#38536c 14px 27px);
-}
-
-.desk{
- position:absolute;
- left:5%;
- bottom:12%;
- width:32%;
- height:14%;
- background:linear-gradient(180deg,#a4774c 0 15%,#6c452b 16% 100%);
- border:6px solid #3d281b;
- box-shadow:0 13px 0 #2c1b13,0 22px 20px #0009;
- transform:translateZ(70px);
-}
-
-.desk:before,.desk:after{
- content:"";
- position:absolute;
- top:100%;
- height:76px;
- width:15px;
- background:linear-gradient(90deg,#342015,#765033,#382319);
-}
-
-.desk:before{left:11%}
-.desk:after{right:11%}
-
-.monitor{
- position:absolute;
- left:26%;
- bottom:100%;
- width:49%;
- height:116%;
- border:8px solid #161d27;
- border-radius:7px;
- background:linear-gradient(140deg,#152c43,#39708a 55%,#102032);
-}
-
-.monitor:after{
- content:"TOOLBOX";
- position:absolute;
- inset:0;
- display:grid;
- place-items:center;
- color:#f0d49a;
- font-weight:900;
- letter-spacing:3px;
-}
-
-.lamp{
- position:absolute;
- left:9%;
- bottom:100%;
- width:42px;
- height:58px;
- border-left:6px solid #d3ad70;
- transform:skew(-13deg);
-}
-
-.lamp:before{
- content:"";
- position:absolute;
- top:-9px;
- left:-21px;
- width:47px;
- height:21px;
- background:linear-gradient(#ffe1a1,#bd8d4c);
- border-radius:50% 50% 6px 6px;
- box-shadow:0 0 32px #ffd78c;
-}
-
-.plant{
- position:absolute;
- left:3%;
- bottom:14%;
- width:64px;
- height:120px;
- transform:translateZ(65px);
-}
-
-.plant:before{
- content:"";
- position:absolute;
- bottom:0;
- left:8px;
- width:48px;
- height:48px;
- background:linear-gradient(90deg,#684027,#b17b4b,#684027);
- clip-path:polygon(8% 0,92% 0,78% 100%,22% 100%);
-}
-
-.plant:after{
- content:"";
- position:absolute;
- bottom:38px;
- left:31px;
- width:8px;
- height:78px;
- background:#4c8152;
- box-shadow:-20px -8px 0 -1px #5e925a,19px -13px 0 -1px #699a5d,-26px -30px 0 -2px #3f714a,25px -34px 0 -2px #4d8050,-7px -48px 0 -2px #4b7e4d;
-}
-
-.bed{
- position:absolute;
- left:39%;
- bottom:5%;
- width:43%;
- height:24%;
- transform:translateZ(75px);
- background:linear-gradient(90deg,#3c2a20,#765239 10%,#4a3021);
- border:8px solid #3e291c;
-}
-
-.bed:before{
- content:"";
- position:absolute;
- left:-3%;
- right:-3%;
- top:-30%;
- height:34%;
- background:linear-gradient(#98704e,#5e3e29);
- border:6px solid #3d291e;
- border-radius:10px 10px 0 0;
-}
-
-.mattress{
- position:absolute;
- inset:13% 2% 5%;
- border-radius:12px 12px 3px 3px;
- background:linear-gradient(180deg,#e2ddce,#9eaaa8 90%);
-}
-
-.pillow{
- position:absolute;
- top:15%;
- width:27%;
- height:30%;
- border-radius:17px;
- background:linear-gradient(145deg,#f4efdf,#c9c4b2);
-}
-
-.pillow.a{right:8%}
-.pillow.b{right:39%}
-
-.blanket{
- position:absolute;
- left:3%;
- right:3%;
- bottom:5%;
- height:44%;
- background:linear-gradient(120deg,#233c56,#4b6a82 55%,#263d54);
- border-radius:6px 6px 0 0;
-}
-
-/* راهنما */
-
-.hint{
- position:absolute;
- bottom:1%;
- left:50%;
- transform:translateX(-50%);
- white-space:nowrap;
- font-size:11px;
- color:#d3dbe5;
- background:#091321d9;
- border:1px solid #ffffff2c;
- padding:10px 17px;
- border-radius:30px;
-}
-
-/* فهرست کتاب‌ها */
-
-.library{
- max-width:1120px;
- margin:0 auto;
- padding:32px 18px 75px;
-}
-
-.library-head{
- display:flex;
- justify-content:space-between;
- align-items:end;
- gap:15px;
- margin-bottom:18px;
-}
-
-.library-head h2{
- font-size:21px;
- color:#f0d39e;
- margin:0;
-}
-
-.library-head p{
- font-size:12px;
- color:#aebbd0;
- margin:7px 0 0;
-}
-
-.search{
- width:min(260px,48vw);
- padding:11px 13px;
- border:1px solid #ffffff2c;
- border-radius:12px;
- background:#15243a;
- color:#fff;
- outline:none;
-}
-
-.cards{
- display:grid;
- grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
- gap:12px;
-}
-
-.card{
- display:flex;
- align-items:center;
- gap:12px;
- text-align:right;
- min-height:83px;
- padding:12px;
- border:1px solid #ffffff24;
- border-radius:14px;
- background:linear-gradient(145deg,#243951,#111d2e);
- color:#f4ead8;
- transition:.2s;
-}
-
-.card:hover{
- transform:translateY(-4px);
- border-color:#d8b477;
-}
-
-.mini{
- width:40px;
- height:55px;
- flex:none;
- border-radius:3px 6px 4px 3px;
- background:linear-gradient(90deg,#0007,transparent 25%,#ffffff2a 40%,transparent 60%),var(--c);
- border:1px solid #ffffff4d;
- display:grid;
- place-items:center;
- font-size:18px;
-}
-
-.card b{
- font-size:12px;
- display:block;
-}
-
-.card small{
- display:block;
- color:#aebbd0;
- font-size:10px;
- margin-top:6px;
-}
+.action-btn:active{transform:scale(.97)}
+#appFrame{width:100%;height:85vh;border:0;background:white}
 
 /* درباره من */
-
-.about-panel{
- position:fixed;
- z-index:50;
- inset:0;
- background:#030811bb;
- display:none;
- align-items:center;
- justify-content:center;
- padding:18px;
- backdrop-filter:blur(8px);
+.about-content{
+  padding:28px 20px 30px;text-align:center;
+  line-height:2.2;overflow-y:auto
 }
-
-.about-panel.show{display:flex}
-
-.about-box{
- width:min(360px,100%);
- padding:24px;
- border-radius:18px;
- background:linear-gradient(145deg,#263b53,#101b2b);
- border:1px solid #d8b477;
- text-align:center;
- line-height:2;
+.about-content h3{
+  color:#f5d293;font-size:20px;margin:0 0 14px
 }
-
-.about-box h3{
- margin:0;
- color:#f1d39b;
+.about-content p{
+  color:#e5d3b7;font-size:13px;margin:8px 0
 }
-
-.about-box button{
- margin-top:12px;
- padding:9px 20px;
- border-radius:9px;
- border:1px solid #d8b477;
- background:#6f5131;
- color:white;
+.about-content .developer{
+  color:#f4d49c;font-size:13px;font-weight:bold;
+  direction:ltr;display:block;margin-top:14px
 }
-
-/* پنجره برنامه‌ها */
-
-.modal{
- position:fixed;
- z-index:60;
- inset:0;
- display:none;
- align-items:center;
- justify-content:center;
- padding:12px;
- background:#030811e8;
- backdrop-filter:blur(10px);
+.email-link{
+  display:inline-block;direction:ltr;
+  color:#f5d293;text-decoration:none;
+  font-size:14px;font-weight:bold;
+  border:1px solid #987044;border-radius:9px;
+  padding:7px 13px;margin-top:5px;
+  background:linear-gradient(145deg,#54351e,#28170e)
 }
+.email-link:hover{background:#80552c}
 
-.modal.open{display:flex}
-
-.reader{
- width:min(1150px,100%);
- height:min(820px,94svh);
- display:flex;
- flex-direction:column;
- overflow:hidden;
- border-radius:17px;
- border:1px solid #d8b47799;
- background:#101c2c;
+/* فهرست کتاب‌ها */
+.book-list{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;padding:15px;overflow-y:auto
 }
-
-.reader-head{
- display:flex;
- align-items:center;
- justify-content:space-between;
- gap:10px;
- padding:11px 14px;
- background:linear-gradient(90deg,#273d55,#15243a);
- border-bottom:1px solid #ffffff22;
+.list-item{
+  padding:12px 8px;border:1px solid #987044;
+  border-radius:9px;color:#ffe4b4;
+  background:linear-gradient(145deg,#54351e,#28170e);
+  font-size:12px;text-align:center
 }
+.list-item:active{background:#80552c}
 
-.reader-title{
- font-weight:800;
- color:#f1d39b;
- font-size:14px;
+@media(min-width:1025px){
+  .scene{box-shadow:0 0 50px #000}
 }
-
-.reader-actions{
- display:flex;
- gap:7px;
-}
-
-.reader-actions button{
- border:1px solid #ffffff30;
- background:#304a65;
- color:#fff;
- border-radius:9px;
- padding:8px 10px;
- font-size:11px;
-}
-
-.reader iframe{
- width:100%;
- flex:1;
- border:0;
- background:white;
-}
-
-.reader-note{
- padding:8px 12px;
- background:#0b1625;
- color:#b9c5d5;
- font-size:10px;
- line-height:1.7;
-}
-
-/* موبایل */
-
-@media(max-width:700px){
-
- .topbar{
-  min-height:66px;
-  padding:8px 10px;
- }
-
- .brand strong{font-size:13px}
- .brand-mark{width:39px;height:39px}
-
- .top-actions button{
-  padding:8px 9px;
-  font-size:10px;
- }
-
- .hero{
-  min-height:790px;
-  align-items:flex-start;
-  padding:18px 5px 40px;
- }
-
- .room{
-  width:100%;
-  height:690px;
-  min-height:690px;
-  transform:scale(.98)!important;
-  transform-origin:top center;
- }
-
- .room-shell{inset:2% 0 10%}
- .backwall{border-width:8px}
-
- .wall-title{top:3%}
- .wall-title b{font-size:23px}
-
- .window{
-  left:3%;
-  top:17%;
-  width:24%;
-  height:33%;
-  border-width:7px;
- }
-
- .shelf-unit{
-  right:2%;
-  top:16%;
-  width:70%;
-  height:67%;
-  gap:11px;
- }
-
- .shelf-row{
-  padding:9px 7px 12px;
-  gap:4px;
-  border-width:5px;
-  border-bottom-width:12px;
- }
-
- .book{
-  flex:0 0 clamp(34px,8.5vw,48px);
-  width:clamp(34px,8.5vw,48px);
-  height:82%;
-  padding:5px 2px;
- }
-
- .book span{
-  font-size:clamp(9px,2.25vw,12px);
- }
-
- .desk{
-  left:3%;
-  bottom:13%;
-  width:34%;
-  height:12%;
- }
-
- .bed{
-  left:38%;
-  bottom:5%;
-  width:49%;
-  height:22%;
- }
-
- .plant{
-  left:1%;
-  bottom:14%;
-  transform:translateZ(60px) scale(.85);
-  transform-origin:bottom left;
- }
-
- .floor{height:20%}
-
- .rug{
-  width:50%;
-  left:27%;
- }
-
- .hint{
-  bottom:0;
-  font-size:10px;
-  padding:9px 12px;
-  max-width:95%;
-  text-align:center;
- }
-
- .library{padding:25px 13px 65px}
-
- .library-head{
-  align-items:stretch;
-  flex-direction:column;
- }
-
- .search{width:100%}
-
- .cards{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;
- }
-
- .card{
-  min-height:76px;
-  padding:9px;
-  gap:8px;
- }
-
- .card b{font-size:11px}
- .reader{height:95svh}
- .reader-actions button{padding:7px;font-size:10px}
-}
-
-@media(prefers-reduced-motion:reduce){
- *{
-  animation-duration:.01ms!important;
-  transition-duration:.01ms!important;
-  scroll-behavior:auto!important;
- }
+@media(max-width:500px){
+  .overlay{padding:7px}
+  .dialog{max-height:96vh}
+  #appFrame{height:88vh}
+  .dialog-title{font-size:12px}
+  .action-btn{padding:7px 8px;font-size:10px}
+  .book-list{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 
 <body>
 
-<header class="topbar">
- <div class="brand">
-  <div class="brand-mark">📚</div>
-  <div>
-   <strong>اتاق جعبه‌ابزار</strong>
-   <small>کتابخانه دیجیتال مسعود</small>
-  </div>
- </div>
+<main class="page">
+<div class="scene">
 
- <div class="top-actions">
-  <button onclick="document.getElementById('library').scrollIntoView({behavior:'smooth'})">فهرست کتاب‌ها</button>
-  <button onclick="showAbout()">درباره من</button>
- </div>
-</header>
+  <img class="scene-image"
+       src="1000130761.png"
+       alt="کتابخانه دیجیتال"
+       draggable="false">
 
-<main>
+  <button class="hotspot list-hotspot"
+          aria-label="فهرست کتاب‌ها"
+          onclick="showList()"></button>
 
-<section class="hero" id="hero">
+  <button class="hotspot about-hotspot"
+          aria-label="درباره من"
+          onclick="showAbout()"></button>
 
- <div class="room" id="room">
+  <!-- کتاب‌های ردیف اول -->
+  <button class="hotspot book-1" aria-label="قرعه کشی" onclick="openBook(0)"></button>
+  <button class="hotspot book-2" aria-label="ماشین حساب" onclick="openBook(1)"></button>
+  <button class="hotspot book-3" aria-label="اطلس خودشناسی" onclick="openBook(2)"></button>
+  <button class="hotspot book-4" aria-label="عدد خوان" onclick="openBook(3)"></button>
+  <button class="hotspot book-5" aria-label="تاس دیجیتال" onclick="openBook(4)"></button>
 
-  <div class="room-shell">
+  <!-- کتاب‌های ردیف دوم -->
+  <button class="hotspot book-6" aria-label="استودیو QR Code" onclick="openBook(5)"></button>
+  <button class="hotspot book-7" aria-label="استودیو رنگ" onclick="openBook(6)"></button>
+  <button class="hotspot book-8" aria-label="استخراج متن از عکس" onclick="openBook(7)"></button>
+  <button class="hotspot book-9" aria-label="مترجم چند زبانه" onclick="openBook(8)"></button>
+  <button class="hotspot book-10" aria-label="زبان‌های رمزی" onclick="openBook(9)"></button>
 
-   <div class="backwall"></div>
-   <div class="crown"></div>
-   <div class="baseboard"></div>
-
-   <div class="wall-title">
-    <b>اتاق جعبه‌ابزار</b>
-    <small>هر کتاب، یک ابزار تازه</small>
-   </div>
-
-   <div class="window">
-    <div class="curtain l"></div>
-    <div class="curtain r"></div>
-   </div>
-
-   <div class="shelf-unit">
-    <div class="shelf-row" id="row0"></div>
-    <div class="shelf-row" id="row1"></div>
-    <div class="shelf-row" id="row2"></div>
-   </div>
-
-   <div class="desk">
-    <div class="monitor"></div>
-    <div class="lamp"></div>
-   </div>
-
-   <div class="plant"></div>
-
-   <div class="bed">
-    <div class="mattress"></div>
-    <div class="pillow a"></div>
-    <div class="pillow b"></div>
-    <div class="blanket"></div>
-   </div>
-
-   <div class="floor"></div>
-   <div class="rug"></div>
-
-  </div>
- </div>
-
- <div class="hint">
-  برای باز کردن کتاب، فقط روی جلد آن بزن
- </div>
-
-</section>
-
-<section class="library" id="library">
-
- <div class="library-head">
-  <div>
-   <h2>کتابخانه من</h2>
-   <p id="count">۱۴ کتاب در قفسه‌ها</p>
-  </div>
-
-  <input
-   class="search"
-   id="search"
-   placeholder="جست‌وجوی نام کتاب..."
-   oninput="renderCards()"
-  >
- </div>
-
- <div class="cards" id="cards"></div>
-
-</section>
-
-</main>
-
-<div class="about-panel" id="aboutPanel" onclick="if(event.target===this)hideAbout()">
-
- <div class="about-box">
-  <h3>درباره اتاق جعبه‌ابزار</h3>
-  <p>یک کتابخانه دیجیتال برای ابزارها و پروژه‌های کاربردی.</p>
-  <b>Developer: Masoud delavar</b>
-  <br>
-  <button onclick="hideAbout()">بستن</button>
- </div>
+  <!-- کتاب‌های ردیف سوم -->
+  <button class="hotspot book-11" aria-label="آب و هوا" onclick="openBook(10)"></button>
+  <button class="hotspot book-12" aria-label="دانشنامه جهان شناسی" onclick="openBook(11)"></button>
+  <button class="hotspot book-13" aria-label="مرکز زمان" onclick="openBook(12)"></button>
+  <button class="hotspot book-14" aria-label="فاصله یاب" onclick="openBook(13)"></button>
 
 </div>
+</main>
 
-<div class="modal" id="modal" onclick="if(event.target===this)closeBook()">
-
- <div class="reader">
-
-  <div class="reader-head">
-   <div class="reader-title" id="readerTitle">عنوان کتاب</div>
-
-   <div class="reader-actions">
-    <button onclick="openExternal()">باز کردن جداگانه ↗</button>
-    <button onclick="closeBook()">بستن ✕</button>
-   </div>
+<!-- پنجره اجرای برنامه -->
+<div class="overlay" id="appOverlay" onclick="outsideClose(event,'appOverlay')">
+  <div class="dialog">
+    <div class="dialog-head">
+      <span class="dialog-title" id="appTitle">عنوان برنامه</span>
+      <div class="actions">
+        <button class="action-btn" onclick="openExternal()">باز کردن جداگانه ↗</button>
+        <button class="action-btn" onclick="closeApp()">بستن ✕</button>
+      </div>
+    </div>
+    <iframe id="appFrame" title="برنامه انتخاب‌شده"
+      allow="clipboard-read; clipboard-write; fullscreen"></iframe>
   </div>
+</div>
 
-  <iframe
-   id="appFrame"
-   title="برنامه انتخاب‌شده"
-   allow="clipboard-read; clipboard-write; fullscreen"
-  ></iframe>
-
-  <div class="reader-note">
-   اگر سایت اجازه نمایش داخل پنجره را ندهد، گزینه «باز کردن جداگانه» را بزن.
+<!-- فهرست کتاب‌ها -->
+<div class="overlay" id="listOverlay" onclick="outsideClose(event,'listOverlay')">
+  <div class="dialog">
+    <div class="dialog-head">
+      <span class="dialog-title">فهرست کتاب‌های من</span>
+      <button class="action-btn" onclick="hideList()">بستن ✕</button>
+    </div>
+    <div class="book-list" id="bookList"></div>
   </div>
+</div>
 
- </div>
+<!-- درباره من -->
+<div class="overlay" id="aboutOverlay" onclick="outsideClose(event,'aboutOverlay')">
+  <div class="dialog">
+
+    <div class="dialog-head">
+      <span class="dialog-title">درباره من</span>
+      <button class="action-btn" onclick="hideAbout()">بستن ✕</button>
+    </div>
+
+    <div class="about-content">
+      <h3>درباره من</h3>
+
+      <p>توسعه‌دهنده وب و طراح پروژه‌های دیجیتال</p>
+
+      <span class="developer">Developer: Masoud delavar</span>
+
+      <p>راه ارتباطی:</p>
+
+      <a class="email-link"
+         href="mailto:masoud0098d@gmail.com">
+         masoud0098d@gmail.com
+      </a>
+    </div>
+
+  </div>
 </div>
 
 <script>
-
-/* اطلاعات ۱۴ کتاب */
-
-const books=[
-
- {
-  name:"قرعه کشی",
-  url:"https://masoud73d.github.io/ghoree-keshi/",
-  color:"#a34d43",
-  icon:"🎟️"
- },
-
- {
-  name:"ماشین حساب",
-  url:"https://masoud73d.github.io/calculator/",
-  color:"#47758b",
-  icon:"🧮"
- },
-
- {
-  name:"اطلس خودشناسی",
-  url:"https://masoud73d.github.io/Khodshenasi-va-taghvim/",
-  color:"#80649a",
-  icon:"🧭"
- },
-
- {
-  name:"عدد خوان",
-  url:"https://masoud73d.github.io/adad-khan/",
-  color:"#b47d3d",
-  icon:"🔢"
- },
-
- {
-  name:"تاس دیجیتال",
-  url:"https://masoud73d.github.io/Taas/",
-  color:"#4b8068",
-  icon:"🎲"
- },
-
- {
-  name:"استودیو QR Code",
-  url:"https://masoud73d.github.io/Qr.Code/",
-  color:"#426e89",
-  icon:"▦"
- },
-
- {
-  name:"استودیو رنگ",
-  url:"https://masoud73d.github.io/Colors/",
-  color:"#a65e79",
-  icon:"🎨"
- },
-
- {
-  name:"استخراج متن از عکس",
-  url:"https://masoud73d.github.io/Text-reader/",
-  color:"#866d4b",
-  icon:"📷"
- },
-
- {
-  name:"مترجم چند زبانه",
-  url:"https://masoud73d.github.io/dictionary/",
-  color:"#477e83",
-  icon:"🌐"
- },
-
- {
-  name:"زبان‌های رمزی",
-  url:"https://masoud73d.github.io/motarjeme-ramzi/",
-  color:"#945d48",
-  icon:"🔐"
- },
-
- {
-  name:"آب‌وهوا",
-  url:"https://masoud73d.github.io/weather/",
-  color:"#4d80a3",
-  icon:"🌤️"
- },
-
- {
-  name:"دانشنامه جهان‌شناسی",
-  url:"https://masoud73d.github.io/Jaahaan-shenasi/",
-  color:"#687b4d",
-  icon:"🌍"
- },
-
- {
-  name:"مرکز زمان",
-  url:"https://masoud73d.github.io/markaz-zaman/",
-  color:"#8b704e",
-  icon:"🕰️"
- },
-
- {
-  name:"فاصله‌یاب",
-  url:"https://masoud73d.github.io/fasle-yab/",
-  color:"#4f7897",
-  icon:"📍"
- }
-
+const books = [
+  {name:"قرعه کشی",url:"https://masoud73d.github.io/ghoree-keshi/"},
+  {name:"ماشین حساب",url:"https://masoud73d.github.io/calculator/"},
+  {name:"اطلس خودشناسی",url:"https://masoud73d.github.io/Khodshenasi-va-taghvim/"},
+  {name:"عدد خوان",url:"https://masoud73d.github.io/adad-khan/"},
+  {name:"تاس دیجیتال",url:"https://masoud73d.github.io/Taas/"},
+  {name:"استودیو QR Code",url:"https://masoud73d.github.io/Qr.Code/"},
+  {name:"استودیو رنگ",url:"https://masoud73d.github.io/Colors/"},
+  {name:"استخراج متن از عکس",url:"https://masoud73d.github.io/Text-reader/"},
+  {name:"مترجم چند زبانه",url:"https://masoud73d.github.io/dictionary/"},
+  {name:"زبان‌های رمزی",url:"https://masoud73d.github.io/motarjeme-ramzi/"},
+  {name:"آب و هوا",url:"https://masoud73d.github.io/weather/"},
+  {name:"دانشنامه جهان‌شناسی",url:"https://masoud73d.github.io/Jaahaan-shenasi/"},
+  {name:"مرکز زمان",url:"https://masoud73d.github.io/markaz-zaman/"},
+  {name:"فاصله‌یاب",url:"https://masoud73d.github.io/fasle-yab/"}
 ];
 
-let activeUrl="";
-let opening=false;
+let activeUrl = "";
 
-const rowEls=[
- document.getElementById("row0"),
- document.getElementById("row1"),
- document.getElementById("row2")
-];
+function openBook(index){
+  const book=books[index];
+  if(!book)return;
 
-/* ساخت کتاب‌ها */
-
-books.forEach((b,i)=>{
-
- const book=document.createElement("button");
-
- book.type="button";
- book.className="book";
- book.style.setProperty("--book",b.color);
- book.title=b.name;
- book.setAttribute("aria-label","باز کردن "+b.name);
-
- const title=document.createElement("span");
- title.textContent=b.name;
-
- book.appendChild(title);
-
- book.addEventListener("click",function(e){
-
-  e.stopPropagation();
-
-  openBook(i,book);
-
- });
-
- rowEls[Math.floor(i/5)].appendChild(book);
-
-});
-
-/* ساخت فهرست */
-
-function renderCards(){
-
- const q=document
-  .getElementById("search")
-  .value
-  .trim()
-  .toLocaleLowerCase("fa");
-
- const wrap=document.getElementById("cards");
-
- wrap.innerHTML="";
-
- const list=books
-  .map((b,i)=>({...b,index:i}))
-  .filter(b=>b.name.toLocaleLowerCase("fa").includes(q));
-
- document.getElementById("count").textContent=
-  list.length+" کتاب از "+books.length+" کتاب";
-
- list.forEach(b=>{
-
-  const el=document.createElement("button");
-
-  el.type="button";
-  el.className="card";
-
-  const mini=document.createElement("span");
-  mini.className="mini";
-  mini.style.setProperty("--c",b.color);
-  mini.textContent=b.icon;
-
-  const info=document.createElement("span");
-
-  const title=document.createElement("b");
-  title.textContent=b.name;
-
-  const subtitle=document.createElement("small");
-  subtitle.textContent="برای باز کردن لمس کن";
-
-  info.appendChild(title);
-  info.appendChild(subtitle);
-
-  el.appendChild(mini);
-  el.appendChild(info);
-
-  el.addEventListener("click",()=>openBook(b.index,null));
-
-  wrap.appendChild(el);
-
- });
-
+  activeUrl=book.url;
+  document.getElementById("appTitle").textContent=book.name;
+  document.getElementById("appFrame").src=book.url;
+  document.getElementById("appOverlay").classList.add("show");
+  document.body.style.overflow="hidden";
 }
 
-/* باز کردن کتاب */
-
-function openBook(i,element){
-
- if(opening)return;
-
- opening=true;
-
- const b=books[i];
-
- activeUrl=b.url;
-
- document.getElementById("readerTitle").textContent=b.name;
-
- if(element){
-
-  element.classList.remove("selected");
-
-  void element.offsetWidth;
-
-  element.classList.add("selected");
-
-  setTimeout(()=>showReader(b),820);
-
- }else{
-
-  showReader(b);
-
- }
-
-}
-
-function showReader(b){
-
- document.getElementById("appFrame").src=b.url;
-
- document.getElementById("modal").classList.add("open");
-
- document.body.style.overflow="hidden";
-
- opening=false;
-
-}
-
-/* بستن برنامه */
-
-function closeBook(){
-
- document.getElementById("modal").classList.remove("open");
-
- document.getElementById("appFrame").src="about:blank";
-
- document.body.style.overflow="";
-
- document.querySelectorAll(".book.selected").forEach(x=>{
-  x.classList.remove("selected");
- });
-
- opening=false;
-
+function closeApp(){
+  document.getElementById("appOverlay").classList.remove("show");
+  document.getElementById("appFrame").src="about:blank";
+  document.body.style.overflow="";
 }
 
 function openExternal(){
-
- if(activeUrl){
-  window.open(activeUrl,"_blank","noopener,noreferrer");
- }
-
+  if(activeUrl)window.open(activeUrl,"_blank","noopener,noreferrer");
 }
 
-/* درباره من */
+function showList(){
+  document.getElementById("listOverlay").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+
+function hideList(){
+  document.getElementById("listOverlay").classList.remove("show");
+  document.body.style.overflow="";
+}
 
 function showAbout(){
-
- document.getElementById("aboutPanel").classList.add("show");
-
+  document.getElementById("aboutOverlay").classList.add("show");
+  document.body.style.overflow="hidden";
 }
 
 function hideAbout(){
-
- document.getElementById("aboutPanel").classList.remove("show");
-
+  document.getElementById("aboutOverlay").classList.remove("show");
+  document.body.style.overflow="";
 }
 
-/* اجرای اولیه */
+function outsideClose(event,id){
+  if(event.target.id===id){
+    if(id==="appOverlay")closeApp();
+    if(id==="listOverlay")hideList();
+    if(id==="aboutOverlay")hideAbout();
+  }
+}
 
-renderCards();
+function renderList(){
+  const container=document.getElementById("bookList");
 
-/* حرکت سه‌بعدی اتاق */
+  books.forEach((book,index)=>{
+    const button=document.createElement("button");
+    button.className="list-item";
+    button.type="button";
+    button.textContent=book.name;
 
-let drag=false;
-let lastX=0;
-let lastY=0;
-let rx=0;
-let ry=0;
+    button.addEventListener("click",()=>{
+      hideList();
+      openBook(index);
+    });
 
-const hero=document.getElementById("hero");
-const room=document.getElementById("room");
+    container.appendChild(button);
+  });
+}
 
-hero.addEventListener("pointerdown",e=>{
-
- /*
- فقط لمس فضای خالی می‌تواند حرکت سه‌بعدی ایجاد کند.
- لمس کتاب‌ها و دکمه‌ها وارد حالت کشیدن نمی‌شود.
- */
-
- if(e.target.closest("button"))return;
-
- drag=true;
-
- lastX=e.clientX;
- lastY=e.clientY;
-
- hero.setPointerCapture(e.pointerId);
-
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"){
+    closeApp();
+    hideList();
+    hideAbout();
+  }
 });
 
-hero.addEventListener("pointermove",e=>{
-
- if(!drag)return;
-
- const dx=e.clientX-lastX;
- const dy=e.clientY-lastY;
-
- ry=Math.max(-7,Math.min(7,ry+dx*.025));
- rx=Math.max(-3,Math.min(3,rx-dy*.018));
-
- room.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`;
-
- lastX=e.clientX;
- lastY=e.clientY;
-
-});
-
-hero.addEventListener("pointerup",()=>{
- drag=false;
-});
-
-hero.addEventListener("pointercancel",()=>{
- drag=false;
-});
-
-/* کلید خروج */
-
-document.addEventListener("keydown",e=>{
-
- if(e.key==="Escape"){
-  closeBook();
-  hideAbout();
- }
-
-});
-
+renderList();
 </script>
 
 </body>
