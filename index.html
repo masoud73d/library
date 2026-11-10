@@ -8,139 +8,367 @@
 <title>اتاق جعبه‌ابزار | مسعود</title>
 
 <style>
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  margin:0;background:#160a06;color:#f8e4bd;
-  font-family:Tahoma,Arial,sans-serif;overflow-x:hidden
-}
-button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.page{
-  width:100%;min-height:100vh;display:flex;
-  justify-content:center;align-items:flex-start;background:#160a06
-}
-.scene{
-  position:relative;width:100%;max-width:1024px;
-  line-height:0;overflow:hidden;isolation:isolate
-}
-.scene-image{
-  display:block;width:100%;height:auto;user-select:none;
-  -webkit-user-drag:none;pointer-events:none
-}
-.hotspot{
-  position:absolute;display:block;padding:0;margin:0;
-  border:0;border-radius:5px;background:transparent;
-  appearance:none;-webkit-appearance:none;
-  touch-action:manipulation;z-index:5;line-height:normal
-}
-.hotspot:focus-visible{
-  outline:2px solid #ffe3a1;background:#ffffff12
+* {
+  box-sizing: border-box;
 }
 
-/* ردیف اول */
-.book-1{left:12.8%;top:23.7%;width:14.1%;height:12.3%}
-.book-2{left:27.4%;top:23.7%;width:14%;height:12.3%}
-.book-3{left:42.2%;top:23.6%;width:14.8%;height:12.4%}
-.book-4{left:57.6%;top:23.7%;width:15%;height:12.3%}
-.book-5{left:73.7%;top:23.7%;width:15.2%;height:12.3%}
-
-/* ردیف دوم */
-.book-6{left:10.7%;top:41.5%;width:15.7%;height:13.2%}
-.book-7{left:27.2%;top:41.5%;width:15.5%;height:13.2%}
-.book-8{left:43.4%;top:41.5%;width:14.8%;height:13.2%}
-.book-9{left:58.7%;top:41.5%;width:16%;height:13.2%}
-.book-10{left:75.5%;top:41.5%;width:14.2%;height:13.2%}
-
-/* ردیف سوم */
-.book-11{left:18.4%;top:59.8%;width:14.8%;height:13%}
-.book-12{left:35.2%;top:59.8%;width:14.5%;height:13%}
-.book-13{left:52%;top:59.8%;width:15.2%;height:13%}
-.book-14{left:69.1%;top:59.8%;width:14.9%;height:13%}
-
-/* دکمه‌های تصویر */
-.list-hotspot{
-  left:65.5%;top:7.7%;width:21%;height:4.8%;border-radius:20px
-}
-.about-hotspot{
-  left:87.6%;top:7.8%;width:11%;height:6.2%;border-radius:20px
+html {
+  scroll-behavior: smooth;
 }
 
-/* پنجره‌ها */
-.overlay{
-  position:fixed;inset:0;z-index:100;display:none;
-  align-items:center;justify-content:center;padding:12px;
-  background:rgba(0,0,0,.88);backdrop-filter:blur(8px)
+body {
+  margin: 0;
+  background: #160a06;
+  color: #f8e4bd;
+  font-family: Tahoma, Arial, sans-serif;
+  overflow-x: hidden;
 }
-.overlay.show{display:flex}
-.dialog{
-  width:min(100%,1100px);max-height:94vh;
-  display:flex;flex-direction:column;overflow:hidden;
-  border:1px solid #bd8a43;border-radius:14px;
-  background:#20130d;box-shadow:0 20px 70px #000
-}
-.dialog-head{
-  min-height:52px;display:flex;align-items:center;
-  justify-content:space-between;gap:10px;padding:9px 13px;
-  background:linear-gradient(90deg,#553018,#24150d);
-  border-bottom:1px solid #a8793e
-}
-.dialog-title{font-size:14px;font-weight:bold;color:#ffe0a1}
-.actions{display:flex;gap:7px}
-.action-btn{
-  border:1px solid #c39755;border-radius:8px;padding:8px 11px;
-  color:#ffe9c2;background:#58371d;font-size:11px
-}
-.action-btn:active{transform:scale(.97)}
-#appFrame{width:100%;height:85vh;border:0;background:white}
 
-/* درباره من */
-.about-content{
-  padding:28px 20px 30px;text-align:center;
-  line-height:2.2;overflow-y:auto
+button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.about-content h3{
-  color:#f5d293;font-size:20px;margin:0 0 14px
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #160a06;
 }
-.about-content p{
-  color:#e5d3b7;font-size:13px;margin:8px 0
+
+.scene {
+  position: relative;
+  width: 100%;
+  max-width: 1024px;
+  line-height: 0;
+  overflow: hidden;
+  isolation: isolate;
 }
-.about-content .developer{
-  color:#f4d49c;font-size:13px;font-weight:bold;
-  direction:ltr;display:block;margin-top:14px
+
+/* تصویر اصلی کتابخانه */
+.scene-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
-.email-link{
-  display:inline-block;direction:ltr;
-  color:#f5d293;text-decoration:none;
-  font-size:14px;font-weight:bold;
-  border:1px solid #987044;border-radius:9px;
-  padding:7px 13px;margin-top:5px;
-  background:linear-gradient(145deg,#54351e,#28170e)
+
+/* محدوده‌های شفاف کلیک */
+.hotspot {
+  position: absolute;
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  z-index: 5;
+  line-height: normal;
 }
-.email-link:hover{background:#80552c}
+
+.hotspot:focus-visible {
+  outline: 2px solid #ffe3a1;
+  background: #ffffff12;
+}
+
+/* کتاب‌های ردیف اول */
+.book-1 {
+  left: 12.8%;
+  top: 23.7%;
+  width: 14.1%;
+  height: 12.3%;
+}
+
+.book-2 {
+  left: 27.4%;
+  top: 23.7%;
+  width: 14%;
+  height: 12.3%;
+}
+
+.book-3 {
+  left: 42.2%;
+  top: 23.6%;
+  width: 14.8%;
+  height: 12.4%;
+}
+
+.book-4 {
+  left: 57.6%;
+  top: 23.7%;
+  width: 15%;
+  height: 12.3%;
+}
+
+.book-5 {
+  left: 73.7%;
+  top: 23.7%;
+  width: 15.2%;
+  height: 12.3%;
+}
+
+/* کتاب‌های ردیف دوم */
+.book-6 {
+  left: 10.7%;
+  top: 41.5%;
+  width: 15.7%;
+  height: 13.2%;
+}
+
+.book-7 {
+  left: 27.2%;
+  top: 41.5%;
+  width: 15.5%;
+  height: 13.2%;
+}
+
+.book-8 {
+  left: 43.4%;
+  top: 41.5%;
+  width: 14.8%;
+  height: 13.2%;
+}
+
+.book-9 {
+  left: 58.7%;
+  top: 41.5%;
+  width: 16%;
+  height: 13.2%;
+}
+
+.book-10 {
+  left: 75.5%;
+  top: 41.5%;
+  width: 14.2%;
+  height: 13.2%;
+}
+
+/* کتاب‌های ردیف سوم */
+.book-11 {
+  left: 18.4%;
+  top: 59.8%;
+  width: 14.8%;
+  height: 13%;
+}
+
+.book-12 {
+  left: 35.2%;
+  top: 59.8%;
+  width: 14.5%;
+  height: 13%;
+}
+
+.book-13 {
+  left: 52%;
+  top: 59.8%;
+  width: 15.2%;
+  height: 13%;
+}
+
+.book-14 {
+  left: 69.1%;
+  top: 59.8%;
+  width: 14.9%;
+  height: 13%;
+}
+
+/* دکمه‌های روی تصویر */
+.list-hotspot {
+  left: 65.5%;
+  top: 7.7%;
+  width: 21%;
+  height: 4.8%;
+  border-radius: 20px;
+}
+
+.about-hotspot {
+  left: 87.6%;
+  top: 7.8%;
+  width: 11%;
+  height: 6.2%;
+  border-radius: 20px;
+}
+
+/* پنجره‌های داخلی */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(8px);
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.dialog {
+  width: min(100%, 1100px);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #bd8a43;
+  border-radius: 14px;
+  background: #20130d;
+  box-shadow: 0 20px 70px #000;
+}
+
+.dialog-head {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 13px;
+  background: linear-gradient(90deg,#553018,#24150d);
+  border-bottom: 1px solid #a8793e;
+}
+
+.dialog-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffe0a1;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+}
+
+.action-btn {
+  border: 1px solid #c39755;
+  border-radius: 8px;
+  padding: 8px 11px;
+  color: #ffe9c2;
+  background: #58371d;
+  font-size: 11px;
+}
+
+.action-btn:active {
+  transform: scale(.97);
+}
+
+#appFrame {
+  width: 100%;
+  height: 85vh;
+  border: 0;
+  background: white;
+}
+
+/* بخش درباره من */
+.about-content {
+  padding: 28px 20px 30px;
+  text-align: center;
+  line-height: 2.2;
+  overflow-y: auto;
+}
+
+.about-content h3 {
+  color: #f5d293;
+  font-size: 20px;
+  margin: 0 0 14px;
+}
+
+.about-content p {
+  color: #e5d3b7;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.about-content .developer {
+  color: #f4d49c;
+  font-size: 13px;
+  font-weight: bold;
+  direction: ltr;
+  display: block;
+  margin-top: 14px;
+}
+
+.email-link {
+  display: inline-block;
+  direction: ltr;
+  color: #f5d293;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #987044;
+  border-radius: 9px;
+  padding: 7px 13px;
+  margin-top: 5px;
+  background: linear-gradient(145deg,#54351e,#28170e);
+}
+
+.email-link:hover {
+  background: #80552c;
+}
 
 /* فهرست کتاب‌ها */
-.book-list{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;padding:15px;overflow-y:auto
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+  padding: 15px;
+  overflow-y: auto;
 }
-.list-item{
-  padding:12px 8px;border:1px solid #987044;
-  border-radius:9px;color:#ffe4b4;
-  background:linear-gradient(145deg,#54351e,#28170e);
-  font-size:12px;text-align:center
-}
-.list-item:active{background:#80552c}
 
-@media(min-width:1025px){
-  .scene{box-shadow:0 0 50px #000}
+.list-item {
+  padding: 12px 8px;
+  border: 1px solid #987044;
+  border-radius: 9px;
+  color: #ffe4b4;
+  background: linear-gradient(145deg,#54351e,#28170e);
+  font-size: 12px;
+  text-align: center;
 }
-@media(max-width:500px){
-  .overlay{padding:7px}
-  .dialog{max-height:96vh}
-  #appFrame{height:88vh}
-  .dialog-title{font-size:12px}
-  .action-btn{padding:7px 8px;font-size:10px}
-  .book-list{grid-template-columns:1fr 1fr}
+
+.list-item:active {
+  background: #80552c;
+}
+
+@media (min-width: 1025px) {
+  .scene {
+    box-shadow: 0 0 50px #000;
+  }
+}
+
+@media (max-width: 500px) {
+  .overlay {
+    padding: 7px;
+  }
+
+  .dialog {
+    max-height: 96vh;
+  }
+
+  #appFrame {
+    height: 88vh;
+  }
+
+  .dialog-title {
+    font-size: 12px;
+  }
+
+  .action-btn {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+
+  .book-list {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>
 </head>
@@ -148,92 +376,140 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 <body>
 
 <main class="page">
-<div class="scene">
+  <div class="scene">
 
-  <img class="scene-image"
-       src="1000130761.png"
-       alt="کتابخانه دیجیتال"
-       draggable="false">
+    <!-- تصویر واقعی کتابخانه -->
+    <img
+      class="scene-image"
+      src="./library-bg.png"
+      alt="کتابخانه دیجیتال"
+      draggable="false"
+    >
 
-  <button class="hotspot list-hotspot"
-          aria-label="فهرست کتاب‌ها"
-          onclick="showList()"></button>
+    <!-- فهرست و درباره من -->
+    <button
+      class="hotspot list-hotspot"
+      type="button"
+      aria-label="فهرست کتاب‌ها"
+      onclick="showList()">
+    </button>
 
-  <button class="hotspot about-hotspot"
-          aria-label="درباره من"
-          onclick="showAbout()"></button>
+    <button
+      class="hotspot about-hotspot"
+      type="button"
+      aria-label="درباره من"
+      onclick="showAbout()">
+    </button>
 
-  <!-- کتاب‌های ردیف اول -->
-  <button class="hotspot book-1" aria-label="قرعه کشی" onclick="openBook(0)"></button>
-  <button class="hotspot book-2" aria-label="ماشین حساب" onclick="openBook(1)"></button>
-  <button class="hotspot book-3" aria-label="اطلس خودشناسی" onclick="openBook(2)"></button>
-  <button class="hotspot book-4" aria-label="عدد خوان" onclick="openBook(3)"></button>
-  <button class="hotspot book-5" aria-label="تاس دیجیتال" onclick="openBook(4)"></button>
+    <!-- ردیف اول -->
+    <button class="hotspot book-1" type="button" aria-label="قرعه کشی" onclick="openBook(0)"></button>
+    <button class="hotspot book-2" type="button" aria-label="ماشین حساب" onclick="openBook(1)"></button>
+    <button class="hotspot book-3" type="button" aria-label="اطلس خودشناسی" onclick="openBook(2)"></button>
+    <button class="hotspot book-4" type="button" aria-label="عدد خوان" onclick="openBook(3)"></button>
+    <button class="hotspot book-5" type="button" aria-label="تاس دیجیتال" onclick="openBook(4)"></button>
 
-  <!-- کتاب‌های ردیف دوم -->
-  <button class="hotspot book-6" aria-label="استودیو QR Code" onclick="openBook(5)"></button>
-  <button class="hotspot book-7" aria-label="استودیو رنگ" onclick="openBook(6)"></button>
-  <button class="hotspot book-8" aria-label="استخراج متن از عکس" onclick="openBook(7)"></button>
-  <button class="hotspot book-9" aria-label="مترجم چند زبانه" onclick="openBook(8)"></button>
-  <button class="hotspot book-10" aria-label="زبان‌های رمزی" onclick="openBook(9)"></button>
+    <!-- ردیف دوم -->
+    <button class="hotspot book-6" type="button" aria-label="استودیو QR Code" onclick="openBook(5)"></button>
+    <button class="hotspot book-7" type="button" aria-label="استودیو رنگ" onclick="openBook(6)"></button>
+    <button class="hotspot book-8" type="button" aria-label="استخراج متن از عکس" onclick="openBook(7)"></button>
+    <button class="hotspot book-9" type="button" aria-label="مترجم چند زبانه" onclick="openBook(8)"></button>
+    <button class="hotspot book-10" type="button" aria-label="زبان‌های رمزی" onclick="openBook(9)"></button>
 
-  <!-- کتاب‌های ردیف سوم -->
-  <button class="hotspot book-11" aria-label="آب و هوا" onclick="openBook(10)"></button>
-  <button class="hotspot book-12" aria-label="دانشنامه جهان شناسی" onclick="openBook(11)"></button>
-  <button class="hotspot book-13" aria-label="مرکز زمان" onclick="openBook(12)"></button>
-  <button class="hotspot book-14" aria-label="فاصله یاب" onclick="openBook(13)"></button>
+    <!-- ردیف سوم -->
+    <button class="hotspot book-11" type="button" aria-label="آب و هوا" onclick="openBook(10)"></button>
+    <button class="hotspot book-12" type="button" aria-label="دانشنامه جهان شناسی" onclick="openBook(11)"></button>
+    <button class="hotspot book-13" type="button" aria-label="مرکز زمان" onclick="openBook(12)"></button>
+    <button class="hotspot book-14" type="button" aria-label="فاصله یاب" onclick="openBook(13)"></button>
 
-</div>
+  </div>
 </main>
 
 <!-- پنجره اجرای برنامه -->
-<div class="overlay" id="appOverlay" onclick="outsideClose(event,'appOverlay')">
+<div
+  class="overlay"
+  id="appOverlay"
+  onclick="outsideClose(event,'appOverlay')">
+
   <div class="dialog">
+
     <div class="dialog-head">
       <span class="dialog-title" id="appTitle">عنوان برنامه</span>
+
       <div class="actions">
-        <button class="action-btn" onclick="openExternal()">باز کردن جداگانه ↗</button>
-        <button class="action-btn" onclick="closeApp()">بستن ✕</button>
+        <button class="action-btn" type="button" onclick="openExternal()">
+          باز کردن جداگانه ↗
+        </button>
+
+        <button class="action-btn" type="button" onclick="closeApp()">
+          بستن ✕
+        </button>
       </div>
     </div>
-    <iframe id="appFrame" title="برنامه انتخاب‌شده"
-      allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+
+    <iframe
+      id="appFrame"
+      title="برنامه انتخاب‌شده"
+      allow="clipboard-read; clipboard-write; fullscreen">
+    </iframe>
+
   </div>
 </div>
 
-<!-- فهرست کتاب‌ها -->
-<div class="overlay" id="listOverlay" onclick="outsideClose(event,'listOverlay')">
+<!-- پنجره فهرست کتاب‌ها -->
+<div
+  class="overlay"
+  id="listOverlay"
+  onclick="outsideClose(event,'listOverlay')">
+
   <div class="dialog">
+
     <div class="dialog-head">
       <span class="dialog-title">فهرست کتاب‌های من</span>
-      <button class="action-btn" onclick="hideList()">بستن ✕</button>
+
+      <button class="action-btn" type="button" onclick="hideList()">
+        بستن ✕
+      </button>
     </div>
+
     <div class="book-list" id="bookList"></div>
+
   </div>
 </div>
 
-<!-- درباره من -->
-<div class="overlay" id="aboutOverlay" onclick="outsideClose(event,'aboutOverlay')">
+<!-- پنجره درباره من -->
+<div
+  class="overlay"
+  id="aboutOverlay"
+  onclick="outsideClose(event,'aboutOverlay')">
+
   <div class="dialog">
 
     <div class="dialog-head">
       <span class="dialog-title">درباره من</span>
-      <button class="action-btn" onclick="hideAbout()">بستن ✕</button>
+
+      <button class="action-btn" type="button" onclick="hideAbout()">
+        بستن ✕
+      </button>
     </div>
 
     <div class="about-content">
+
       <h3>درباره من</h3>
 
       <p>توسعه‌دهنده وب و طراح پروژه‌های دیجیتال</p>
 
-      <span class="developer">Developer: Masoud delavar</span>
+      <span class="developer">
+        Developer: Masoud delavar
+      </span>
 
       <p>راه ارتباطی:</p>
 
-      <a class="email-link"
-         href="mailto:masoud0098d@gmail.com">
-         masoud0098d@gmail.com
+      <a
+        class="email-link"
+        href="mailto:masoud0098d@gmail.com">
+        masoud0098d@gmail.com
       </a>
+
     </div>
 
   </div>
@@ -241,83 +517,131 @@ button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 
 <script>
 const books = [
-  {name:"قرعه کشی",url:"https://masoud73d.github.io/ghoree-keshi/"},
-  {name:"ماشین حساب",url:"https://masoud73d.github.io/calculator/"},
-  {name:"اطلس خودشناسی",url:"https://masoud73d.github.io/Khodshenasi-va-taghvim/"},
-  {name:"عدد خوان",url:"https://masoud73d.github.io/adad-khan/"},
-  {name:"تاس دیجیتال",url:"https://masoud73d.github.io/Taas/"},
-  {name:"استودیو QR Code",url:"https://masoud73d.github.io/Qr.Code/"},
-  {name:"استودیو رنگ",url:"https://masoud73d.github.io/Colors/"},
-  {name:"استخراج متن از عکس",url:"https://masoud73d.github.io/Text-reader/"},
-  {name:"مترجم چند زبانه",url:"https://masoud73d.github.io/dictionary/"},
-  {name:"زبان‌های رمزی",url:"https://masoud73d.github.io/motarjeme-ramzi/"},
-  {name:"آب و هوا",url:"https://masoud73d.github.io/weather/"},
-  {name:"دانشنامه جهان‌شناسی",url:"https://masoud73d.github.io/Jaahaan-shenasi/"},
-  {name:"مرکز زمان",url:"https://masoud73d.github.io/markaz-zaman/"},
-  {name:"فاصله‌یاب",url:"https://masoud73d.github.io/fasle-yab/"}
+  {
+    name: "قرعه کشی",
+    url: "https://masoud73d.github.io/ghoree-keshi/"
+  },
+  {
+    name: "ماشین حساب",
+    url: "https://masoud73d.github.io/calculator/"
+  },
+  {
+    name: "اطلس خودشناسی",
+    url: "https://masoud73d.github.io/Khodshenasi-va-taghvim/"
+  },
+  {
+    name: "عدد خوان",
+    url: "https://masoud73d.github.io/adad-khan/"
+  },
+  {
+    name: "تاس دیجیتال",
+    url: "https://masoud73d.github.io/Taas/"
+  },
+  {
+    name: "استودیو QR Code",
+    url: "https://masoud73d.github.io/Qr.Code/"
+  },
+  {
+    name: "استودیو رنگ",
+    url: "https://masoud73d.github.io/Colors/"
+  },
+  {
+    name: "استخراج متن از عکس",
+    url: "https://masoud73d.github.io/Text-reader/"
+  },
+  {
+    name: "مترجم چند زبانه",
+    url: "https://masoud73d.github.io/dictionary/"
+  },
+  {
+    name: "زبان‌های رمزی",
+    url: "https://masoud73d.github.io/motarjeme-ramzi/"
+  },
+  {
+    name: "آب و هوا",
+    url: "https://masoud73d.github.io/weather/"
+  },
+  {
+    name: "دانشنامه جهان‌شناسی",
+    url: "https://masoud73d.github.io/Jaahaan-shenasi/"
+  },
+  {
+    name: "مرکز زمان",
+    url: "https://masoud73d.github.io/markaz-zaman/"
+  },
+  {
+    name: "فاصله‌یاب",
+    url: "https://masoud73d.github.io/fasle-yab/"
+  }
 ];
 
 let activeUrl = "";
 
-function openBook(index){
-  const book=books[index];
-  if(!book)return;
+function openBook(index) {
+  const book = books[index];
 
-  activeUrl=book.url;
-  document.getElementById("appTitle").textContent=book.name;
-  document.getElementById("appFrame").src=book.url;
+  if (!book) return;
+
+  activeUrl = book.url;
+
+  document.getElementById("appTitle").textContent = book.name;
+  document.getElementById("appFrame").src = book.url;
   document.getElementById("appOverlay").classList.add("show");
-  document.body.style.overflow="hidden";
+
+  document.body.style.overflow = "hidden";
 }
 
-function closeApp(){
+function closeApp() {
   document.getElementById("appOverlay").classList.remove("show");
-  document.getElementById("appFrame").src="about:blank";
-  document.body.style.overflow="";
+  document.getElementById("appFrame").src = "about:blank";
+  document.body.style.overflow = "";
 }
 
-function openExternal(){
-  if(activeUrl)window.open(activeUrl,"_blank","noopener,noreferrer");
-}
-
-function showList(){
-  document.getElementById("listOverlay").classList.add("show");
-  document.body.style.overflow="hidden";
-}
-
-function hideList(){
-  document.getElementById("listOverlay").classList.remove("show");
-  document.body.style.overflow="";
-}
-
-function showAbout(){
-  document.getElementById("aboutOverlay").classList.add("show");
-  document.body.style.overflow="hidden";
-}
-
-function hideAbout(){
-  document.getElementById("aboutOverlay").classList.remove("show");
-  document.body.style.overflow="";
-}
-
-function outsideClose(event,id){
-  if(event.target.id===id){
-    if(id==="appOverlay")closeApp();
-    if(id==="listOverlay")hideList();
-    if(id==="aboutOverlay")hideAbout();
+function openExternal() {
+  if (activeUrl) {
+    window.open(activeUrl, "_blank", "noopener,noreferrer");
   }
 }
 
-function renderList(){
-  const container=document.getElementById("bookList");
+function showList() {
+  document.getElementById("listOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
 
-  books.forEach((book,index)=>{
-    const button=document.createElement("button");
-    button.className="list-item";
-    button.type="button";
-    button.textContent=book.name;
+function hideList() {
+  document.getElementById("listOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
 
-    button.addEventListener("click",()=>{
+function showAbout() {
+  document.getElementById("aboutOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function hideAbout() {
+  document.getElementById("aboutOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+function outsideClose(event, id) {
+  if (event.target.id === id) {
+    if (id === "appOverlay") closeApp();
+    if (id === "listOverlay") hideList();
+    if (id === "aboutOverlay") hideAbout();
+  }
+}
+
+function renderList() {
+  const container = document.getElementById("bookList");
+
+  books.forEach((book, index) => {
+    const button = document.createElement("button");
+
+    button.className = "list-item";
+    button.type = "button";
+    button.textContent = book.name;
+
+    button.addEventListener("click", () => {
       hideList();
       openBook(index);
     });
@@ -326,8 +650,8 @@ function renderList(){
   });
 }
 
-document.addEventListener("keydown",event=>{
-  if(event.key==="Escape"){
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
     closeApp();
     hideList();
     hideAbout();
