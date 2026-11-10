@@ -6,6 +6,7 @@
     <application
         android:allowBackup="true"
         android:label="library"
+        android:icon="@drawable/ic_launcher"
         android:usesCleartextTraffic="false"
         android:theme="@style/AppTheme">
 
