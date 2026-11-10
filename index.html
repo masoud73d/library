@@ -48,7 +48,6 @@ button {
   isolation: isolate;
 }
 
-/* تصویر اصلی کتابخانه */
 .scene-image {
   display: block;
   width: 100%;
@@ -79,7 +78,7 @@ button {
   background: #ffffff12;
 }
 
-/* کتاب‌های ردیف اول */
+/* ردیف اول */
 .book-1 {
   left: 12.8%;
   top: 23.7%;
@@ -115,7 +114,7 @@ button {
   height: 12.3%;
 }
 
-/* کتاب‌های ردیف دوم */
+/* ردیف دوم */
 .book-6 {
   left: 10.7%;
   top: 41.5%;
@@ -151,7 +150,7 @@ button {
   height: 13.2%;
 }
 
-/* کتاب‌های ردیف سوم */
+/* ردیف سوم */
 .book-11 {
   left: 18.4%;
   top: 59.8%;
@@ -197,10 +196,13 @@ button {
   border-radius: 20px;
 }
 
-/* پنجره‌های داخلی */
+/* لایه‌های پنجره */
 .overlay {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
   z-index: 100;
   display: none;
   align-items: center;
@@ -208,15 +210,18 @@ button {
   padding: 12px;
   background: rgba(0,0,0,.88);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .overlay.show {
   display: flex;
 }
 
+/* پنجره عمومی */
 .dialog {
   width: min(100%, 1100px);
   max-height: 94vh;
+  max-height: 94dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -226,8 +231,16 @@ button {
   box-shadow: 0 20px 70px #000;
 }
 
+/* پنجره مخصوص اجرای ابزار */
+.app-dialog {
+  height: 88vh;
+  height: 88dvh;
+  min-height: 0;
+}
+
 .dialog-head {
   min-height: 52px;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -235,6 +248,8 @@ button {
   padding: 9px 13px;
   background: linear-gradient(90deg,#553018,#24150d);
   border-bottom: 1px solid #a8793e;
+  position: relative;
+  z-index: 2;
 }
 
 .dialog-title {
@@ -246,6 +261,7 @@ button {
 .actions {
   display: flex;
   gap: 7px;
+  flex-shrink: 0;
 }
 
 .action-btn {
@@ -255,20 +271,29 @@ button {
   color: #ffe9c2;
   background: #58371d;
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .action-btn:active {
   transform: scale(.97);
 }
 
+/* اصلاح اصلی iframe */
 #appFrame {
+  display: block;
   width: 100%;
-  height: 85vh;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
   border: 0;
+  margin: 0;
+  padding: 0;
   background: white;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* بخش درباره من */
+/* درباره من */
 .about-content {
   padding: 28px 20px 30px;
   text-align: center;
@@ -338,36 +363,73 @@ button {
   background: #80552c;
 }
 
-@media (min-width: 1025px) {
-  .scene {
-    box-shadow: 0 0 50px #000;
-  }
-}
+/* تنظیمات موبایل */
+@media (max-width: 600px) {
 
-@media (max-width: 500px) {
   .overlay {
-    padding: 7px;
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    height: 100vh;
+    height: 100dvh;
   }
 
-  .dialog {
-    max-height: 96vh;
+  .app-dialog {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    min-height: 0;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
   }
 
-  #appFrame {
-    height: 88vh;
+  .app-dialog .dialog-head {
+    min-height: 54px;
+    padding-top: max(9px, env(safe-area-inset-top));
+    padding-right: 10px;
+    padding-left: 10px;
   }
 
-  .dialog-title {
+  .app-dialog .dialog-title {
     font-size: 12px;
   }
 
-  .action-btn {
+  .app-dialog .action-btn {
     padding: 7px 8px;
     font-size: 10px;
   }
 
+  #appFrame {
+    width: 100%;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;
+  }
+
+  /* پنجره‌های فهرست و درباره من */
+  .overlay:not(#appOverlay) {
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overlay:not(#appOverlay) .dialog {
+    width: 100%;
+    max-height: 85vh;
+    max-height: 85dvh;
+  }
+
   .book-list {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 601px) {
+  .scene {
+    box-shadow: 0 0 50px #000;
   }
 }
 </style>
@@ -378,7 +440,7 @@ button {
 <main class="page">
   <div class="scene">
 
-    <!-- تصویر واقعی کتابخانه -->
+    <!-- تصویر اصلی کتابخانه -->
     <img
       class="scene-image"
       src="./library-bg.png"
@@ -424,25 +486,33 @@ button {
   </div>
 </main>
 
-<!-- پنجره اجرای برنامه -->
+<!-- پنجره اجرای ابزارها -->
 <div
   class="overlay"
   id="appOverlay"
   onclick="outsideClose(event,'appOverlay')">
 
-  <div class="dialog">
+  <div class="dialog app-dialog">
 
     <div class="dialog-head">
       <span class="dialog-title" id="appTitle">عنوان برنامه</span>
 
       <div class="actions">
-        <button class="action-btn" type="button" onclick="openExternal()">
+
+        <button
+          class="action-btn"
+          type="button"
+          onclick="openExternal()">
           باز کردن جداگانه ↗
         </button>
 
-        <button class="action-btn" type="button" onclick="closeApp()">
+        <button
+          class="action-btn"
+          type="button"
+          onclick="closeApp()">
           بستن ✕
         </button>
+
       </div>
     </div>
 
@@ -455,7 +525,7 @@ button {
   </div>
 </div>
 
-<!-- پنجره فهرست کتاب‌ها -->
+<!-- فهرست کتاب‌ها -->
 <div
   class="overlay"
   id="listOverlay"
@@ -466,7 +536,10 @@ button {
     <div class="dialog-head">
       <span class="dialog-title">فهرست کتاب‌های من</span>
 
-      <button class="action-btn" type="button" onclick="hideList()">
+      <button
+        class="action-btn"
+        type="button"
+        onclick="hideList()">
         بستن ✕
       </button>
     </div>
@@ -476,7 +549,7 @@ button {
   </div>
 </div>
 
-<!-- پنجره درباره من -->
+<!-- درباره من -->
 <div
   class="overlay"
   id="aboutOverlay"
@@ -487,7 +560,10 @@ button {
     <div class="dialog-head">
       <span class="dialog-title">درباره من</span>
 
-      <button class="action-btn" type="button" onclick="hideAbout()">
+      <button
+        class="action-btn"
+        type="button"
+        onclick="hideAbout()">
         بستن ✕
       </button>
     </div>
@@ -585,15 +661,24 @@ function openBook(index) {
   activeUrl = book.url;
 
   document.getElementById("appTitle").textContent = book.name;
-  document.getElementById("appFrame").src = book.url;
-  document.getElementById("appOverlay").classList.add("show");
 
+  const frame = document.getElementById("appFrame");
+
+  frame.src = "about:blank";
+
+  document.getElementById("appOverlay").classList.add("show");
   document.body.style.overflow = "hidden";
+
+  requestAnimationFrame(() => {
+    frame.src = book.url;
+  });
 }
 
 function closeApp() {
   document.getElementById("appOverlay").classList.remove("show");
+
   document.getElementById("appFrame").src = "about:blank";
+
   document.body.style.overflow = "";
 }
 
