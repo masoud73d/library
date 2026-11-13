@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#160a06">
 <title>اتاق جعبه‌ابزار | مسعود</title>
+<link rel="preload" as="image" href="./library-bg.png" fetchpriority="high">
 
 <style>
 * {
@@ -30,9 +31,121 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* صفحه خوش‌آمدگویی و لودینگ */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  padding: 28px;
+  text-align: center;
+  color: #f8e4bd;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(126,79,37,.34), transparent 48%),
+    linear-gradient(145deg,#24130b 0%,#100805 58%,#1d100a 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .45s ease, visibility .45s ease;
+}
+
+.splash-screen.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-emblem {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+}
+
+.splash-emblem::before,
+.splash-emblem::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(226,184,112,.7);
+  border-radius: 50%;
+  animation: emblemPulse 2.4s ease-in-out infinite;
+}
+
+.splash-emblem::after {
+  inset: -7px;
+  border-color: rgba(226,184,112,.25);
+  animation-delay: .6s;
+}
+
+.splash-book {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #bd8a43;
+  border-radius: 24px;
+  color: #f7d99e;
+  font-size: 43px;
+  background: linear-gradient(145deg,#684323,#29170d);
+  box-shadow: 0 8px 35px #0009, inset 0 1px 0 #ffffff30;
+}
+
+.splash-title {
+  margin: 8px 0 0;
+  color: #f8d99f;
+  font-size: clamp(22px,6vw,29px);
+  font-weight: bold;
+}
+
+.splash-subtitle {
+  margin: 0;
+  color: #c9ad83;
+  font-size: 13px;
+}
+
+.splash-loader {
+  width: 148px;
+  height: 3px;
+  margin-top: 17px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #62472d;
+}
+
+.splash-loader span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,#b47b36,#ffe3a1,#b47b36);
+  animation: loadingSweep 1.15s ease-in-out infinite;
+}
+
+.splash-status {
+  color: #bda17b;
+  font-size: 11px;
+}
+
+@keyframes loadingSweep {
+  0% { transform: translateX(160%); }
+  100% { transform: translateX(-260%); }
+}
+
+@keyframes emblemPulse {
+  0%,100% { transform: scale(1); opacity: .5; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+/* صفحه اصلی */
 .page {
   width: 100%;
-  min-height: 100vh;
+  min-height: 0;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -194,6 +307,33 @@ button {
   width: 11%;
   height: 6.2%;
   border-radius: 20px;
+}
+
+/* دکمه خروج زیر کتابخانه */
+.exit-area {
+  width: 100%;
+  max-width: 1024px;
+  display: flex;
+  justify-content: center;
+  padding: 18px 16px 30px;
+  margin: 0 auto;
+  background: #160a06;
+}
+
+.exit-button {
+  min-width: 180px;
+  padding: 12px 28px;
+  border: 1px solid #c39755;
+  border-radius: 12px;
+  color: #ffe7bd;
+  font-size: 13px;
+  font-weight: bold;
+  background: linear-gradient(145deg,#684323,#2b190f);
+  box-shadow: 0 5px 18px #0008, inset 0 1px 0 #ffffff20;
+}
+
+.exit-button:active {
+  transform: scale(.97);
 }
 
 /* لایه‌های پنجره */
@@ -365,7 +505,6 @@ button {
 
 /* تنظیمات موبایل */
 @media (max-width: 600px) {
-
   .overlay {
     padding: 0;
     align-items: stretch;
@@ -409,7 +548,6 @@ button {
     height: 0;
   }
 
-  /* پنجره‌های فهرست و درباره من */
   .overlay:not(#appOverlay) {
     padding: 12px;
     align-items: center;
@@ -437,6 +575,22 @@ button {
 
 <body>
 
+<!-- صفحه خوش‌آمدگویی -->
+<div class="splash-screen" id="splashScreen" role="status" aria-live="polite">
+  <div class="splash-emblem">
+    <div class="splash-book" aria-hidden="true">📖</div>
+  </div>
+
+  <h1 class="splash-title">اتاق جعبه‌ابزار</h1>
+  <p class="splash-subtitle">کتابخانه‌ای از ابزارهای کاربردی</p>
+
+  <div class="splash-loader" aria-hidden="true">
+    <span></span>
+  </div>
+
+  <small class="splash-status">در حال آماده‌سازی کتابخانه...</small>
+</div>
+
 <main class="page">
   <div class="scene">
 
@@ -444,6 +598,9 @@ button {
       class="scene-image"
       src="./library-bg.png"
       alt="کتابخانه دیجیتال"
+      fetchpriority="high"
+      loading="eager"
+      decoding="async"
       draggable="false"
     >
 
@@ -485,6 +642,13 @@ button {
   </div>
 </main>
 
+<!-- دکمه خروج در پایین کتابخانه -->
+<div class="exit-area">
+  <button class="exit-button" type="button" onclick="exitLibrary()">
+    خروج از برنامه
+  </button>
+</div>
+
 <!-- پنجره اجرای ابزارها -->
 <div
   class="overlay"
@@ -497,7 +661,6 @@ button {
       <span class="dialog-title" id="appTitle">عنوان برنامه</span>
 
       <div class="actions">
-
         <button
           class="action-btn"
           type="button"
@@ -511,7 +674,6 @@ button {
           onclick="closeApp()">
           بستن ✕
         </button>
-
       </div>
     </div>
 
@@ -652,6 +814,65 @@ const books = [
 
 let activeUrl = "";
 
+/* خروج از برنامه */
+function exitLibrary() {
+  const confirmed = window.confirm("می‌خواهید از برنامه خارج شوید؟");
+
+  if (!confirmed) return;
+
+  if (
+    window.AndroidApp &&
+    typeof window.AndroidApp.exitApp === "function"
+  ) {
+    window.AndroidApp.exitApp();
+  } else {
+    window.close();
+
+    setTimeout(() => {
+      if (!document.hidden) {
+        alert("برای خروج از نسخه مرورگر، از دکمه برگشت مرورگر استفاده کنید.");
+      }
+    }, 150);
+  }
+}
+
+/* مدیریت صفحه شروع */
+async function finishStartup() {
+  const splash = document.getElementById("splashScreen");
+  const image = document.querySelector(".scene-image");
+  const startedAt = Date.now();
+
+  try {
+    if (image && typeof image.decode === "function") {
+      await image.decode();
+    } else if (image && !image.complete) {
+      await new Promise(resolve => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      });
+    }
+  } catch (error) {
+    // در صورت خطای تصویر، صفحه اصلی همچنان باز می‌شود.
+  }
+
+  // لودینگ کوتاه و بدون انتظار غیرضروری
+  const remaining = Math.max(
+    0,
+    700 - (Date.now() - startedAt)
+  );
+
+  setTimeout(() => {
+    splash.classList.add("hide");
+    document.body.style.overflow = "";
+
+    setTimeout(() => {
+      splash.remove();
+    }, 500);
+
+  }, remaining);
+}
+
+/* بازکردن ابزار */
 function openBook(index) {
   const book = books[index];
 
@@ -673,6 +894,7 @@ function openBook(index) {
   });
 }
 
+/* بستن ابزار */
 function closeApp() {
   document.getElementById("appOverlay").classList.remove("show");
 
@@ -681,12 +903,14 @@ function closeApp() {
   document.body.style.overflow = "";
 }
 
+/* بازکردن ابزار در مرورگر */
 function openExternal() {
   if (activeUrl) {
     window.open(activeUrl, "_blank", "noopener,noreferrer");
   }
 }
 
+/* فهرست */
 function showList() {
   document.getElementById("listOverlay").classList.add("show");
   document.body.style.overflow = "hidden";
@@ -697,6 +921,7 @@ function hideList() {
   document.body.style.overflow = "";
 }
 
+/* درباره من */
 function showAbout() {
   document.getElementById("aboutOverlay").classList.add("show");
   document.body.style.overflow = "hidden";
@@ -707,6 +932,7 @@ function hideAbout() {
   document.body.style.overflow = "";
 }
 
+/* بستن با لمس بیرون پنجره */
 function outsideClose(event, id) {
   if (event.target.id === id) {
     if (id === "appOverlay") closeApp();
@@ -715,6 +941,7 @@ function outsideClose(event, id) {
   }
 }
 
+/* ساخت فهرست کتاب‌ها */
 function renderList() {
   const container = document.getElementById("bookList");
 
@@ -734,6 +961,7 @@ function renderList() {
   });
 }
 
+/* کلید برگشت صفحه‌کلید */
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     closeApp();
@@ -742,7 +970,9 @@ document.addEventListener("keydown", event => {
   }
 });
 
+/* شروع برنامه */
 renderList();
+finishStartup();
 </script>
 
 </body>
