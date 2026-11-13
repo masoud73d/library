@@ -11,11 +11,11 @@ import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
 import android.content.Intent;
 import android.net.Uri;
-import android.view.KeyEvent;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
+
     private static final String WEBSITE_URL =
             "https://masoud73d.github.io/library/";
 
@@ -28,19 +28,36 @@ public class MainActivity extends Activity {
 
         WebSettings settings = webView.getSettings();
 
+        // تنظیمات اصلی نمایش صفحات
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setLoadWithOverviewMode(true);
+
+        // تنظیم مقیاس و اندازه صفحه
         settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(false);
+        settings.setTextZoom(100);
+
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
+
+        // دریافت نسخه جدید صفحات
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
+        webView.clearHistory();
+
+        // دسترسی فایل‌ها
         settings.setAllowFileAccess(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(true);
 
+        // تنظیم کوکی‌ها
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
 
+        // مدیریت لینک‌ها
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
@@ -48,7 +65,20 @@ public class MainActivity extends Activity {
                     WebView view,
                     WebResourceRequest request) {
 
-                String url = request.getUrl().toString();
+                return handleUrl(request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(
+                    WebView view,
+                    String url) {
+
+                return handleUrl(Uri.parse(url));
+            }
+
+            private boolean handleUrl(Uri uri) {
+
+                String url = uri.toString();
 
                 if (url.startsWith("http://") ||
                     url.startsWith("https://")) {
@@ -58,9 +88,11 @@ public class MainActivity extends Activity {
                 try {
                     Intent intent = new Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse(url)
+                            uri
                     );
+
                     startActivity(intent);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -75,19 +107,16 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
     protected void onDestroy() {
+
         if (webView != null) {
+            webView.stopLoading();
+            webView.clearHistory();
+            webView.removeAllViews();
             webView.destroy();
+            webView = null;
         }
+
         super.onDestroy();
     }
 }
