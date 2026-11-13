@@ -4,7 +4,7 @@ package com.masoud.library;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
-import android.view.WindowInsets;
+import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
@@ -12,6 +12,7 @@ import android.webkit.WebSettings;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.ValueCallback;
+import android.webkit.JavascriptInterface;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
@@ -22,7 +23,6 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> filePathCallback;
 
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
-
     private static final String WEBSITE_URL =
             "https://masoud73d.github.io/library/";
 
@@ -30,53 +30,30 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Window window = getWindow();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(true);
+        }
+
+        window.setStatusBarColor(0xFF160A06);
+        window.setNavigationBarColor(0xFF160A06);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setStatusBarContrastEnforced(false);
+            window.setNavigationBarContrastEnforced(false);
+        }
+
         webView = new WebView(this);
         webView.setBackgroundColor(0xFF160A06);
-        webView.setClipToPadding(true);
         setContentView(webView);
-
-        // هماهنگی با نوارهای سیستمی اندروید
-        webView.setOnApplyWindowInsetsListener((view, insets) -> {
-
-            int left;
-            int top;
-            int right;
-            int bottom;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-
-                android.graphics.Insets systemInsets =
-                        insets.getInsets(
-                                WindowInsets.Type.systemBars()
-                                | WindowInsets.Type.displayCutout()
-                        );
-
-                left = systemInsets.left;
-                top = systemInsets.top;
-                right = systemInsets.right;
-                bottom = systemInsets.bottom;
-
-            } else {
-
-                left = insets.getSystemWindowInsetLeft();
-                top = insets.getSystemWindowInsetTop();
-                right = insets.getSystemWindowInsetRight();
-                bottom = insets.getSystemWindowInsetBottom();
-            }
-
-            view.setPadding(left, top, right, bottom);
-
-            return insets;
-        });
 
         WebSettings settings = webView.getSettings();
 
-        // تنظیمات اصلی
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        // تنظیم اندازه و مقیاس
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
         settings.setTextZoom(100);
@@ -85,31 +62,27 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
 
-        // دسترسی به فایل‌ها
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
 
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(true);
 
-        // پاک کردن کش قبلی
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        webView.clearCache(true);
-        webView.clearHistory();
+        // استفاده از کش برای بارگذاری سریع‌تر
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
-        // تنظیم کوکی‌ها
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
 
-        // مدیریت لینک‌ها
+        webView.addJavascriptInterface(new AndroidBridge(), "AndroidApp");
+
         webView.setWebViewClient(new WebViewClient() {
 
             @Override
             public boolean shouldOverrideUrlLoading(
                     WebView view,
                     WebResourceRequest request) {
-
                 return handleUrl(request.getUrl());
             }
 
@@ -117,12 +90,10 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(
                     WebView view,
                     String url) {
-
                 return handleUrl(Uri.parse(url));
             }
 
             private boolean handleUrl(Uri uri) {
-
                 String url = uri.toString();
 
                 if (url.startsWith("http://")
@@ -131,13 +102,8 @@ public class MainActivity extends Activity {
                 }
 
                 try {
-                    Intent intent = new Intent(
-                            Intent.ACTION_VIEW,
-                            uri
-                    );
-
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                     startActivity(intent);
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -146,7 +112,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        // انتخاب عکس و فایل
         webView.setWebChromeClient(new WebChromeClient() {
 
             @Override
@@ -172,10 +137,8 @@ public class MainActivity extends Activity {
                     return true;
 
                 } catch (ActivityNotFoundException e) {
-
                     filePathCallback.onReceiveValue(null);
                     filePathCallback = null;
-
                     return false;
                 }
             }
@@ -184,7 +147,15 @@ public class MainActivity extends Activity {
         webView.loadUrl(WEBSITE_URL);
     }
 
-    // دریافت فایل انتخاب‌شده
+    // ارتباط دکمه خروج صفحه اصلی با اندروید
+    private class AndroidBridge {
+
+        @JavascriptInterface
+        public void exitApp() {
+            runOnUiThread(() -> finish());
+        }
+    }
+
     @Override
     protected void onActivityResult(
             int requestCode,
@@ -193,23 +164,20 @@ public class MainActivity extends Activity {
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE
+                && filePathCallback != null) {
 
-            if (filePathCallback != null) {
+            Uri[] results =
+                    WebChromeClient.FileChooserParams.parseResult(
+                            resultCode,
+                            data
+                    );
 
-                Uri[] results =
-                        WebChromeClient.FileChooserParams.parseResult(
-                                resultCode,
-                                data
-                        );
-
-                filePathCallback.onReceiveValue(results);
-                filePathCallback = null;
-            }
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
         }
     }
 
-    // مدیریت دکمه برگشت گوشی
     @Override
     public void onBackPressed() {
 
@@ -221,27 +189,23 @@ public class MainActivity extends Activity {
         webView.evaluateJavascript(
             "(function() {" +
 
-            "var app = document.getElementById('appOverlay');" +
-            "var list = document.getElementById('listOverlay');" +
-            "var about = document.getElementById('aboutOverlay');" +
+            "var app=document.getElementById('appOverlay');" +
+            "var list=document.getElementById('listOverlay');" +
+            "var about=document.getElementById('aboutOverlay');" +
 
-            "if (app && app.classList.contains('show')) {" +
-            "if (typeof closeApp === 'function') closeApp();" +
-            "return 'handled';" +
-            "}" +
+            "if(app&&app.classList.contains('show')){" +
+            "if(typeof closeApp==='function')closeApp();" +
+            "return 'handled';}" +
 
-            "if (list && list.classList.contains('show')) {" +
-            "if (typeof hideList === 'function') hideList();" +
-            "return 'handled';" +
-            "}" +
+            "if(list&&list.classList.contains('show')){" +
+            "if(typeof hideList==='function')hideList();" +
+            "return 'handled';}" +
 
-            "if (about && about.classList.contains('show')) {" +
-            "if (typeof hideAbout === 'function') hideAbout();" +
-            "return 'handled';" +
-            "}" +
+            "if(about&&about.classList.contains('show')){" +
+            "if(typeof hideAbout==='function')hideAbout();" +
+            "return 'handled';}" +
 
-            "return 'none';" +
-            "})();",
+            "return 'none';})();",
 
             value -> {
 
@@ -253,7 +217,7 @@ public class MainActivity extends Activity {
                 if (webView != null && webView.canGoBack()) {
                     webView.goBack();
                 } else {
-                    MainActivity.super.onBackPressed();
+                    finish();
                 }
             }
         );
@@ -269,7 +233,7 @@ public class MainActivity extends Activity {
 
         if (webView != null) {
             webView.stopLoading();
-            webView.clearHistory();
+            webView.removeJavascriptInterface("AndroidApp");
             webView.removeAllViews();
             webView.destroy();
             webView = null;
