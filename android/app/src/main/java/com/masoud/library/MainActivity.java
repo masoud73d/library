@@ -9,12 +9,17 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
+import android.webkit.ValueCallback;
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.net.Uri;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
+    private ValueCallback<Uri[]> filePathCallback;
+
+    private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
     private static final String WEBSITE_URL =
             "https://masoud73d.github.io/library/";
@@ -28,12 +33,12 @@ public class MainActivity extends Activity {
 
         WebSettings settings = webView.getSettings();
 
-        // تنظیمات اصلی نمایش صفحات
+        // تنظیمات اصلی
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        // تنظیم مقیاس و اندازه صفحه
+        // تنظیم نمایش و اندازه صفحه
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
         settings.setTextZoom(100);
@@ -42,15 +47,17 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
 
-        // دریافت نسخه جدید صفحات
+        // دسترسی به فایل‌ها
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setSupportMultipleWindows(true);
+
+        // پاک کردن کش قدیمی
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.clearCache(true);
         webView.clearHistory();
-
-        // دسترسی فایل‌ها
-        settings.setAllowFileAccess(true);
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        settings.setSupportMultipleWindows(true);
 
         // تنظیم کوکی‌ها
         CookieManager cookieManager = CookieManager.getInstance();
@@ -101,13 +108,126 @@ public class MainActivity extends Activity {
             }
         });
 
-        webView.setWebChromeClient(new WebChromeClient());
+        // انتخاب عکس و فایل
+        webView.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+            public boolean onShowFileChooser(
+                    WebView view,
+                    ValueCallback<Uri[]> callback,
+                    FileChooserParams params) {
+
+                if (filePathCallback != null) {
+                    filePathCallback.onReceiveValue(null);
+                }
+
+                filePathCallback = callback;
+
+                try {
+                    Intent intent = params.createIntent();
+
+                    startActivityForResult(
+                            intent,
+                            FILE_CHOOSER_REQUEST_CODE
+                    );
+
+                    return true;
+
+                } catch (ActivityNotFoundException e) {
+
+                    filePathCallback.onReceiveValue(null);
+                    filePathCallback = null;
+
+                    return false;
+                }
+            }
+        });
 
         webView.loadUrl(WEBSITE_URL);
     }
 
+    // دریافت فایل انتخاب‌شده
+    @Override
+    protected void onActivityResult(
+            int requestCode,
+            int resultCode,
+            Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+
+            if (filePathCallback != null) {
+
+                Uri[] results =
+                        WebChromeClient.FileChooserParams.parseResult(
+                                resultCode,
+                                data
+                        );
+
+                filePathCallback.onReceiveValue(results);
+                filePathCallback = null;
+            }
+        }
+    }
+
+    // مدیریت دکمه برگشت گوشی
+    @Override
+    public void onBackPressed() {
+
+        if (webView == null) {
+            super.onBackPressed();
+            return;
+        }
+
+        webView.evaluateJavascript(
+            "(function() {" +
+
+            "var app = document.getElementById('appOverlay');" +
+            "var list = document.getElementById('listOverlay');" +
+            "var about = document.getElementById('aboutOverlay');" +
+
+            "if (app && app.classList.contains('show')) {" +
+            "if (typeof closeApp === 'function') closeApp();" +
+            "return 'handled';" +
+            "}" +
+
+            "if (list && list.classList.contains('show')) {" +
+            "if (typeof hideList === 'function') hideList();" +
+            "return 'handled';" +
+            "}" +
+
+            "if (about && about.classList.contains('show')) {" +
+            "if (typeof hideAbout === 'function') hideAbout();" +
+            "return 'handled';" +
+            "}" +
+
+            "return 'none';" +
+            "})();",
+
+            value -> {
+
+                if (!"\"none\"".equals(value) &&
+                    !"none".equals(value)) {
+                    return;
+                }
+
+                if (webView != null && webView.canGoBack()) {
+                    webView.goBack();
+                } else {
+                    MainActivity.super.onBackPressed();
+                }
+            }
+        );
+    }
+
     @Override
     protected void onDestroy() {
+
+        if (filePathCallback != null) {
+            filePathCallback.onReceiveValue(null);
+            filePathCallback = null;
+        }
 
         if (webView != null) {
             webView.stopLoading();
