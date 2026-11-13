@@ -9,13 +9,9 @@
 <link rel="preload" as="image" href="./library-bg.png" fetchpriority="high">
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -31,7 +27,7 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* صفحه خوش‌آمدگویی و لودینگ */
+/* صفحه خوش‌آمدگویی */
 .splash-screen {
   position: fixed;
   inset: 0;
@@ -309,31 +305,96 @@ button {
   border-radius: 20px;
 }
 
-/* دکمه خروج زیر کتابخانه */
-.exit-area {
-  width: 100%;
-  max-width: 1024px;
-  display: flex;
-  justify-content: center;
-  padding: 18px 16px 30px;
-  margin: 0 auto;
-  background: #160a06;
-}
-
+/* دکمه خروج روی تصویر کتابخانه */
 .exit-button {
-  min-width: 180px;
-  padding: 12px 28px;
-  border: 1px solid #c39755;
+  position: absolute;
+  left: 50%;
+  bottom: 2.2%;
+  transform: translateX(-50%);
+  z-index: 8;
+  min-width: 170px;
+  padding: 11px 25px;
+  border: 1px solid #d0a35e;
   border-radius: 12px;
   color: #ffe7bd;
   font-size: 13px;
   font-weight: bold;
-  background: linear-gradient(145deg,#684323,#2b190f);
-  box-shadow: 0 5px 18px #0008, inset 0 1px 0 #ffffff20;
+  line-height: 1.5;
+  white-space: nowrap;
+  background: linear-gradient(145deg,rgba(104,67,35,.97),rgba(43,25,15,.98));
+  box-shadow: 0 5px 18px #0009, inset 0 1px 0 #ffffff30;
 }
 
 .exit-button:active {
-  transform: scale(.97);
+  transform: translateX(-50%) scale(.97);
+}
+
+/* پنجره تأیید خروج فارسی */
+.exit-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.exit-confirm.show {
+  display: flex;
+}
+
+.exit-confirm-box {
+  width: min(100%, 340px);
+  padding: 24px 20px 18px;
+  text-align: center;
+  border: 1px solid #bd8a43;
+  border-radius: 16px;
+  color: #f8e4bd;
+  background: linear-gradient(145deg,#2b190f,#160a06);
+  box-shadow: 0 18px 55px #000c;
+}
+
+.exit-confirm-title {
+  margin: 0 0 10px;
+  color: #f8d99f;
+  font-size: 18px;
+}
+
+.exit-confirm-message {
+  margin: 0 0 22px;
+  color: #e5d3b7;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.exit-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.exit-confirm-actions button {
+  min-width: 105px;
+  padding: 10px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.exit-cancel {
+  border: 1px solid #987044;
+  color: #f5dfbd;
+  background: #382316;
+}
+
+.exit-accept {
+  border: 1px solid #d0a35e;
+  color: #fff0d2;
+  background: linear-gradient(145deg,#80552c,#4c2d18);
 }
 
 /* لایه‌های پنجره */
@@ -639,39 +700,38 @@ button {
     <button class="hotspot book-13" type="button" aria-label="مرکز زمان" onclick="openBook(12)"></button>
     <button class="hotspot book-14" type="button" aria-label="فاصله یاب" onclick="openBook(13)"></button>
 
+    <!-- دکمه خروج پایین و وسط تصویر -->
+    <button class="exit-button" type="button" onclick="showExitConfirm()">
+      خروج از برنامه
+    </button>
+
   </div>
 </main>
 
-<!-- دکمه خروج در پایین کتابخانه -->
-<div class="exit-area">
-  <button class="exit-button" type="button" onclick="exitLibrary()">
-    خروج از برنامه
-  </button>
+<!-- پنجره تأیید خروج فارسی -->
+<div class="exit-confirm" id="exitConfirm" role="dialog" aria-modal="true" aria-labelledby="exitConfirmTitle">
+  <div class="exit-confirm-box">
+    <h2 class="exit-confirm-title" id="exitConfirmTitle">خروج از برنامه</h2>
+    <p class="exit-confirm-message">آیا مطمئن هستید که می‌خواهید از برنامه خارج شوید؟</p>
+    <div class="exit-confirm-actions">
+      <button class="exit-cancel" type="button" onclick="hideExitConfirm()">انصراف</button>
+      <button class="exit-accept" type="button" onclick="confirmExit()">خروج</button>
+    </div>
+  </div>
 </div>
 
 <!-- پنجره اجرای ابزارها -->
-<div
-  class="overlay"
-  id="appOverlay"
-  onclick="outsideClose(event,'appOverlay')">
-
+<div class="overlay" id="appOverlay" onclick="outsideClose(event,'appOverlay')">
   <div class="dialog app-dialog">
-
     <div class="dialog-head">
       <span class="dialog-title" id="appTitle">عنوان برنامه</span>
 
       <div class="actions">
-        <button
-          class="action-btn"
-          type="button"
-          onclick="openExternal()">
+        <button class="action-btn" type="button" onclick="openExternal()">
           باز کردن جداگانه ↗
         </button>
 
-        <button
-          class="action-btn"
-          type="button"
-          onclick="closeApp()">
+        <button class="action-btn" type="button" onclick="closeApp()">
           بستن ✕
         </button>
       </div>
@@ -682,57 +742,37 @@ button {
       title="برنامه انتخاب‌شده"
       allow="clipboard-read; clipboard-write; fullscreen">
     </iframe>
-
   </div>
 </div>
 
 <!-- فهرست کتاب‌ها -->
-<div
-  class="overlay"
-  id="listOverlay"
-  onclick="outsideClose(event,'listOverlay')">
-
+<div class="overlay" id="listOverlay" onclick="outsideClose(event,'listOverlay')">
   <div class="dialog">
-
     <div class="dialog-head">
       <span class="dialog-title">فهرست کتاب‌های من</span>
 
-      <button
-        class="action-btn"
-        type="button"
-        onclick="hideList()">
+      <button class="action-btn" type="button" onclick="hideList()">
         بستن ✕
       </button>
     </div>
 
     <div class="book-list" id="bookList"></div>
-
   </div>
 </div>
 
 <!-- درباره من -->
-<div
-  class="overlay"
-  id="aboutOverlay"
-  onclick="outsideClose(event,'aboutOverlay')">
-
+<div class="overlay" id="aboutOverlay" onclick="outsideClose(event,'aboutOverlay')">
   <div class="dialog">
-
     <div class="dialog-head">
       <span class="dialog-title">درباره من</span>
 
-      <button
-        class="action-btn"
-        type="button"
-        onclick="hideAbout()">
+      <button class="action-btn" type="button" onclick="hideAbout()">
         بستن ✕
       </button>
     </div>
 
     <div class="about-content">
-
       <h3>درباره من</h3>
-
       <p>توسعه‌دهنده وب و طراح پروژه‌های دیجیتال</p>
 
       <span class="developer">
@@ -741,14 +781,10 @@ button {
 
       <p>راه ارتباطی:</p>
 
-      <a
-        class="email-link"
-        href="mailto:masoud0098d@gmail.com">
+      <a class="email-link" href="mailto:masoud0098d@gmail.com">
         masoud0098d@gmail.com
       </a>
-
     </div>
-
   </div>
 </div>
 
@@ -814,11 +850,19 @@ const books = [
 
 let activeUrl = "";
 
-/* خروج از برنامه */
-function exitLibrary() {
-  const confirmed = window.confirm("می‌خواهید از برنامه خارج شوید؟");
+/* نمایش پنجره تأیید خروج */
+function showExitConfirm() {
+  document.getElementById("exitConfirm").classList.add("show");
+}
 
-  if (!confirmed) return;
+/* بستن پنجره تأیید خروج */
+function hideExitConfirm() {
+  document.getElementById("exitConfirm").classList.remove("show");
+}
+
+/* تأیید خروج */
+function confirmExit() {
+  hideExitConfirm();
 
   if (
     window.AndroidApp &&
@@ -827,12 +871,6 @@ function exitLibrary() {
     window.AndroidApp.exitApp();
   } else {
     window.close();
-
-    setTimeout(() => {
-      if (!document.hidden) {
-        alert("برای خروج از نسخه مرورگر، از دکمه برگشت مرورگر استفاده کنید.");
-      }
-    }, 150);
   }
 }
 
@@ -855,7 +893,6 @@ async function finishStartup() {
     // در صورت خطای تصویر، صفحه اصلی همچنان باز می‌شود.
   }
 
-  // لودینگ کوتاه و بدون انتظار غیرضروری
   const remaining = Math.max(
     0,
     700 - (Date.now() - startedAt)
@@ -868,7 +905,6 @@ async function finishStartup() {
     setTimeout(() => {
       splash.remove();
     }, 500);
-
   }, remaining);
 }
 
@@ -897,9 +933,7 @@ function openBook(index) {
 /* بستن ابزار */
 function closeApp() {
   document.getElementById("appOverlay").classList.remove("show");
-
   document.getElementById("appFrame").src = "about:blank";
-
   document.body.style.overflow = "";
 }
 
@@ -961,12 +995,13 @@ function renderList() {
   });
 }
 
-/* کلید برگشت صفحه‌کلید */
+/* کلید برگشت */
 document.addEventListener("keydown", event => {
   if (event.key === "Escape") {
     closeApp();
     hideList();
     hideAbout();
+    hideExitConfirm();
   }
 });
 
