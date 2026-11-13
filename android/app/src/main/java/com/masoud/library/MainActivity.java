@@ -3,6 +3,8 @@ package com.masoud.library;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Build;
+import android.view.WindowInsets;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
@@ -29,7 +31,43 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         webView = new WebView(this);
+        webView.setBackgroundColor(0xFF160A06);
+        webView.setClipToPadding(true);
         setContentView(webView);
+
+        // هماهنگی با نوارهای سیستمی اندروید
+        webView.setOnApplyWindowInsetsListener((view, insets) -> {
+
+            int left;
+            int top;
+            int right;
+            int bottom;
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+
+                android.graphics.Insets systemInsets =
+                        insets.getInsets(
+                                WindowInsets.Type.systemBars()
+                                | WindowInsets.Type.displayCutout()
+                        );
+
+                left = systemInsets.left;
+                top = systemInsets.top;
+                right = systemInsets.right;
+                bottom = systemInsets.bottom;
+
+            } else {
+
+                left = insets.getSystemWindowInsetLeft();
+                top = insets.getSystemWindowInsetTop();
+                right = insets.getSystemWindowInsetRight();
+                bottom = insets.getSystemWindowInsetBottom();
+            }
+
+            view.setPadding(left, top, right, bottom);
+
+            return insets;
+        });
 
         WebSettings settings = webView.getSettings();
 
@@ -38,7 +76,7 @@ public class MainActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
-        // تنظیم نمایش و اندازه صفحه
+        // تنظیم اندازه و مقیاس
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(false);
         settings.setTextZoom(100);
@@ -54,7 +92,7 @@ public class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(true);
 
-        // پاک کردن کش قدیمی
+        // پاک کردن کش قبلی
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.clearCache(true);
         webView.clearHistory();
@@ -87,8 +125,8 @@ public class MainActivity extends Activity {
 
                 String url = uri.toString();
 
-                if (url.startsWith("http://") ||
-                    url.startsWith("https://")) {
+                if (url.startsWith("http://")
+                        || url.startsWith("https://")) {
                     return false;
                 }
 
@@ -207,8 +245,8 @@ public class MainActivity extends Activity {
 
             value -> {
 
-                if (!"\"none\"".equals(value) &&
-                    !"none".equals(value)) {
+                if (!"\"none\"".equals(value)
+                        && !"none".equals(value)) {
                     return;
                 }
 
