@@ -4,6 +4,7 @@ package com.masoud.library;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Build;
+import android.os.Message;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -20,9 +21,11 @@ import android.net.Uri;
 public class MainActivity extends Activity {
 
     private WebView webView;
+    private WebView popupWebView;
     private ValueCallback<Uri[]> filePathCallback;
 
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
+
     private static final String WEBSITE_URL =
             "https://masoud73d.github.io/library/";
 
@@ -68,7 +71,6 @@ public class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(true);
 
-        // استفاده از کش برای بارگذاری سریع‌تر
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
         CookieManager cookieManager = CookieManager.getInstance();
@@ -115,6 +117,57 @@ public class MainActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient() {
 
             @Override
+            public boolean onCreateWindow(
+                    WebView view,
+                    boolean isDialog,
+                    boolean isUserGesture,
+                    Message resultMsg) {
+
+                WebView popup = new WebView(MainActivity.this);
+                popupWebView = popup;
+
+                WebSettings popupSettings = popup.getSettings();
+                popupSettings.setJavaScriptEnabled(true);
+                popupSettings.setDomStorageEnabled(true);
+
+                popup.setWebViewClient(new WebViewClient() {
+
+                    @Override
+                    public boolean shouldOverrideUrlLoading(
+                            WebView view,
+                            WebResourceRequest request) {
+
+                        openExternalUrl(request.getUrl());
+                        closePopup(view);
+                        return true;
+                    }
+
+                    @Override
+                    public boolean shouldOverrideUrlLoading(
+                            WebView view,
+                            String url) {
+
+                        openExternalUrl(Uri.parse(url));
+                        closePopup(view);
+                        return true;
+                    }
+                });
+
+                WebView.WebViewTransport transport =
+                        (WebView.WebViewTransport) resultMsg.obj;
+
+                transport.setWebView(popup);
+                resultMsg.sendToTarget();
+
+                return true;
+            }
+
+            @Override
+            public void onCloseWindow(WebView window) {
+                closePopup(window);
+            }
+
+            @Override
             public boolean onShowFileChooser(
                     WebView view,
                     ValueCallback<Uri[]> callback,
@@ -147,7 +200,38 @@ public class MainActivity extends Activity {
         webView.loadUrl(WEBSITE_URL);
     }
 
-    // ارتباط دکمه خروج صفحه اصلی با اندروید
+    private void openExternalUrl(Uri uri) {
+        if (uri == null) {
+            return;
+        }
+
+        String scheme = uri.getScheme();
+
+        if (scheme == null ||
+                (!scheme.equals("http") && !scheme.equals("https"))) {
+            return;
+        }
+
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void closePopup(WebView popup) {
+        if (popup != null) {
+            popup.stopLoading();
+            popup.setWebViewClient(null);
+            popup.destroy();
+        }
+
+        if (popupWebView == popup) {
+            popupWebView = null;
+        }
+    }
+
     private class AndroidBridge {
 
         @JavascriptInterface
@@ -229,6 +313,12 @@ public class MainActivity extends Activity {
         if (filePathCallback != null) {
             filePathCallback.onReceiveValue(null);
             filePathCallback = null;
+        }
+
+        if (popupWebView != null) {
+            popupWebView.stopLoading();
+            popupWebView.destroy();
+            popupWebView = null;
         }
 
         if (webView != null) {
