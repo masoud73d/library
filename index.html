@@ -491,6 +491,49 @@ button {
   -webkit-overflow-scrolling: touch;
 }
 
+/* بخش به‌روزرسانی */
+.update-entry {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 13px 10px;
+  border: 1px solid #c39755;
+  border-radius: 10px;
+  color: #ffe9c2;
+  background: linear-gradient(145deg,#684323,#2b190f);
+  font-size: 13px;
+  font-weight: bold;
+}
+.update-content {
+  padding: 24px 20px 28px;
+  text-align: center;
+  color: #e5d3b7;
+  line-height: 2;
+  overflow-y: auto;
+}
+.update-version {
+  color: #f5d293;
+  font-weight: bold;
+  font-size: 17px;
+  margin: 8px 0;
+}
+.update-notes {
+  white-space: pre-wrap;
+  font-size: 13px;
+  margin: 12px 0 20px;
+}
+.update-download {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid #d0a35e;
+  border-radius: 9px;
+  color: #fff0d2;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bold;
+  background: linear-gradient(145deg,#80552c,#4c2d18);
+}
+.update-download[hidden] { display: none; }
+
 /* درباره من */
 .about-content {
   padding: 28px 20px 30px;
@@ -749,6 +792,25 @@ button {
     </div>
 
     <div class="book-list" id="bookList"></div>
+    <div style="padding:0 15px 15px">
+      <button class="update-entry" type="button" onclick="showUpdate()">به‌روزرسانی برنامه</button>
+    </div>
+  </div>
+</div>
+
+<!-- پنجره به‌روزرسانی -->
+<div class="overlay" id="updateOverlay" onclick="outsideClose(event,'updateOverlay')">
+  <div class="dialog">
+    <div class="dialog-head">
+      <span class="dialog-title">به‌روزرسانی برنامه</span>
+      <button class="action-btn" type="button" onclick="hideUpdate()">بستن ✕</button>
+    </div>
+    <div class="update-content">
+      <div id="updateStatus">در حال بررسی نسخه‌های جدید...</div>
+      <div class="update-version" id="updateVersion" hidden></div>
+      <div class="update-notes" id="updateNotes" hidden></div>
+      <a class="update-download" id="updateDownload" href="#" target="_blank" rel="noopener noreferrer" hidden>دانلود نسخه جدید</a>
+    </div>
   </div>
 </div>
 
@@ -947,6 +1009,61 @@ function hideList() {
   document.body.style.overflow = "";
 }
 
+/* پنجره به‌روزرسانی */
+function showUpdate() {
+  hideList();
+  document.getElementById("updateOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+  loadUpdateInfo();
+}
+
+function hideUpdate() {
+  document.getElementById("updateOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+async function loadUpdateInfo() {
+  const status = document.getElementById("updateStatus");
+  const version = document.getElementById("updateVersion");
+  const notes = document.getElementById("updateNotes");
+  const download = document.getElementById("updateDownload");
+
+  status.textContent = "در حال بررسی نسخه‌های جدید...";
+  version.hidden = true;
+  notes.hidden = true;
+  download.hidden = true;
+  download.removeAttribute("href");
+
+  try {
+    const response = await fetch("./update.json?t=" + Date.now(), {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Update information unavailable");
+
+    const info = await response.json();
+    const safeUrl = typeof info.downloadUrl === "string" &&
+      /^https:\/\//i.test(info.downloadUrl);
+
+    if (info.published === true && safeUrl) {
+      status.textContent = "نسخه جدیدی برای دریافت منتشر شده است.";
+      version.textContent = "نسخه " + (info.version || "جدید");
+      version.hidden = false;
+
+      if (info.releaseNotes) {
+        notes.textContent = info.releaseNotes;
+        notes.hidden = false;
+      }
+
+      download.href = info.downloadUrl;
+      download.hidden = false;
+    } else {
+      status.textContent = "در حال حاضر به‌روزرسانی جدیدی منتشر نشده است.";
+    }
+  } catch (error) {
+    status.textContent = "بررسی به‌روزرسانی ممکن نشد. لطفاً بعداً دوباره تلاش کنید.";
+  }
+}
+
 /* درباره من */
 function showAbout() {
   document.getElementById("aboutOverlay").classList.add("show");
@@ -964,6 +1081,7 @@ function outsideClose(event, id) {
     if (id === "appOverlay") closeApp();
     if (id === "listOverlay") hideList();
     if (id === "aboutOverlay") hideAbout();
+    if (id === "updateOverlay") hideUpdate();
   }
 }
 
