@@ -49,13 +49,16 @@ jobs:
       - name: Prepare persistent APK signing key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
             echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/android/app/library-signing.jks"
             echo "ANDROID_KEYSTORE_PATH=$GITHUB_WORKSPACE/android/app/library-signing.jks" >> "$GITHUB_ENV"
-            echo "Persistent signing key found."
+            echo "Persistent signing key is fully configured."
           else
-            echo "::warning::Persistent signing key is not configured. This APK will use a temporary debug key and must NOT be installed as the update version."
+            echo "::warning::Persistent signing key is not fully configured. This APK will use a temporary debug key and must NOT be installed as the update version."
           fi
 
       - name: Build APK
