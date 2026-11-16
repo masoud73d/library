@@ -10,7 +10,6 @@
 
 <style>
 * { box-sizing: border-box; }
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -305,7 +304,7 @@ button {
   border-radius: 20px;
 }
 
-/* دکمه خروج روی تصویر کتابخانه */
+/* دکمه خروج */
 .exit-button {
   position: absolute;
   left: 50%;
@@ -329,7 +328,7 @@ button {
   transform: translateX(-50%) scale(.97);
 }
 
-/* پنجره تأیید خروج فارسی */
+/* پنجره تأیید خروج */
 .exit-confirm {
   position: fixed;
   inset: 0;
@@ -397,7 +396,7 @@ button {
   background: linear-gradient(145deg,#80552c,#4c2d18);
 }
 
-/* لایه‌های پنجره */
+/* پنجره‌ها */
 .overlay {
   position: fixed;
   inset: 0;
@@ -418,7 +417,6 @@ button {
   display: flex;
 }
 
-/* پنجره عمومی */
 .dialog {
   width: min(100%, 1100px);
   max-height: 94vh;
@@ -432,7 +430,6 @@ button {
   box-shadow: 0 20px 70px #000;
 }
 
-/* پنجره مخصوص اجرای ابزار */
 .app-dialog {
   height: 88vh;
   height: 88dvh;
@@ -564,7 +561,7 @@ button {
   background: #80552c;
 }
 
-/* تنظیمات موبایل */
+/* موبایل */
 @media (max-width: 600px) {
   .overlay {
     padding: 0;
@@ -642,7 +639,7 @@ button {
     <div class="splash-book" aria-hidden="true">📖</div>
   </div>
 
-  <h1 class="splash-title"درحال ورود به کتابخانه</h1>
+  <h1 class="splash-title">درحال ورود به کتابخانه</h1>
   <p class="splash-subtitle">کتابخانه‌ای از ابزارهای کاربردی</p>
 
   <div class="splash-loader" aria-hidden="true">
@@ -700,7 +697,6 @@ button {
     <button class="hotspot book-13" type="button" aria-label="مرکز زمان" onclick="openBook(12)"></button>
     <button class="hotspot book-14" type="button" aria-label="فاصله یاب" onclick="openBook(13)"></button>
 
-    <!-- دکمه خروج پایین و وسط تصویر -->
     <button class="exit-button" type="button" onclick="showExitConfirm()">
       خروج از برنامه
     </button>
@@ -708,7 +704,7 @@ button {
   </div>
 </main>
 
-<!-- پنجره تأیید خروج فارسی -->
+<!-- تأیید خروج -->
 <div class="exit-confirm" id="exitConfirm" role="dialog" aria-modal="true" aria-labelledby="exitConfirmTitle">
   <div class="exit-confirm-box">
     <h2 class="exit-confirm-title" id="exitConfirmTitle">خروج از برنامه</h2>
