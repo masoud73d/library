@@ -491,6 +491,50 @@ button {
   -webkit-overflow-scrolling: touch;
 }
 
+/* اعلان نسخه جدید بالای قفسه کتاب‌ها */
+.update-banner {
+  position: absolute;
+  z-index: 7;
+  top: 14.1%;
+  left: 8%;
+  width: 84%;
+  padding: 7px 11px;
+  border: 1px solid #e0b66e;
+  border-radius: 9px;
+  color: #fff0d2;
+  text-align: center;
+  line-height: 1.45;
+  background: linear-gradient(145deg,rgba(77,43,20,.97),rgba(28,15,9,.97));
+  box-shadow: 0 4px 14px #000b, inset 0 1px 0 #ffffff25;
+}
+.update-banner[hidden] { display: none; }
+.update-banner-title {
+  color: #ffe0a1;
+  font-size: clamp(10px, 2.5vw, 15px);
+  font-weight: bold;
+}
+.update-banner-version,
+.update-banner-notes,
+.update-banner-guide {
+  margin-top: 3px;
+  font-size: clamp(8px, 1.8vw, 11px);
+  line-height: 1.5;
+}
+.update-banner-notes:empty { display: none; }
+.update-banner-download {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 4px 13px;
+  border: 1px solid #e0b66e;
+  border-radius: 7px;
+  color: #fff3d8;
+  text-decoration: none;
+  font-size: clamp(9px, 2vw, 12px);
+  font-weight: bold;
+  line-height: 1.5;
+  background: linear-gradient(145deg,#80552c,#4c2d18);
+}
+
 /* بخش به‌روزرسانی */
 .update-entry {
   grid-column: 1 / -1;
@@ -704,6 +748,17 @@ button {
       decoding="async"
       draggable="false"
     >
+
+    <!-- اعلان نسخه جدید؛ فقط پس از انتشار تأییدشده نمایش داده می‌شود -->
+    <section class="update-banner" id="updateBanner" hidden aria-live="polite">
+      <div class="update-banner-title" id="bannerTitle">نسخه جدید منتشر شد</div>
+      <div class="update-banner-version" id="bannerVersion"></div>
+      <div class="update-banner-notes" id="bannerNotes"></div>
+      <div class="update-banner-guide">
+        برای به‌روزرسانی، روی «دانلود نسخه جدید» بزنید؛ فایل APK را پس از دانلود باز کنید و گزینه نصب یا به‌روزرسانی را انتخاب کنید.
+      </div>
+      <a class="update-banner-download" id="bannerDownload" href="#" target="_blank" rel="noopener noreferrer">دانلود نسخه جدید</a>
+    </section>
 
     <!-- فهرست و درباره من -->
     <button
@@ -928,6 +983,36 @@ function confirmExit() {
   }
 }
 
+/* بررسی نسخه جدید و نمایش اعلان بالای کتاب‌ها */
+async function checkUpdateBanner() {
+  const banner = document.getElementById("updateBanner");
+  const version = document.getElementById("bannerVersion");
+  const notes = document.getElementById("bannerNotes");
+  const download = document.getElementById("bannerDownload");
+
+  try {
+    const response = await fetch("./update.json?t=" + Date.now(), {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Update information unavailable");
+
+    const info = await response.json();
+    const validUrl = typeof info.downloadUrl === "string" &&
+      /^https:\/\//i.test(info.downloadUrl);
+
+    if (info.published === true && validUrl) {
+      version.textContent = info.version ? "نسخه " + info.version : "";
+      notes.textContent = info.releaseNotes || "";
+      download.href = info.downloadUrl;
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+    }
+  } catch (error) {
+    banner.hidden = true;
+  }
+}
+
 /* مدیریت صفحه شروع */
 async function finishStartup() {
   const splash = document.getElementById("splashScreen");
@@ -1117,6 +1202,7 @@ document.addEventListener("keydown", event => {
 
 /* شروع برنامه */
 renderList();
+checkUpdateBanner();
 finishStartup();
 </script>
 
