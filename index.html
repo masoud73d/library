@@ -491,48 +491,88 @@ button {
   -webkit-overflow-scrolling: touch;
 }
 
-/* اعلان نسخه جدید بالای قفسه کتاب‌ها */
+/* اعلان کوچک نسخه جدید؛ بالای تمام کتاب‌ها و بدون پوشاندن قفسه‌ها */
 .update-banner {
   position: absolute;
   z-index: 7;
-  top: 14.1%;
+  top: 10.3%;
   left: 8%;
   width: 84%;
-  padding: 7px 11px;
+  min-height: 6.4%;
+  padding: 5px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
   border: 1px solid #e0b66e;
-  border-radius: 9px;
-  color: #fff0d2;
+  border-radius: 12px;
+  color: #17345e;
   text-align: center;
-  line-height: 1.45;
-  background: linear-gradient(145deg,rgba(77,43,20,.97),rgba(28,15,9,.97));
-  box-shadow: 0 4px 14px #000b, inset 0 1px 0 #ffffff25;
+  line-height: 1.25;
+  background: linear-gradient(180deg,#ffffff 0%,#dce8ff 100%);
+  box-shadow: 0 3px 10px #0008, inset 0 1px 0 #ffffff;
 }
 .update-banner[hidden] { display: none; }
+.update-banner-icon {
+  flex: 0 0 auto;
+  font-size: clamp(16px, 3.4vw, 25px);
+  line-height: 1;
+}
+.update-banner-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 5px;
+  row-gap: 2px;
+}
 .update-banner-title {
-  color: #ffe0a1;
-  font-size: clamp(10px, 2.5vw, 15px);
+  color: #17345e;
+  font-size: clamp(9px, 2.1vw, 13px);
   font-weight: bold;
 }
-.update-banner-version,
-.update-banner-notes,
-.update-banner-guide {
-  margin-top: 3px;
+.update-banner-version {
+  color: #294c7b;
   font-size: clamp(8px, 1.8vw, 11px);
-  line-height: 1.5;
-}
-.update-banner-notes:empty { display: none; }
-.update-banner-download {
-  display: inline-block;
-  margin-top: 5px;
-  padding: 4px 13px;
-  border: 1px solid #e0b66e;
-  border-radius: 7px;
-  color: #fff3d8;
-  text-decoration: none;
-  font-size: clamp(9px, 2vw, 12px);
   font-weight: bold;
-  line-height: 1.5;
-  background: linear-gradient(145deg,#80552c,#4c2d18);
+}
+.update-banner-notes,
+.update-banner-guide { display: none; }
+.update-banner-download {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid #168d27;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: clamp(8px, 1.9vw, 11px);
+  font-weight: bold;
+  line-height: 1.4;
+  background: linear-gradient(180deg,#20c83a,#07931e);
+  box-shadow: 0 2px 4px #0003;
+}
+.update-banner-close {
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 25px;
+  background: #aabbd5;
+}
+@media (max-width: 380px) {
+  .update-banner { left: 5%; width: 90%; gap: 5px; padding: 4px 6px; }
+  .update-banner-icon { display: none; }
+  .update-banner-download { padding: 4px 7px; }
+  .update-banner-close { width: 21px; height: 21px; line-height: 21px; }
 }
 
 /* بخش به‌روزرسانی */
@@ -751,13 +791,13 @@ button {
 
     <!-- اعلان نسخه جدید؛ فقط پس از انتشار تأییدشده نمایش داده می‌شود -->
     <section class="update-banner" id="updateBanner" hidden aria-live="polite">
-      <div class="update-banner-title" id="bannerTitle">نسخه جدید منتشر شد</div>
-      <div class="update-banner-version" id="bannerVersion"></div>
-      <div class="update-banner-notes" id="bannerNotes"></div>
-      <div class="update-banner-guide">
-        برای به‌روزرسانی، روی «دانلود نسخه جدید» بزنید؛ فایل APK را پس از دانلود باز کنید و گزینه نصب یا به‌روزرسانی را انتخاب کنید.
+      <span class="update-banner-icon" aria-hidden="true">🚀</span>
+      <div class="update-banner-copy">
+        <span class="update-banner-title" id="bannerTitle">نسخه جدید منتشر شد!</span>
+        <span class="update-banner-version" id="bannerVersion"></span>
       </div>
-      <a class="update-banner-download" id="bannerDownload" href="#" target="_blank" rel="noopener noreferrer">دانلود نسخه جدید</a>
+      <a class="update-banner-download" id="bannerDownload" href="#" target="_blank" rel="noopener noreferrer">⬇ دانلود نسخه جدید</a>
+      <button class="update-banner-close" type="button" aria-label="بستن اعلان" onclick="document.getElementById('updateBanner').hidden=true">×</button>
     </section>
 
     <!-- فهرست و درباره من -->
