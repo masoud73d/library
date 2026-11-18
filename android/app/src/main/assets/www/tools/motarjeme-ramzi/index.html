@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>رمزگشا | مترجم زبان‌ها و کدها</title>
+<style>
+:root{--bg:#0b1220;--panel:#111c2e;--panel2:#17243a;--border:#293951;--text:#e8eef8;--muted:#9aabc2;--accent:#69e0c4;--gold:#f3c969;--danger:#ff8585;--input:#0b1525;--shadow:0 12px 35px #0003}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:1.8}
+button,textarea,select{font:inherit}
+button{cursor:pointer;background:var(--panel2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:8px 13px;transition:.15s}
+button:hover{border-color:var(--accent);transform:translateY(-1px)}
+button:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{padding:24px 16px 18px;text-align:center;background:linear-gradient(135deg,#101e34,#132d43);border-bottom:1px solid var(--border)}
+.brand{font-size:30px;font-weight:bold;color:var(--accent)}
+.subtitle{color:var(--muted);font-size:14px}
+.container{width:min(1120px,94%);margin:22px auto 40px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:var(--shadow)}
+h2{font-size:19px;margin:0 0 12px}
+h3{font-size:15px;margin:0 0 8px;color:var(--accent)}
+.small{font-size:12px;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+textarea,select{width:100%;background:var(--input);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px}
+textarea{min-height:130px;resize:vertical}
+select{cursor:pointer}
+option{background:var(--panel);color:var(--text)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.primary{background:#164c50;border-color:#287c77;color:#d8fff7}
+.danger{color:var(--danger)}
+.controls{margin-top:12px}
+.language-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.language-group{background:#0e192a;border:1px solid var(--border);border-radius:13px;padding:13px;min-width:0}
+.method-list{display:grid;gap:7px}
+.method{display:flex;align-items:center;gap:8px;text-align:right;width:100%;padding:9px 10px;background:#142239}
+.method.active{border-color:var(--accent);background:#173b45;color:#dffff8}
+.symbol{width:27px;text-align:center;font-size:17px;flex-shrink:0}
+.method-text{min-width:0}
+.method-name{font-size:13px;font-weight:bold}
+.method-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.status{padding:8px 11px;background:#0e192a;border:1px solid var(--border);border-radius:9px;color:var(--muted);font-size:12px;margin-top:10px;min-height:42px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab.active{border-color:var(--accent);color:var(--accent)}
+.hidden{display:none!important}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.history-item{padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:8px;overflow-wrap:anywhere}
+.history-item p{margin:4px 0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
+.about-btn{position:fixed;bottom:14px;left:14px;z-index:5;font-size:12px;background:#162740;box-shadow:var(--shadow)}
+.modal-backdrop{position:fixed;inset:0;background:#0009;display:grid;place-items:center;padding:20px;z-index:10}
+.modal{width:min(420px,100%);background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center}
+@media(max-width:760px){
+.language-columns{grid-template-columns:1fr}
+.grid{grid-template-columns:1fr}
+.brand{font-size:25px}
+.panel{padding:13px}
+textarea{min-height:115px}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">🔐 رمزگشا</div>
+<div class="subtitle">مترجم زبان‌ها و کدها</div>
+</header>
+
+<main class="container">
+<section class="panel">
+<h2>انتخاب روش تبدیل</h2>
+<p class="small">روش موردنظرت رو از یکی از سه دسته زیر انتخاب کن.</p>
+<div class="language-columns">
+<section class="language-group">
+<h3>🗣️ زبان‌های رمزی ایرانی</h3>
+<div class="method-list" id="secretMethods"></div>
+</section>
+<section class="language-group">
+<h3>🔣 خط و کد</h3>
+<div class="method-list" id="codeMethods"></div>
+</section>
+<section class="language-group">
+<h3>🧩 رمزهای کلاسیک و ابزارها</h3>
+<div class="method-list" id="classicMethods"></div>
+</section>
+</div>
+</section>
+
+<section class="panel">
+<h2>مترجم</h2>
+<div class="grid">
+<div>
+<label for="direction">جهت تبدیل</label>
+<select id="direction">
+<option value="encode">متن عادی ← تبدیل به رمز</option>
+<option value="decode">رمز ← تبدیل به متن عادی</option>
+</select>
+</div>
+<div>
+<label for="selectedMethod">روش انتخاب‌شده</label>
+<select id="selectedMethod"></select>
+</div>
+</div>
+
+<div style="margin-top:14px">
+<label for="source">متن ورودی</label>
+<textarea id="source" placeholder="متن یا کدی که می‌خواهی تبدیل کنی اینجا بنویس..."></textarea>
+</div>
+
+<div class="row controls">
+<button class="primary" id="convertBtn">تبدیل کن</button>
+<button id="swapBtn">جابجایی جهت</button>
+<button id="sampleBtn">نمونه متن</button>
+<button id="clearBtn">پاک کردن</button>
+<button id="speakBtn">🔊 خواندن متن</button>
+</div>
+
+<div style="margin-top:16px">
+<label for="result">نتیجه</label>
+<textarea id="result" placeholder="نتیجه تبدیل اینجا نمایش داده می‌شود..." readonly></textarea>
+</div>
+
+<div class="result-actions">
+<button class="primary" id="copyBtn">کپی نتیجه</button>
+<button id="favoriteBtn">☆ افزودن به علاقه‌مندی‌ها</button>
+</div>
+<div class="status" id="status" aria-live="polite">یک روش انتخاب کن و متن رو وارد کن.</div>
+</section>
+
+<section class="panel">
+<h2>🧰 ابزارهای کمکی</h2>
+<div class="tabs">
+<button class="tab active" data-tab="detect">تشخیص احتمالی کد</button>
+<button class="tab" data-tab="chain">تبدیل دومرحله‌ای</button>
+<button class="tab" data-tab="compare">مقایسه روش‌ها</button>
+</div>
+
+<div id="tab-detect">
+<p class="small">با توجه به شکل متن، چند احتمال پیشنهاد می‌شه؛ تشخیص قطعی نیست.</p>
+<button class="primary" id="detectBtn">بررسی متن ورودی</button>
+<div id="detectResult" class="status">هنوز متنی بررسی نشده است.</div>
+</div>
+
+<div id="tab-chain" class="hidden">
+<div class="grid">
+<div>
+<label for="chainFirst">مرحله اول</label>
+<select id="chainFirst"></select>
+</div>
+<div>
+<label for="chainSecond">مرحله دوم</label>
+<select id="chainSecond"></select>
+</div>
+</div>
+<div class="row controls">
+<button class="primary" id="chainBtn">اجرای تبدیل دومرحله‌ای</button>
+<select id="chainDirection" style="width:auto;flex:1">
+<option value="encode">تبدیل دو مرحله‌ای</option>
+<option value="decode">بازگشایی دو مرحله‌ای</option>
+</select>
+</div>
+<div class="status" id="chainResult">نتیجه در این قسمت نمایش داده می‌شود.</div>
+</div>
+
+<div id="tab-compare" class="hidden">
+<p class="small">متن ورودی رو با چند روش تبدیل کن تا نتیجه‌ها رو مقایسه کنی.</p>
+<button class="primary" id="compareBtn">مقایسه روش‌ها</button>
+<div id="compareResult"></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>⭐ علاقه‌مندی‌ها و سابقه</h2>
+<div class="tabs">
+<button class="tab active" data-tab="history">سابقه تبدیل‌ها</button>
+<button class="tab" data-tab="favorites">علاقه‌مندی‌ها</button>
+</div>
+<div id="tab-history">
+<div id="historyList" class="small">هنوز سابقه‌ای ثبت نشده.</div>
+</div>
+<div id="tab-favorites" class="hidden">
+<div id="favoriteList" class="small">هنوز موردی ذخیره نشده.</div>
+</div>
+<div class="row controls">
+<button id="clearHistoryBtn" class="danger">پاک کردن سابقه</button>
+<button id="clearFavoritesBtn" class="danger">پاک کردن علاقه‌مندی‌ها</button>
+</div>
+</section>
+
+<footer>رمزگشا | مترجم زبان‌ها و کدها</footer>
+</main>
+
+<button class="about-btn" id="aboutOpen">درباره من</button>
+<div class="modal-backdrop hidden" id="aboutModal">
+<div class="modal">
+<div class="modal-head">
+<h2>درباره من</h2>
+<button id="aboutClose">✕</button>
+</div>
+<p>Developer: Masoud delavar</p>
+<p>Email: masoud0098d@gmail.com</p>
+</div>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const methods = [
+{id:"mot",name:"مطربی",desc:"زبان رمزی ایرانی",group:"secret",symbol:"🎭"},
+{id:"sos",name:"سوسکی",desc:"روش رمزی سرگرمی",group:"secret",symbol:"🐞"},
+{id:"sid",name:"سیدی",desc:"روش رمزی ساده",group:"secret",symbol:"🗝️"},
+{id:"zar",name:"زرگری",desc:"افزودن بخش‌های رمزی",group:"secret",symbol:"✨"},
+{id:"lam",name:"لامی",desc:"روش آزمایشی",group:"secret",symbol:"🔤"},
+{id:"morse",name:"مورس",desc:"نقطه و خط",group:"code",symbol:"·−"},
+{id:"braille",name:"بریل فارسی",desc:"نمایش نوشتاری بریل",group:"code",symbol:"⠿"},
+{id:"url",name:"URL Encoding",desc:"کدگذاری متن برای نشانی",group:"code",symbol:"🌐"},
+{id:"binary",name:"باینری UTF-8",desc:"نمایش بایت‌ها به صفر و یک",group:"code",symbol:"010"},
+{id:"hex",name:"هگزادسیمال UTF-8",desc:"نمایش بایت‌ها در مبنای ۱۶",group:"code",symbol:"0x"},
+{id:"base64",name:"Base64",desc:"کدگذاری متنی",group:"code",symbol:"64"},
+{id:"caesar",name:"سزار",desc:"جابه‌جایی حروف لاتین",group:"classic",symbol:"🔁"},
+{id:"reverse",name:"برعکس‌نویسی",desc:"وارونه کردن ترتیب متن",group:"classic",symbol:"↔️"}
+];
+
+let selected = "mot";
+let history = safeLoad("ramzgosha_history", []);
+let favorites = safeLoad("ramzgosha_favorites", []);
+
+function safeLoad(key, fallback) {
+    try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return Array.isArray(value) ? value : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function safeSave(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+}
+
+function populateMethods() {
+    const groups = {
+        secret: $("secretMethods"),
+        code: $("codeMethods"),
+        classic: $("classicMethods")
+    };
+
+    methods.forEach(method => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "method";
+        button.dataset.method = method.id;
+        button.innerHTML =
+            `<span class="symbol">${method.symbol}</span>
+            <span class="method-text">
+            <span class="method-name">${method.name}</span><br>
+            <span class="method-desc">${method.desc}</span>
+            </span>`;
+
+        button.addEventListener("click", () => chooseMethod(method.id));
+        groups[method.group].appendChild(button);
+        $("selectedMethod").appendChild(new Option(method.name, method.id));
+    });
+
+    ["chainFirst", "chainSecond"].forEach(id => {
+        methods.forEach(method => {
+            $(id).appendChild(new Option(method.name, method.id));
+        });
+    });
+
+    $("chainFirst").value = "morse";
+    $("chainSecond").value = "base64";
+}
+
+function chooseMethod(id) {
+    selected = id;
+    $("selectedMethod").value = id;
+
+    document.querySelectorAll(".method").forEach(button => {
+        button.classList.toggle("active", button.dataset.method === id);
+    });
+
+    const method = methods.find(item => item.id === id);
+    setStatus("روش انتخاب شد: " + (method ? method.name : id));
+}
+
+function setStatus(message) {
+    $("status").textContent = message;
+}
+
+const alphabet = "ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی";
+const secretMaps = {};
+
+for (const [id, suffix, prefix] of [
+    ["sos", "س", ""],
+    ["sid", "ی", ""],
+    ["lam", "", "ل"]
+]) {
+    secretMaps[id] = {};
+    for (const character of alphabet) {
+        secretMaps[id][character] = prefix + character + suffix;
+    }
+}
+
+/* قانون مطربی:
+   ۱. اگر واژه با مصوت یا «ع» شروع شود، حرف اول با «ش» جایگزین
+      و «لی» به انتهای واژه اضافه می‌شود.
+   ۲. اگر واژه با صامت شروع شود، حرف اول به انتها منتقل می‌شود
+      و «ا» به ابتدای واژه و انتهای آن اضافه می‌شود.
+   ۳. برای جلوگیری از «اا» در نمونه‌هایی مثل شایان، اگر بخش
+      جابه‌جاشده با «ا» شروع شود، آن را به «آ» تبدیل می‌کنیم.
+   ۴. اگر بخش جابه‌جاشده با «ی» شروع شود، «ا» به ابتدای آن می‌آید.
+*/
+
+const PersianVowels = new Set(["ا","آ","أ","إ","ٱ","و","ؤ","ی","ي","ئ"]);
+
+function encodeMotWord(word) {
+    if (!word) return word;
+
+    const chars = Array.from(word);
+    const first = chars[0];
+
+    // قانون کلمات آغازشونده با مصوت یا ع
+    if (PersianVowels.has(first) || first === "ع") {
+        return "ش" + chars.slice(1).join("") + "لی";
+    }
+
+    // انتقال حرف اول به انتهای کلمه
+    let rotated = chars.slice(1).join("") + first;
+
+    // افزودن الف به ابتدا، با رعایت شکل نمونه‌های قبلی
+    if (rotated.startsWith("ا")) {
+        rotated = "آ" + rotated.slice(1);
+    } else if (rotated.startsWith("ی")) {
+        rotated = "ا" + rotated;
+    } else {
+        rotated = "ا" + rotated;
+    }
+
+    // افزودن الف به انتهای کلمه
+    return rotated + "ا";
+}
+
+function encodeMot(text) {
+    return text.split(/(\s+)/u).map(part =>
+        /^\s+$/u.test(part) ? part : encodeMotWord(part)
+    ).join("");
+}
+
+function decodeMotWord(word) {
+    if (word.length >= 3 && word.startsWith("ش") && word.endsWith("لی")) {
+        return "ع" + word.slice(1, -2);
+    }
+
+    if (word.length >= 3 && word.endsWith("ا")) {
+        let core = word.slice(0, -1);
+
+        if (core.startsWith("آ")) {
+            core = "ا" + core.slice(1);
+        }
+
+        if (core.startsWith("ا") && core.length > 1) {
+            core = core.slice(1);
+        }
+
+        if (core.length > 1) {
+            const chars = Array.from(core);
+            return chars.pop() + chars.join("");
+        }
+
+        return core;
+    }
+
+    return word;
+}
+
+function decodeMot(text) {
+    return text.split(/(\s+)/u).map(part =>
+        /^\s+$/u.test(part) ? part : decodeMotWord(part)
+    ).join("");
+}
+
+/* زرگری */
+const shortVowels = new Set(["َ", "ِ", "ُ"]);
+const longVowels = new Set(["ا", "آ", "و", "ی", "ي"]);
+
+const zargariExamples = {
+    "تو": "توزو",
+    "من": "مزن",
+    "شما": "شزمازا",
+    "کتاب": "کزتازاب",
+    "چشم": "چَزَشم",
+    "آمدم": "آزامَزَدَزَم"
+};
+
+function encodeZargari(text) {
+    return text.split(/(\s+)/u).map(word => {
+        if (/^\s+$/u.test(word)) return word;
+        if (zargariExamples[word]) return zargariExamples[word];
+
+        const chars = Array.from(word.normalize("NFC"));
+        let out = "";
+
+        for (let i = 0; i < chars.length; i++) {
+            const c = chars[i];
+            out += c;
+
+            if (!alphabet.includes(c)) continue;
+
+            const next = chars[i + 1];
+
+            if (next && shortVowels.has(next)) {
+                out += "ز" + next;
+                i++;
+                continue;
+            }
+
+            if (longVowels.has(c)) {
+                const vowel = c === "ي" ? "ی" : c;
+                out += "ز" + vowel;
+            }
+        }
+
+        return out;
+    }).join("");
+}
+
+function decodeZargari(text) {
+    let out = text.normalize("NFC");
+
+    for (const [plain, coded] of Object.entries(zargariExamples)) {
+        out = out.split(coded).join(plain);
+    }
+
+    out = out.replace(/([اویيآ])ز\1/gu, "$1");
+    out = out.replace(/([َُِ])ز\1/gu, "$1");
+
+    return out;
+}
+
+/* زبان سوسکی: حرف اول هر واژه جایگزین می‌شود و در پایان «به + حرف اول + یدی» می‌آید. */
+function encodeSosWord(word) {
+    const chars = Array.from(word);
+    if (!chars.length) return word;
+    const first = chars[0];
+    const replacement = first === "س" ? "ل" : "س";
+    return replacement + chars.slice(1).join("") + " به " + first + "یدی";
+}
+
+function encodeSos(text) {
+    return text.replace(/[\p{L}\p{M}]+/gu, encodeSosWord);
+}
+
+/* بازگشایی سوسکی؛ فاصله‌ها و نشانه‌گذاری جمله حفظ می‌شوند. */
+function decodeSos(text) {
+    return text.replace(
+        /(\S+)\s+به\s+([\p{L}])یدی([^\p{L}\p{M}]*)/gu,
+        (match, encodedWord, first, trailing) => {
+            const expectedPrefix = first === "س" ? "ل" : "س";
+            if (!encodedWord.startsWith(expectedPrefix)) return match;
+            return first + Array.from(encodedWord).slice(1).join("") + trailing;
+        }
+    );
+}
+
+function encodeSecret(text, id) {
+    if (id === "mot") return encodeMot(text);
+    if (id === "sos") return encodeSos(text);
+    if (id === "zar") return encodeZargari(text);
+
+    const map = secretMaps[id];
+    return Array.from(text).map(c =>
+        c === " " ? c : (map[c] || c)
+    ).join("");
+}
+
+function decodeSecret(text, id) {
+    if (id === "mot") return decodeMot(text);
+    if (id === "sos") return decodeSos(text);
+    if (id === "zar") return decodeZargari(text);
+
+    const map = secretMaps[id];
+    const inverse = Object.entries(map).sort((a, b) => b[1].length - a[1].length);
+
+    return text.split(/(\s+)/).map(token => {
+        if (!token.trim()) return token;
+
+        let output = "";
+        let index = 0;
+
+        while (index < token.length) {
+            const found = inverse.find(([plain, encoded]) =>
+                token.startsWith(encoded, index)
+            );
+
+            if (found) {
+                output += found[0];
+                index += found[1].length;
+            } else {
+                output += token[index++];
+            }
+        }
+
+        return output;
+    }).join("");
+}
+
+const morseMap = {
+a:".-",b:"-...",c:"-.-.",d:"-..",e:".",f:"..-.",g:"--.",h:"....",
+i:"..",j:".---",k:"-.-",l:".-..",m:"--",n:"-.",o:"---",p:".--.",
+q:"--.-",r:".-.",s:"...",t:"-",u:"..-",v:"...-",w:".--",x:"-..-",
+y:"-.--",z:"--..","0":"-----","1":".----","2":"..---","3":"...--",
+"4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.",
+".":".-.-.-",",":"--..--","?":"..--..","!":"-.-.--"
+};
+
+const brailleMap = {
+"ا":"⠁","آ":"⠜","ب":"⠃","پ":"⠏","ت":"⠞","ث":"⠹","ج":"⠚","چ":"⠡",
+"ح":"⠱","خ":"⠭","د":"⠙","ذ":"⠮","ر":"⠗","ز":"⠵","ژ":"⠿","س":"⠎",
+"ش":"⠩","ص":"⠯","ض":"⠫","ط":"⠾","ظ":"⠿","ع":"⠷","غ":"⠣","ف":"⠋",
+"ق":"⠟","ک":"⠅","گ":"⠛","ل":"⠇","م":"⠍","ن":"⠝","و":"⠺","ه":"⠓",
+"ی":"⠊","ء":"⠄"," ":"⠀"
+};
+
+function reverseMap(map) {
+    const out = {};
+    for (const [k, v] of Object.entries(map)) {
+        if (!(v in out)) out[v] = k;
+    }
+    return out;
+}
+
+const reverseBrailleMap = reverseMap(brailleMap);
+
+function bytesBinary(text) {
+    return Array.from(new TextEncoder().encode(text))
+        .map(b => b.toString(2).padStart(8, "0"))
+        .join(" ");
+}
+
+function binaryText(text) {
+    const bytes = text.trim().split(/\s+/).filter(Boolean);
+    if (!bytes.length) return "";
+
+    if (bytes.some(b => !/^[01]{8}$/.test(b))) {
+        throw Error("باینری باید شامل گروه‌های ۸ بیتی باشد.");
+    }
+
+    return new TextDecoder("utf-8", {fatal:true})
+        .decode(new Uint8Array(bytes.map(b => parseInt(b, 2))));
+}
+
+function bytesHex(text) {
+    return Array.from(new TextEncoder().encode(text))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join(" ");
+}
+
+function hexText(text) {
+    const bytes = text.trim().split(/[\s,]+/).filter(Boolean);
+    if (!bytes.length) return "";
+
+    if (bytes.some(b => !/^[0-9a-f]{2}$/i.test(b))) {
+        throw Error("هگز باید شامل بایت‌های دو رقمی باشد.");
+    }
+
+    return new TextDecoder("utf-8", {fatal:true})
+        .decode(new Uint8Array(bytes.map(b => parseInt(b, 16))));
+}
+
+function morseEncode(text) {
+    return text.toLowerCase().split(/\s+/).map(word =>
+        Array.from(word).map(c => morseMap[c] || c).join(" ")
+    ).join(" / ");
+}
+
+function morseDecode(text) {
+    return text.trim().split(/\s*\/\s*/).map(word =>
+        word.trim().split(/\s+/).map(code =>
+            Object.keys(morseMap).find(key => morseMap[key] === code) || code
+        ).join("")
+    ).join(" ");
+}
+
+function caesar(text, shift) {
+    return text.replace(/[a-z]/gi, c => {
+        const base = c === c.toUpperCase() ? 65 : 97;
+        return String.fromCharCode((c.charCodeAt(0) - base + shift + 26) % 26 + base);
+    });
+}
+
+function transform(text, id, direction) {
+    if (!text) return "";
+
+    const encode = direction === "encode";
+
+    switch (id) {
+        case "mot":
+        case "sos":
+        case "sid":
+        case "zar":
+        case "lam":
+            return encode ? encodeSecret(text, id) : decodeSecret(text, id);
+
+        case "morse":
+            return encode ? morseEncode(text) : morseDecode(text);
+
+        case "braille":
+            return Array.from(text).map(c =>
+                encode ? (brailleMap[c] || c) : (reverseBrailleMap[c] || c)
+            ).join("");
+
+        case "url":
+            if (encode) return encodeURIComponent(text);
+            try {
+                return decodeURIComponent(text.replace(/\+/g, " "));
+            } catch {
+                throw Error("متن URL معتبر نیست.");
+            }
+
+        case "binary":
+            return encode ? bytesBinary(text) : binaryText(text);
+
+        case "hex":
+            return encode ? bytesHex(text) : hexText(text);
+
+        case "base64":
+            if (encode) {
+                let binary = "";
+                new TextEncoder().encode(text).forEach(byte => {
+                    binary += String.fromCharCode(byte);
+                });
+                return btoa(binary);
+            }
+
+            try {
+                return new TextDecoder("utf-8", {fatal:true}).decode(
+                    Uint8Array.from(atob(text.trim()), c => c.charCodeAt(0))
+                );
+            } catch {
+                throw Error("متن Base64 معتبر نیست.");
+            }
+
+        case "caesar":
+            return caesar(text, encode ? 3 : -3);
+
+        case "reverse":
+            return Array.from(text).reverse().join("");
+
+        default:
+            return text;
+    }
+}
+
+function convert({quiet = false, record = true} = {}) {
+    const text = $("source").value;
+
+    if (!text) {
+        $("result").value = "";
+        if (!quiet) setStatus("اول متن ورودی رو وارد کن.");
+        return "";
+    }
+
+    try {
+        const output = transform(
+            text,
+            $("selectedMethod").value,
+            $("direction").value
+        );
+
+        $("result").value = output;
+
+        if (!quiet) setStatus("تبدیل انجام شد.");
+
+        if (record) {
+            history.unshift({
+                method: $("selectedMethod").value,
+                direction: $("direction").value,
+                input: text,
+                output,
+                time: new Date().toLocaleString("fa-IR")
+            });
+
+            history = history.slice(0, 30);
+            safeSave("ramzgosha_history", history);
+            renderHistory();
+        }
+
+        return output;
+    } catch (error) {
+        if (!quiet) setStatus(error.message || "تبدیل انجام نشد.");
+        return "";
+    }
+}
+
+function renderHistory() {
+    const target = $("historyList");
+
+    if (!history.length) {
+        target.textContent = "هنوز سابقه‌ای ثبت نشده.";
+        return;
+    }
+
+    target.replaceChildren();
+
+    history.forEach((item, index) => {
+        const box = document.createElement("div");
+        box.className = "history-item";
+
+        const title = document.createElement("strong");
+        title.textContent =
+            (methods.find(m => m.id === item.method)?.name || item.method) +
+            " · " + (item.direction === "encode" ? "تبدیل" : "بازگشایی");
+
+        const input = document.createElement("p");
+        input.textContent = "ورودی: " + item.input;
+
+        const output = document.createElement("p");
+        output.textContent = "نتیجه: " + item.output;
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const use = document.createElement("button");
+        use.textContent = "استفاده دوباره";
+        use.onclick = () => {
+            $("source").value = item.input;
+            $("result").value = item.output;
+            chooseMethod(item.method);
+            $("direction").value = item.direction;
+            window.scrollTo({top:0, behavior:"smooth"});
+        };
+
+        const remove = document.createElement("button");
+        remove.textContent = "حذف";
+        remove.onclick = () => {
+            history.splice(index, 1);
+            safeSave("ramzgosha_history", history);
+            renderHistory();
+        };
+
+        row.append(use, remove);
+        box.append(title, input, output, row);
+        target.appendChild(box);
+    });
+}
+
+function renderFavorites() {
+    const target = $("favoriteList");
+
+    if (!favorites.length) {
+        target.textContent = "هنوز موردی ذخیره نشده.";
+        return;
+    }
+
+    target.replaceChildren();
+
+    favorites.forEach((item, index) => {
+        const box = document.createElement("div");
+        box.className = "history-item";
+
+        const paragraph = document.createElement("p");
+        paragraph.textContent =
+            (methods.find(m => m.id === item.method)?.name || item.method) +
+            " : " + item.output;
+
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const use = document.createElement("button");
+        use.textContent = "بارگذاری";
+        use.onclick = () => {
+            $("source").value = item.input;
+            $("result").value = item.output;
+            chooseMethod(item.method);
+            $("direction").value = item.direction;
+        };
+
+        const remove = document.createElement("button");
+        remove.textContent = "حذف";
+        remove.onclick = () => {
+            favorites.splice(index, 1);
+            safeSave("ramzgosha_favorites", favorites);
+            renderFavorites();
+        };
+
+        row.append(use, remove);
+        box.append(paragraph, row);
+        target.appendChild(box);
+    });
+}
+
+function addFavorite() {
+    if (!$("result").value) {
+        setStatus("اول یک تبدیل انجام بده.");
+        return;
+    }
+
+    favorites.unshift({
+        method: $("selectedMethod").value,
+        direction: $("direction").value,
+        input: $("source").value,
+        output: $("result").value
+    });
+
+    favorites = favorites.slice(0, 50);
+    safeSave("ramzgosha_favorites", favorites);
+    renderFavorites();
+    setStatus("به علاقه‌مندی‌ها اضافه شد.");
+}
+
+function detect() {
+    const text = $("source").value.trim();
+
+    if (!text) {
+        $("detectResult").textContent = "اول متنی وارد کن.";
+        return;
+    }
+
+    const guesses = [];
+
+    if (/^[01\s]+$/.test(text) && text.replace(/\s/g, "").length % 8 === 0) {
+        guesses.push("باینری UTF-8");
+    }
+
+    if (/^[0-9a-f\s]+$/i.test(text) && text.replace(/\s/g, "").length % 2 === 0) {
+        guesses.push("هگزادسیمال");
+    }
+
+    if (/^[.\-/\s]+$/.test(text) && /[.-]/.test(text)) {
+        guesses.push("احتمالاً مورس");
+    }
+
+    if (/^[A-Za-z0-9+/=\s]+$/.test(text) && text.length % 4 === 0) {
+        guesses.push("احتمالاً Base64");
+    }
+
+    if (/%[0-9a-f]{2}/i.test(text)) guesses.push("URL Encoding");
+    if (/[⠁-⣿]/.test(text)) guesses.push("بریل");
+
+    $("detectResult").textContent = guesses.length
+        ? "احتمال‌های شناسایی: " + [...new Set(guesses)].join("، ")
+        : "الگوی مشخصی پیدا نشد؛ ممکنه متن عادی یا زبان رمزی باشه.";
+}
+
+function compare() {
+    const text = $("source").value;
+    const target = $("compareResult");
+    target.replaceChildren();
+
+    if (!text) {
+        target.textContent = "اول متن ورودی رو وارد کن.";
+        return;
+    }
+
+    methods.forEach(method => {
+        try {
+            const value = transform(text, method.id, "encode");
+
+            const box = document.createElement("div");
+            box.className = "history-item";
+
+            const title = document.createElement("strong");
+            title.textContent = method.name;
+
+            const paragraph = document.createElement("p");
+            paragraph.textContent = value;
+
+            const button = document.createElement("button");
+            button.textContent = "انتخاب این روش";
+            button.onclick = () => {
+                chooseMethod(method.id);
+                $("result").value = value;
+                $("direction").value = "encode";
+            };
+
+            box.append(title, paragraph, button);
+            target.appendChild(box);
+        } catch {}
+    });
+}
+
+function chain() {
+    const text = $("source").value;
+
+    if (!text) {
+        $("chainResult").textContent = "اول متن ورودی رو وارد کن.";
+        return;
+    }
+
+    const first = $("chainFirst").value;
+    const second = $("chainSecond").value;
+    const direction = $("chainDirection").value;
+
+    try {
+        const result = direction === "encode"
+            ? transform(transform(text, first, "encode"), second, "encode")
+            : transform(transform(text, second, "decode"), first, "decode");
+
+        $("chainResult").textContent = "نتیجه: " + result;
+        $("result").value = result;
+    } catch (error) {
+        $("chainResult").textContent = error.message || "خطا در تبدیل دومرحله‌ای";
+    }
+}
+
+populateMethods();
+chooseMethod(selected);
+renderHistory();
+renderFavorites();
+
+$("selectedMethod").addEventListener("change", e => chooseMethod(e.target.value));
+$("convertBtn").addEventListener("click", () => convert());
+
+$("swapBtn").addEventListener("click", () => {
+    $("direction").value = $("direction").value === "encode" ? "decode" : "encode";
+
+    const old = $("source").value;
+    $("source").value = $("result").value;
+    $("result").value = old;
+
+    setStatus("جهت تبدیل جابه‌جا شد.");
+});
+
+$("sampleBtn").addEventListener("click", () => {
+    $("source").value = "سلام دنیا";
+    $("result").value = "";
+    setStatus("نمونه آماده است؛ حالا روی تبدیل کن بزن.");
+});
+
+$("clearBtn").addEventListener("click", () => {
+    $("source").value = "";
+    $("result").value = "";
+    setStatus("متن‌ها پاک شدند.");
+});
+
+$("copyBtn").addEventListener("click", async () => {
+    const text = $("result").value;
+
+    if (!text) {
+        setStatus("نتیجه‌ای برای کپی وجود نداره.");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+        setStatus("نتیجه کپی شد.");
+    } catch {
+        $("result").focus();
+        $("result").select();
+
+        try {
+            document.execCommand("copy");
+            setStatus("نتیجه کپی شد.");
+        } catch {
+            setStatus("کپی خودکار پشتیبانی نمی‌شود.");
+        }
+    }
+});
+
+$("favoriteBtn").addEventListener("click", addFavorite);
+$("detectBtn").addEventListener("click", detect);
+$("compareBtn").addEventListener("click", compare);
+$("chainBtn").addEventListener("click", chain);
+
+$("speakBtn").addEventListener("click", () => {
+    const text = $("result").value || $("source").value;
+
+    if (!text) {
+        setStatus("متنی برای خواندن وجود نداره.");
+        return;
+    }
+
+    if (!("speechSynthesis" in window)) {
+        setStatus("خواندن صوتی در این مرورگر پشتیبانی نمی‌شود.");
+        return;
+    }
+
+    speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "fa-IR";
+    speechSynthesis.speak(utterance);
+});
+
+$("clearHistoryBtn").addEventListener("click", () => {
+    history = [];
+    safeSave("ramzgosha_history", history);
+    renderHistory();
+});
+
+$("clearFavoritesBtn").addEventListener("click", () => {
+    favorites = [];
+    safeSave("ramzgosha_favorites", favorites);
+    renderFavorites();
+});
+
+document.querySelectorAll("[data-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+        const panel = button.closest(".panel");
+        const tab = button.dataset.tab;
+
+        panel.querySelectorAll("[data-tab]").forEach(item => {
+            item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        panel.querySelectorAll('[id^="tab-"]').forEach(item => {
+            item.classList.toggle("hidden", item.id !== "tab-" + tab);
+        });
+    });
+});
+
+$("aboutOpen").addEventListener("click", () => {
+    $("aboutModal").classList.remove("hidden");
+});
+
+$("aboutClose").addEventListener("click", () => {
+    $("aboutModal").classList.add("hidden");
+});
+
+$("aboutModal").addEventListener("click", e => {
+    if (e.target === $("aboutModal")) {
+        $("aboutModal").classList.add("hidden");
+    }
+});
+
+$("source").addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") convert();
+});
+</script>
+</body>
+</html>

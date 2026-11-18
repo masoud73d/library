@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>انتخاب متن از روی عکس | OCR</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#09111f;
+  --panel:#111d30;
+  --border:#2b3d57;
+  --accent:#60d8c0;
+  --text:#edf4ff;
+  --muted:#a5b5ca;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Tahoma,Arial,sans-serif;line-height:1.8
+}
+header{
+  padding:20px 12px;text-align:center;background:var(--panel);
+  border-bottom:1px solid var(--border)
+}
+h1{font-size:21px;margin:0}
+header p{font-size:12px;color:var(--muted);margin:4px 0 0}
+main{width:min(950px,calc(100% - 20px));margin:16px auto}
+.panel{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:14px;padding:14px;margin-bottom:14px
+}
+h2{font-size:16px;margin:0 0 10px}
+button,.upload{
+  display:inline-block;border:1px solid var(--border);
+  border-radius:10px;padding:9px 12px;background:#192940;
+  color:var(--text);font:inherit;cursor:pointer
+}
+button.primary{background:var(--accent);color:#06231e;font-weight:bold}
+button:disabled{opacity:.5;cursor:default}
+.upload{
+  display:block;text-align:center;border-style:dashed;
+  padding:18px 8px;background:#0b1728
+}
+.upload strong{display:block}
+.upload small,.hint{color:var(--muted);font-size:12px}
+#fileInput{display:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#status{
+  margin-top:10px;padding:9px;border-radius:8px;
+  background:#0b1728;color:var(--muted);font-size:12px;
+  overflow-wrap:anywhere
+}
+#status.error{color:#ff9a9a}
+#status.success{color:var(--accent)}
+#viewer{
+  width:100%;max-height:70vh;overflow:auto;
+  background:#060b13;border:1px solid var(--border);
+  border-radius:10px;padding:6px;text-align:center;
+  direction:ltr
+}
+#empty{padding:35px 5px;color:var(--muted);font-size:12px}
+#stage{
+  display:none;position:relative;margin:0 auto;
+  line-height:0;isolation:isolate
+}
+#photo{display:block;width:100%;height:auto}
+#textLayer{
+  position:absolute;inset:0;overflow:hidden;
+  user-select:text;-webkit-user-select:text;
+  cursor:text;line-height:normal
+}
+.word{
+  position:absolute;display:block;
+  color:transparent!important;
+  background:transparent;
+  border:0;padding:0;margin:0;
+  white-space:pre;
+  overflow:hidden;
+  font-family:Arial,Tahoma,sans-serif;
+  line-height:1;
+  direction:rtl;
+  unicode-bidi:plaintext;
+  user-select:text;-webkit-user-select:text;
+  -webkit-tap-highlight-color:transparent;
+}
+.word::selection{
+  color:transparent;
+  background:#4285f4a0;
+}
+.word.selected{
+  background:#4285f480;
+  outline:1px solid #4285f4;
+}
+textarea{
+  display:block;width:100%;min-height:180px;
+  background:#091321;color:var(--text);
+  border:1px solid var(--border);border-radius:10px;
+  padding:12px;font:14px/1.9 Tahoma,Arial,sans-serif;
+  direction:auto;text-align:start;resize:vertical
+}
+#progress{height:6px;background:#26364b;border-radius:8px;margin-top:10px;overflow:hidden}
+#bar{height:100%;width:0;background:var(--accent)}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
+#aboutButton{position:fixed;bottom:10px;left:10px;font-size:12px;z-index:5}
+#about{
+  display:none;position:fixed;bottom:55px;left:10px;z-index:5;
+  padding:12px;background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;direction:ltr;text-align:left;
+  overflow-wrap:anywhere;font-size:12px
+}
+@media(max-width:500px){
+  main{width:calc(100% - 12px);margin-top:10px}
+  .panel{padding:10px}
+  .toolbar button{flex:1}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>📄 انتخاب و کپی متن از عکس</h1>
+  <p>تشخیص نوشته‌ها و انتخاب متن با انگشت یا ماوس</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>۱. انتخاب عکس</h2>
+    <label class="upload" for="fileInput">
+      <strong>📷 انتخاب تصویر از گالری</strong>
+      <small>فرمت پیشنهادی: JPG یا PNG</small>
+    </label>
+    <input id="fileInput" type="file" accept="image/*">
+
+    <div class="toolbar">
+      <button id="scan" class="primary" disabled>تشخیص متن‌های عکس</button>
+      <button id="newImage">انتخاب عکس دیگر</button>
+    </div>
+    <div id="status" role="status" aria-live="polite">ابتدا یک عکس انتخاب کن.</div>
+    <div id="progress"><div id="bar"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>۲. انتخاب متن روی عکس</h2>
+    <p class="hint">
+      بعد از تشخیص متن، روی کلمه‌ها بکش تا انتخاب شوند. می‌توانی از ابزار انتخاب متن گوشی استفاده کنی.
+      برای کپی سریع یک کلمه هم روی آن بزن.
+    </p>
+    <div id="viewer">
+      <div id="empty">تصویر انتخاب‌شده اینجا نمایش داده می‌شود.</div>
+      <div id="stage">
+        <img id="photo" alt="تصویر انتخاب‌شده">
+        <div id="textLayer"></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button id="copySelected" class="primary" disabled>کپی متن انتخاب‌شده</button>
+      <button id="selectAll" disabled>انتخاب همه متن</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>۳. متن استخراج‌شده</h2>
+    <p class="hint">متن اینجا قابل ویرایش است. اگر OCR اشتباه خواند، اصلاحش کن.</p>
+    <textarea id="output" placeholder="متن تشخیص داده‌شده اینجا قرار می‌گیرد..."></textarea>
+    <div class="toolbar">
+      <button id="copyAll" class="primary">کپی کل متن</button>
+      <button id="clearText">پاک کردن متن</button>
+    </div>
+  </section>
+</main>
+
+<footer>ابزار استخراج متن از تصویر</footer>
+<button id="aboutButton">درباره من</button>
+<div id="about">
+  <strong>About me</strong><br>
+  Developer: Masoud delavar<br>
+  Email: masoud0098d@gmail.com
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const fileInput = $("fileInput");
+  const photo = $("photo");
+  const stage = $("stage");
+  const layer = $("textLayer");
+  const status = $("status");
+  const output = $("output");
+  const scanButton = $("scan");
+  const bar = $("bar");
+
+  let imageReady = false;
+  let busy = false;
+  let token = 0;
+  let workerPromise = null;
+  let words = [];
+  let imageData = null;
+
+  function message(text, type = "") {
+    status.textContent = text;
+    status.className = type;
+  }
+
+  function progress(value) {
+    bar.style.width = Math.max(0, Math.min(100, value)) + "%";
+  }
+
+  function buttons() {
+    scanButton.disabled = !imageReady || busy;
+    $("copySelected").disabled = busy || words.length === 0;
+    $("selectAll").disabled = busy || words.length === 0;
+    fileInput.disabled = busy;
+  }
+
+  function resetWords() {
+    words = [];
+    layer.replaceChildren();
+    $("copySelected").disabled = true;
+    $("selectAll").disabled = true;
+  }
+
+  function fitImage() {
+    if (!imageReady) return;
+    const maxWidth = Math.max(120, $("viewer").clientWidth - 14);
+    const width = Math.min(photo.naturalWidth, maxWidth);
+    stage.style.width = width + "px";
+    stage.style.height =
+      width * photo.naturalHeight / photo.naturalWidth + "px";
+    photo.style.width = "100%";
+    photo.style.height = "100%";
+    if (words.length) drawWords(words);
+  }
+
+  function loadFile(file) {
+    if (!file || busy) return;
+
+    if (file.type && !file.type.startsWith("image/")) {
+      message("فایل انتخاب‌شده تصویر نیست. لطفاً JPG یا PNG انتخاب کن.", "error");
+      return;
+    }
+
+    const current = ++token;
+    imageReady = false;
+    imageData = null;
+    resetWords();
+    output.value = "";
+    stage.style.display = "none";
+    $("empty").style.display = "block";
+    progress(0);
+    buttons();
+    message("در حال خواندن تصویر...");
+
+    const reader = new FileReader();
+
+    reader.onerror = () => {
+      if (current === token) message("خواندن فایل تصویر ناموفق بود.", "error");
+    };
+
+    reader.onload = () => {
+      if (current !== token) return;
+      if (typeof reader.result !== "string") {
+        message("فایل تصویر قابل خواندن نیست.", "error");
+        return;
+      }
+
+      imageData = reader.result;
+      photo.onload = () => {
+        if (current !== token) return;
+        if (!photo.naturalWidth || !photo.naturalHeight) {
+          message("ابعاد تصویر معتبر نیست.", "error");
+          return;
+        }
+        imageReady = true;
+        $("empty").style.display = "none";
+        stage.style.display = "block";
+        fitImage();
+        buttons();
+        message("عکس بارگذاری شد. برای تشخیص نوشته‌ها دکمه بالا را بزن.", "success");
+      };
+
+      photo.onerror = () => {
+        if (current !== token) return;
+        message("باز کردن عکس ناموفق بود. یک تصویر JPG یا PNG امتحان کن.", "error");
+      };
+
+      photo.src = imageData;
+    };
+
+    try {
+      reader.readAsDataURL(file);
+    } catch (e) {
+      message("خطا در خواندن فایل: " + e.message, "error");
+    }
+  }
+
+  async function getWorker() {
+    if (!workerPromise) {
+      workerPromise = (async () => {
+        if (!window.Tesseract) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+            script.onload = resolve;
+            script.onerror = () => reject(
+              new Error("کتابخانه OCR بارگذاری نشد؛ اینترنت یا دسترسی به CDN را بررسی کن.")
+            );
+            document.head.appendChild(script);
+          });
+        }
+        if (!window.Tesseract) throw new Error("موتور OCR در دسترس نیست.");
+        return Tesseract.createWorker("fas+eng", 1, {
+          logger: info => {
+            if (info.status) {
+              const p = Math.round((info.progress || 0) * 100);
+              message("تشخیص متن: " + info.status + " " + p + "%");
+            }
+          }
+        });
+      })().catch(error => {
+        workerPromise = null;
+        throw error;
+      });
+    }
+    return workerPromise;
+  }
+
+  async function recognize() {
+    if (!imageReady || busy) return;
+    busy = true;
+    buttons();
+    progress(0);
+    resetWords();
+
+    const current = token;
+    try {
+      message("در حال آماده‌سازی تشخیص متن...");
+      const worker = await getWorker();
+      if (current !== token) return;
+
+      message("در حال تشخیص کلمه‌ها؛ ممکن است بار اول کمی طول بکشد.");
+      const result = await worker.recognize(imageData);
+      if (current !== token) return;
+
+      const detected = (result.data.words || []).filter(word =>
+        word.text && word.text.trim() &&
+        word.bbox &&
+        word.bbox.x1 > word.bbox.x0 &&
+        word.bbox.y1 > word.bbox.y0
+      );
+
+      if (!detected.length) {
+        output.value = result.data.text || "";
+        message("متنی با مختصات قابل انتخاب تشخیص داده نشد. متن خام در کادر پایین قرار گرفت.", "error");
+        return;
+      }
+
+      words = detected.map(word => ({
+        text: word.text.trim(),
+        x0: word.bbox.x0,
+        y0: word.bbox.y0,
+        x1: word.bbox.x1,
+        y1: word.bbox.y1,
+        confidence: word.confidence
+      }));
+
+      drawWords(words);
+      output.value = result.data.text || words.map(w => w.text).join(" ");
+      progress(100);
+      message(
+        words.length + " بخش متنی تشخیص داده شد. حالا روی نوشته‌های عکس بکش و متن را انتخاب کن.",
+        "success"
+      );
+    } catch (error) {
+      message("خطا در تشخیص متن: " + (error.message || error), "error");
+    } finally {
+      busy = false;
+      buttons();
+    }
+  }
+
+  function drawWords(items) {
+    if (!imageReady) return;
+    layer.replaceChildren();
+
+    const scaleX = stage.clientWidth / photo.naturalWidth;
+    const scaleY = stage.clientHeight / photo.naturalHeight;
+
+    items.forEach((word, index) => {
+      const span = document.createElement("span");
+      span.className = "word";
+      span.dataset.index = index;
+      span.textContent = word.text;
+
+      const left = word.x0 * scaleX;
+      const top = word.y0 * scaleY;
+      const width = Math.max(3, (word.x1 - word.x0) * scaleX);
+      const height = Math.max(5, (word.y1 - word.y0) * scaleY);
+
+      span.style.left = left + "px";
+      span.style.top = top + "px";
+      span.style.width = width + "px";
+      span.style.height = height + "px";
+      span.style.fontSize = Math.max(8, height * 0.85) + "px";
+
+      span.addEventListener("click", () => {
+        if (busy) return;
+        copyText(word.text);
+      });
+
+      layer.appendChild(span);
+    });
+  }
+
+  function selectedText() {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed) return "";
+    if (!layer.contains(selection.anchorNode) ||
+        !layer.contains(selection.focusNode)) return "";
+    return selection.toString().trim();
+  }
+
+  async function copyText(text) {
+    if (!text) {
+      message("ابتدا یک کلمه یا چند کلمه را روی عکس انتخاب کن.", "error");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      message("متن انتخاب‌شده کپی شد.", "success");
+    } catch (_) {
+      output.value = text;
+      output.focus();
+      output.select();
+      message("متن انتخاب‌شده در کادر پایین قرار گرفت؛ اگر کپی نشد، دستی کپی کن.", "success");
+    }
+  }
+
+  fileInput.addEventListener("change", event => {
+    const file = event.target.files && event.target.files[0];
+    if (file) loadFile(file);
+  });
+
+  $("newImage").addEventListener("click", () => {
+    if (busy) return;
+    fileInput.value = "";
+    fileInput.click();
+  });
+
+  scanButton.addEventListener("click", recognize);
+
+  $("copySelected").addEventListener("click", () => {
+    copyText(selectedText());
+  });
+
+  $("selectAll").addEventListener("click", () => {
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(layer);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    message("همه متن‌های تشخیص‌داده‌شده انتخاب شدند.");
+  });
+
+  $("copyAll").addEventListener("click", () => copyText(output.value.trim()));
+
+  $("clearText").addEventListener("click", () => {
+    output.value = "";
+    message("متن پاک شد.");
+  });
+
+  $("aboutButton").addEventListener("click", () => {
+    const box = $("about");
+    box.style.display = box.style.display === "block" ? "none" : "block";
+  });
+
+  if ("ResizeObserver" in window) {
+    new ResizeObserver(() => {
+      if (imageReady && !busy) fitImage();
+    }).observe($("viewer"));
+  } else {
+    window.addEventListener("resize", () => {
+      if (imageReady && !busy) fitImage();
+    });
+  }
+
+  buttons();
+})();
+</script>
+</body>
+</html>

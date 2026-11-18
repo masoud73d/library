@@ -1,0 +1,1126 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f7f6f2">
+<title>استودیوی رنگ</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  --bg:#f7f6f2;
+  --surface:#fff;
+  --text:#242522;
+  --muted:#85867e;
+  --line:#e9e8e1;
+  --primary:#5b56e8;
+  --primary-light:#eeedff;
+  --radius:20px;
+  --shadow:0 8px 30px rgba(37,35,25,.045);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Vazirmatn',Tahoma,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.8;
+}
+
+button,input,select{font:inherit}
+button{cursor:pointer}
+
+button:focus-visible,input:focus-visible,select:focus-visible{
+  outline:3px solid #b7b3ff;
+  outline-offset:3px;
+}
+
+.app{
+  max-width:1500px;
+  margin:auto;
+  min-height:100vh;
+  padding:20px 24px;
+}
+
+/* فقط دکمه درباره من در بالای سمت راست */
+.top-actions{
+  display:flex;
+  justify-content:flex-start;
+  margin-bottom:22px;
+}
+
+.about-btn{
+  background:#fff;
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:13px;
+  padding:9px 16px;
+  font-weight:700;
+  font-size:13px;
+  transition:.2s;
+}
+
+.about-btn:hover{
+  border-color:var(--primary);
+  color:var(--primary);
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  gap:24px;
+  align-items:start;
+}
+
+.sidebar{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:16px 11px;
+  position:sticky;
+  top:20px;
+  box-shadow:var(--shadow);
+}
+
+.side-label{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  padding:9px 12px;
+}
+
+.nav-list{display:flex;flex-direction:column}
+
+.nav-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  text-align:right;
+  padding:10px 12px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  color:#696a63;
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:4px;
+  transition:.2s;
+}
+
+.nav-icon{
+  width:30px;
+  height:30px;
+  flex-shrink:0;
+  border-radius:9px;
+  background:#f3f2ee;
+  display:grid;
+  place-items:center;
+  font-size:16px;
+}
+
+.nav-btn:hover{background:#f8f7ff;color:var(--primary)}
+
+.nav-btn.active{
+  background:var(--primary-light);
+  color:var(--primary);
+  font-weight:800;
+}
+
+.nav-btn.active .nav-icon{background:#dcd9ff}
+
+.side-note{
+  background:#f8f7f3;
+  padding:13px;
+  border-radius:14px;
+  margin:22px 4px 4px;
+}
+
+.side-note strong{font-size:12px;display:block}
+.side-note p{color:var(--muted);font-size:11px;margin:4px 0 0}
+
+.main{min-width:0}
+.page{display:none;animation:fade .22s ease}
+.page.active{display:block}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(5px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.page-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:14px;
+  margin-bottom:22px;
+}
+
+.eyebrow{
+  color:var(--primary);
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+
+h1{
+  font-size:clamp(23px,3vw,33px);
+  letter-spacing:-.7px;
+  margin:4px 0;
+  line-height:1.5;
+}
+
+.subtitle{color:var(--muted);font-size:13px;margin:0}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:23px;
+  margin-bottom:19px;
+  box-shadow:var(--shadow);
+  min-width:0;
+}
+
+.card-title{font-size:16px;font-weight:800;margin:0 0 5px}
+.card-desc{color:var(--muted);font-size:12px;margin:0 0 19px}
+
+label{display:block;font-size:12px;font-weight:700;margin-bottom:8px}
+
+.field{
+  width:100%;
+  background:#faf9f6;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px 13px;
+  color:var(--text);
+}
+
+.field:focus{border-color:#a8a4ff;outline:none}
+
+input[type=color]{
+  width:100%;
+  height:48px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#fff;
+  padding:4px;
+  cursor:pointer;
+}
+
+.btn{
+  border:0;
+  border-radius:12px;
+  padding:10px 16px;
+  background:var(--primary);
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  transition:.15s;
+}
+
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.btn-light{background:#f1f0ec;color:var(--text)}
+.btn-outline{background:white;color:var(--text);border:1px solid var(--line)}
+
+.btn-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
+
+.hero{
+  background:#e9e7ff;
+  border-radius:24px;
+  padding:27px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  width:190px;
+  height:190px;
+  border-radius:50%;
+  background:#c3bfff;
+  left:-60px;
+  top:-75px;
+  opacity:.65;
+}
+
+.hero-content{position:relative;z-index:1;max-width:600px}
+.hero h1{font-size:clamp(26px,3.5vw,37px);margin:6px 0 8px}
+.hero p{color:#5f5c7e;font-size:13px;max-width:450px;margin:0}
+.hero .btn{background:#3430a4;margin-top:17px}
+
+.mini-stats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.stat{
+  padding:15px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:#fff;
+}
+
+.stat-icon{font-size:21px;margin-bottom:5px}
+.stat strong{display:block;font-size:14px}
+.stat span{color:var(--muted);font-size:11px}
+
+.two-col{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:15px;
+}
+
+.color-pair{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:16px 0;
+}
+
+.color-input{
+  background:#faf9f6;
+  border:1px solid var(--line);
+  border-radius:15px;
+  padding:12px;
+  min-width:0;
+}
+
+.color-input label{margin-bottom:9px}
+
+.swatch{
+  width:100%;
+  height:135px;
+  border:0;
+  border-radius:14px;
+}
+
+.swatch.small{height:90px}
+
+.swatch-code{
+  display:inline-block;
+  background:#fff;
+  color:#292929;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:3px 8px;
+  font-size:12px;
+  font-weight:800;
+  direction:ltr;
+  margin-top:8px;
+}
+
+.result-panel{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:15px;
+  margin-top:18px;
+  background:#fcfbf8;
+}
+
+.result-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:9px;
+}
+
+.result-row:last-child{margin-bottom:0}
+.result-name{color:var(--muted);font-size:12px}
+.result-value{font-weight:800;font-size:12px;direction:ltr;text-align:left}
+
+.copy-btn{
+  border:1px solid var(--line);
+  background:#fff;
+  padding:6px 10px;
+  border-radius:9px;
+  font-size:11px;
+  color:#62635c;
+}
+.copy-btn:hover{color:var(--primary);border-color:var(--primary)}
+
+.palette{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  margin-top:15px;
+}
+
+.palette-item{min-width:0;cursor:pointer;text-align:center}
+.palette-color{height:90px;border-radius:11px;transition:transform .2s}
+.palette-item:hover .palette-color{transform:translateY(-3px)}
+.palette-item small{display:block;font-size:10px;color:var(--muted);direction:ltr;margin-top:6px}
+
+.harmony-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.harmony-card{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
+  background:#fff;
+  min-width:0;
+}
+
+.harmony-card h3{font-size:13px;margin:0 0 3px}
+.harmony-card p{font-size:11px;color:var(--muted);margin:0 0 10px}
+.harmony-strip{display:flex;gap:5px;height:68px}
+.harmony-strip button{flex:1;border:0;border-radius:8px;min-width:0}
+
+.filter-row{display:flex;flex-wrap:wrap;gap:7px;margin:15px 0}
+
+.chip{
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  padding:7px 12px;
+  font-size:12px;
+  color:#66675f;
+}
+
+.chip.active{
+  background:var(--primary-light);
+  color:var(--primary);
+  border-color:#d8d5ff;
+  font-weight:800;
+}
+
+.color-library{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+
+.library-item{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:9px;
+  cursor:pointer;
+  min-width:0;
+  transition:transform .2s;
+}
+.library-item:hover{transform:translateY(-3px)}
+.library-color{height:90px;border-radius:10px;margin-bottom:9px}
+.library-item strong{display:block;font-size:12px}
+.library-item small{display:block;color:var(--muted);direction:ltr;font-size:10px}
+
+.palette-presets{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.preset{border:1px solid var(--line);border-radius:17px;padding:13px;background:#fff}
+.preset h3{margin:0 0 10px;font-size:13px}
+.preset-colors{display:flex;gap:5px;height:72px;margin-bottom:10px}
+.preset-colors button{flex:1;border:0;border-radius:8px;min-width:0}
+.preset-bottom{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.preset-bottom span{font-size:10px;color:var(--muted)}
+
+.warm-cold{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.temperature{border-radius:17px;padding:16px;background:#fff8ed;border:1px solid #f3e8d7}
+.temperature.cold{background:#eef5ff;border-color:#dbe8fb}
+.temperature h3{font-size:14px;margin:0 0 6px}
+.temperature p{font-size:12px;color:#777;margin:0 0 12px}
+.temp-colors{display:flex;height:58px;gap:5px}
+.temp-colors span{flex:1;border-radius:8px}
+
+.about-hero{background:#e9e7ff;border-radius:21px;padding:24px;margin-bottom:19px}
+.about-hero h2{font-size:23px;margin:4px 0}
+.about-hero p{font-size:13px;color:#5f5c7e;margin:0}
+.about-details{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.about-field{border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.about-field span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.about-field strong{font-size:13px;overflow-wrap:anywhere;direction:ltr;display:block;text-align:right}
+
+.empty{color:var(--muted);text-align:center;padding:25px;font-size:13px;grid-column:1/-1}
+
+.footer{text-align:center;padding:24px 10px 8px;color:#9b9b93;font-size:11px}
+
+.toast{
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translate(-50%,20px);
+  background:#272822;
+  color:white;
+  padding:11px 17px;
+  border-radius:12px;
+  font-size:12px;
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:100;
+  box-shadow:0 8px 25px #0002;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:950px){
+  .layout{grid-template-columns:205px minmax(0,1fr)}
+  .color-library{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .card{padding:18px}
+}
+
+@media(max-width:700px){
+  .app{padding:13px}
+  .top-actions{margin-bottom:15px}
+  .layout{grid-template-columns:1fr;gap:15px}
+  .sidebar{position:static;padding:8px;overflow-x:auto;border-radius:15px}
+  .side-label,.side-note{display:none}
+  .nav-list{flex-direction:row;gap:5px;min-width:max-content}
+  .nav-btn{width:auto;flex-direction:column;justify-content:center;gap:4px;padding:7px 10px;margin:0;font-size:10px;min-width:75px}
+  .nav-icon{width:28px;height:28px}
+  .hero{padding:21px}
+  .hero::after{left:-115px}
+  .mini-stats{gap:7px}
+  .stat{padding:10px}
+  .stat strong{font-size:12px}
+  .stat span{font-size:10px}
+  .two-col{grid-template-columns:1fr}
+  .color-library{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .library-color{height:72px}
+  .library-item{padding:7px}
+  .harmony-grid{grid-template-columns:1fr}
+  .page-heading{align-items:flex-start;flex-direction:column}
+}
+
+@media(max-width:400px){
+  .about-details,.warm-cold,.palette-presets{grid-template-columns:1fr}
+  .color-library{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .palette-color{height:57px}
+  .color-pair{gap:7px}
+  .color-input{padding:8px}
+  .card{padding:14px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- نوار برند حذف شده؛ فقط دکمه درباره من باقی مانده -->
+  <div class="top-actions">
+    <button class="about-btn" onclick="showPage('about')">ⓘ درباره من</button>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="side-label">منوی ابزارها</div>
+
+      <nav class="nav-list">
+        <button class="nav-btn active" data-page="home" onclick="showPage('home')">
+          <span class="nav-icon">⌂</span>خانه
+        </button>
+        <button class="nav-btn" data-page="mix" onclick="showPage('mix')">
+          <span class="nav-icon">◉</span>ترکیب رنگ
+        </button>
+        <button class="nav-btn" data-page="harmony" onclick="showPage('harmony')">
+          <span class="nav-icon">◈</span>هارمونی رنگ
+        </button>
+        <button class="nav-btn" data-page="library" onclick="showPage('library')">
+          <span class="nav-icon">▦</span>کتابخانه رنگ
+        </button>
+        <button class="nav-btn" data-page="palettes" onclick="showPage('palettes')">
+          <span class="nav-icon">▤</span>پالت‌های آماده
+        </button>
+        <button class="nav-btn" data-page="temperature" onclick="showPage('temperature')">
+          <span class="nav-icon">☼</span>رنگ گرم و سرد
+        </button>
+      </nav>
+
+      <div class="side-note">
+        <strong>ایده‌ات رو رنگی کن!</strong>
+        <p>رنگ دلخواهت رو انتخاب کن، ترکیب بساز و کد نهایی رو بردار.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- خانه -->
+      <section class="page active" id="page-home">
+        <div class="hero">
+          <div class="hero-content">
+            <div class="eyebrow">COLOR STUDIO</div>
+            <h1>دنیای رنگ‌ها<br>در دستان توست.</h1>
+            <p>رنگ‌ها رو ترکیب کن، هارمونی بساز و برای طراحی‌هات ایده‌های تازه پیدا کن.</p>
+            <button class="btn" onclick="showPage('mix')">شروع ترکیب رنگ ←</button>
+          </div>
+        </div>
+
+        <div class="mini-stats">
+          <div class="stat">
+            <div class="stat-icon">🎨</div>
+            <strong>ترکیب رنگ</strong>
+            <span>ساخت رنگ دلخواه</span>
+          </div>
+          <div class="stat">
+            <div class="stat-icon">🌈</div>
+            <strong>هارمونی</strong>
+            <span>رنگ‌های هماهنگ</span>
+          </div>
+          <div class="stat">
+            <div class="stat-icon">🧩</div>
+            <strong>پالت آماده</strong>
+            <span>ایده برای طراحی</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">چند رنگ برای شروع</h2>
+          <p class="card-desc">روی هر رنگ بزن تا کد HEX اون کپی بشه.</p>
+          <div class="palette" id="homePalette"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">دسترسی سریع</h2>
+          <p class="card-desc">مستقیم برو سراغ ابزار موردنظرت.</p>
+          <div class="two-col">
+            <button class="btn btn-light" onclick="showPage('library')">🔎 جست‌وجوی رنگ</button>
+            <button class="btn btn-light" onclick="showPage('palettes')">✨ پالت‌های آماده</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ترکیب رنگ -->
+      <section class="page" id="page-mix">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">COLOR MIXER</div>
+            <h1>ترکیب رنگ‌ها</h1>
+            <p class="subtitle">با رنگ‌های اصلی شروع کن یا هر رنگ دلخواهی رو انتخاب کن.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">انتخاب رنگ‌ها</h2>
+          <p class="card-desc">سه رنگ اصلی به‌عنوان شروع آماده‌ان؛ گزینه Custom هم برای انتخاب آزاد رنگه.</p>
+
+          <div class="color-pair">
+
+            <div class="color-input">
+              <label for="color1">رنگ اول</label>
+              <select class="field" id="preset1" aria-label="انتخاب رنگ آماده اول">
+                <option value="#FF0000">قرمز اصلی</option>
+                <option value="#FFFF00">زرد اصلی</option>
+                <option value="#0000FF">آبی اصلی</option>
+                <option value="#FFFFFF">سفید</option>
+                <option value="#000000">مشکی</option>
+                <option value="custom">Custom — رنگ دلخواه</option>
+              </select>
+              <input id="color1" type="color" value="#FF0000" style="margin-top:10px">
+              <div class="swatch-code" id="code1">#FF0000</div>
+            </div>
+
+            <div class="color-input">
+              <label for="color2">رنگ دوم</label>
+              <select class="field" id="preset2" aria-label="انتخاب رنگ آماده دوم">
+                <option value="#FF0000">قرمز اصلی</option>
+                <option value="#FFFF00">زرد اصلی</option>
+                <option value="#0000FF" selected>آبی اصلی</option>
+                <option value="#FFFFFF">سفید</option>
+                <option value="#000000">مشکی</option>
+                <option value="custom">Custom — رنگ دلخواه</option>
+              </select>
+              <input id="color2" type="color" value="#0000FF" style="margin-top:10px">
+              <div class="swatch-code" id="code2">#0000FF</div>
+            </div>
+
+          </div>
+
+          <div style="margin-top:20px">
+            <label for="ratio">سهم رنگ اول: <span id="ratioText">50%</span></label>
+            <input id="ratio" type="range" min="0" max="100" value="50" style="width:100%;accent-color:#5b56e8">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#85867e">
+              <span>بیشتر رنگ دوم</span>
+              <span>بیشتر رنگ اول</span>
+            </div>
+          </div>
+
+          <div class="result-panel">
+            <div class="result-row">
+              <span class="result-name">رنگ نهایی</span>
+              <span class="result-value" id="mixHex">#800080</span>
+            </div>
+            <div class="swatch" id="mixPreview" style="background:#800080"></div>
+            <div class="result-row" style="margin-top:14px">
+              <span class="result-name">RGB</span>
+              <span class="result-value" id="mixRgb">rgb(128, 0, 128)</span>
+            </div>
+            <div class="result-row">
+              <span class="result-name">HSL</span>
+              <span class="result-value" id="mixHsl">hsl(300, 100%, 25%)</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn" onclick="copyText($('mixHex').textContent)">کپی کد HEX</button>
+              <button class="btn btn-outline" onclick="copyText($('mixRgb').textContent)">کپی RGB</button>
+            </div>
+          </div>
+
+          <p class="subtitle" style="margin-top:15px">
+            نکته: ترکیب این ابزار بر اساس مدل نور RGB محاسبه می‌شه. ترکیب واقعی رنگ‌های نقاشی، به‌ویژه قرمز و زرد و آبی، ممکنه نتیجه متفاوتی بده.
+          </p>
+        </div>
+      </section>
+
+      <!-- هارمونی -->
+      <section class="page" id="page-harmony">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">COLOR THEORY</div>
+            <h1>هارمونی و رنگ مکمل</h1>
+            <p class="subtitle">یک رنگ پایه انتخاب کن تا ترکیب‌های هماهنگش نمایش داده بشن.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <label for="harmonyColor">رنگ پایه</label>
+          <input type="color" id="harmonyColor" value="#5B56E8" style="max-width:170px">
+          <div class="harmony-grid" id="harmonyGrid" style="margin-top:20px"></div>
+        </div>
+      </section>
+
+      <!-- کتابخانه -->
+      <section class="page" id="page-library">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">COLOR LIBRARY</div>
+            <h1>کتابخانه رنگ‌ها</h1>
+            <p class="subtitle">رنگ رو پیدا کن و با یک کلیک کدش رو کپی کن.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <input class="field" id="colorSearch" type="search" placeholder="جست‌وجو بر اساس نام یا کد رنگ...">
+
+          <div class="filter-row" id="libraryFilters">
+            <button class="chip active" data-filter="all">همه</button>
+            <button class="chip" data-filter="red">قرمز</button>
+            <button class="chip" data-filter="orange">نارنجی</button>
+            <button class="chip" data-filter="yellow">زرد</button>
+            <button class="chip" data-filter="green">سبز</button>
+            <button class="chip" data-filter="blue">آبی</button>
+            <button class="chip" data-filter="purple">بنفش</button>
+            <button class="chip" data-filter="neutral">خنثی</button>
+          </div>
+
+          <div class="color-library" id="colorLibrary"></div>
+        </div>
+      </section>
+
+      <!-- پالت‌ها -->
+      <section class="page" id="page-palettes">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">COLOR PALETTES</div>
+            <h1>پالت‌های آماده</h1>
+            <p class="subtitle">ترکیب‌های آماده برای طراحی و الهام گرفتن.</p>
+          </div>
+        </div>
+
+        <div class="palette-presets" id="presetGrid"></div>
+      </section>
+
+      <!-- گرم و سرد -->
+      <section class="page" id="page-temperature">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">COLOR MOOD</div>
+            <h1>رنگ‌های گرم و سرد</h1>
+            <p class="subtitle">با دمای رنگ آشنا شو و ترکیب متناسب با طرحت رو انتخاب کن.</p>
+          </div>
+        </div>
+
+        <div class="warm-cold">
+          <div class="temperature">
+            <h3>🔥 رنگ‌های گرم</h3>
+            <p>معمولاً حس گرما، انرژی و صمیمیت ایجاد می‌کنن.</p>
+            <div class="temp-colors">
+              <span style="background:#EF4444"></span>
+              <span style="background:#F97316"></span>
+              <span style="background:#FACC15"></span>
+              <span style="background:#E879A0"></span>
+            </div>
+          </div>
+          <div class="temperature cold">
+            <h3>❄️ رنگ‌های سرد</h3>
+            <p>معمولاً حس آرامش، خنکی و تمرکز ایجاد می‌کنن.</p>
+            <div class="temp-colors">
+              <span style="background:#2563EB"></span>
+              <span style="background:#06B6D4"></span>
+              <span style="background:#14B8A6"></span>
+              <span style="background:#8B5CF6"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h2 class="card-title">یک نکته کاربردی</h2>
+          <p class="card-desc">
+            گرم یا سرد بودن رنگ به ته‌رنگ و رنگ‌های اطرافش هم بستگی داره.
+            مثلاً سبز متمایل به زرد معمولاً گرم‌تر از سبز متمایل به آبی به نظر می‌رسه.
+          </p>
+          <button class="btn" onclick="showPage('harmony')">ساخت هارمونی رنگ ←</button>
+        </div>
+      </section>
+
+      <!-- درباره من -->
+      <section class="page" id="page-about">
+        <div class="about-hero">
+          <div class="eyebrow">درباره این ابزار</div>
+          <h2>به فضای رنگ‌ها خوش اومدی!</h2>
+          <p>ابزاری ساده برای ساخت ترکیب رنگ، پیدا کردن رنگ‌های مکمل و الهام گرفتن برای طراحی.</p>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">اطلاعات توسعه‌دهنده</h2>
+          <p class="card-desc">اطلاعات تماس و سازنده ابزار</p>
+
+          <div class="about-details">
+            <div class="about-field">
+              <span>Developer</span>
+              <strong>Masoud delavar</strong>
+              <button class="copy-btn" style="margin-top:10px" onclick="copyText('Masoud delavar')">کپی نام</button>
+            </div>
+            <div class="about-field">
+              <span>Email</span>
+              <strong>masoud0098d@gmail.com</strong>
+              <button class="copy-btn" style="margin-top:10px" onclick="copyText('masoud0098d@gmail.com')">کپی ایمیل</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">امکانات</h2>
+          <p class="card-desc">
+            انتخاب رنگ دلخواه، ترکیب دیجیتالی، تنظیم نسبت رنگ‌ها، نمایش کدهای HEX و RGB،
+            هارمونی رنگ، کتابخانه رنگ‌ها، پالت‌های آماده و آشنایی با رنگ‌های گرم و سرد.
+          </p>
+          <button class="btn btn-light" onclick="showPage('home')">بازگشت به خانه</button>
+        </div>
+      </section>
+
+      <footer class="footer">ساخته‌شده برای علاقه‌مندان به رنگ</footer>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast">کپی شد!</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+
+  const page=$('page-'+name);
+  if(page) page.classList.add('active');
+
+  const nav=document.querySelector('[data-page="'+name+'"]');
+  if(nav) nav.classList.add('active');
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+let toastTimer;
+
+async function copyText(value){
+  const text=String(value||'').trim();
+
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(e){
+    const area=document.createElement('textarea');
+    area.value=text;
+    area.style.position='fixed';
+    area.style.opacity='0';
+    document.body.appendChild(area);
+    area.select();
+    const ok=document.execCommand('copy');
+    area.remove();
+
+    if(!ok){
+      window.prompt('کد را کپی کن:',text);
+      return;
+    }
+  }
+
+  const toast=$('toast');
+  toast.textContent='کپی شد: '+text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toast.classList.remove('show'),2000);
+}
+
+function hexToRgb(hex){
+  hex=hex.replace('#','');
+  if(hex.length===3) hex=hex.split('').map(c=>c+c).join('');
+  const n=parseInt(hex,16);
+  return {r:(n>>16)&255,g:(n>>8)&255,b:n&255};
+}
+
+function rgbToHex(r,g,b){
+  return '#'+[r,g,b].map(v=>
+    Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0')
+  ).join('').toUpperCase();
+}
+
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b);
+  let h=0,s=0,l=(max+min)/2;
+
+  if(max!==min){
+    const d=max-min;
+    s=l>.5?d/(2-max-min):d/(max+min);
+    switch(max){
+      case r:h=(g-b)/d+(g<b?6:0);break;
+      case g:h=(b-r)/d+2;break;
+      case b:h=(r-g)/d+4;break;
+    }
+    h*=60;
+  }
+
+  return {h:Math.round(h),s:Math.round(s*100),l:Math.round(l*100)};
+}
+
+function hexToHsl(hex){
+  const c=hexToRgb(hex);
+  return rgbToHsl(c.r,c.g,c.b);
+}
+
+function hslToHex(h,s,l){
+  h=((h%360)+360)%360;
+  s=Math.max(0,Math.min(100,s))/100;
+  l=Math.max(0,Math.min(100,l))/100;
+
+  const c=(1-Math.abs(2*l-1))*s;
+  const x=c*(1-Math.abs((h/60)%2-1));
+  const m=l-c/2;
+  let r=0,g=0,b=0;
+
+  if(h<60){r=c;g=x}
+  else if(h<120){r=x;g=c}
+  else if(h<180){g=c;b=x}
+  else if(h<240){g=x;b=c}
+  else if(h<300){r=x;b=c}
+  else{r=c;b=x}
+
+  return rgbToHex((r+m)*255,(g+m)*255,(b+m)*255);
+}
+
+/* همگام‌سازی انتخاب‌های آماده و Custom */
+function setupColorPicker(number){
+  const select=$('preset'+number);
+  const picker=$('color'+number);
+
+  select.addEventListener('change',()=>{
+    if(select.value!=='custom'){
+      picker.value=select.value;
+    }
+    updateMixer();
+  });
+
+  picker.addEventListener('input',()=>{
+    select.value='custom';
+    updateMixer();
+  });
+}
+
+function updateMixer(){
+  const c1=$('color1').value;
+  const c2=$('color2').value;
+  const ratio=Number($('ratio').value)/100;
+  const a=hexToRgb(c1),b=hexToRgb(c2);
+
+  const r=a.r*ratio+b.r*(1-ratio);
+  const g=a.g*ratio+b.g*(1-ratio);
+  const bl=a.b*ratio+b.b*(1-ratio);
+
+  const hex=rgbToHex(r,g,bl);
+  const hsl=rgbToHsl(r,g,bl);
+
+  $('code1').textContent=c1.toUpperCase();
+  $('code2').textContent=c2.toUpperCase();
+  $('ratioText').textContent=Math.round(ratio*100)+'%';
+  $('mixHex').textContent=hex;
+  $('mixRgb').textContent=`rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(bl)})`;
+  $('mixHsl').textContent=`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+  $('mixPreview').style.background=hex;
+}
+
+function setupMixer(){
+  setupColorPicker(1);
+  setupColorPicker(2);
+  $('ratio').addEventListener('input',updateMixer);
+  updateMixer();
+}
+
+function buildHarmonies(){
+  const base=$('harmonyColor').value;
+  const {h,s,l}=hexToHsl(base);
+
+  const sets=[
+    {title:'رنگ مکمل',desc:'دو رنگ روبه‌روی هم در چرخه رنگ',hues:[h,h+180]},
+    {title:'رنگ‌های مشابه',desc:'رنگ‌های نزدیک به هم و هماهنگ',hues:[h-30,h,h+30]},
+    {title:'سه‌گانه',desc:'سه رنگ با فاصله برابر',hues:[h,h+120,h+240]},
+    {title:'چهارگانه',desc:'چهار رنگ با تنوع بیشتر',hues:[h,h+90,h+180,h+270]},
+    {title:'تک‌رنگ',desc:'روشنایی‌های متفاوت از یک رنگ',mono:true},
+    {title:'مکمل نزدیک',desc:'رنگ پایه با دو همسایه مکمل',hues:[h,h+150,h+210]}
+  ];
+
+  $('harmonyGrid').innerHTML=sets.map(set=>{
+    const colors=set.mono
+      ?[
+        hslToHex(h,s,Math.max(12,l-30)),
+        hslToHex(h,s,Math.max(20,l-15)),
+        hslToHex(h,s,l),
+        hslToHex(h,s,Math.min(85,l+15)),
+        hslToHex(h,s,Math.min(95,l+30))
+      ]
+      :set.hues.map((hue,i)=>
+        hslToHex(hue,s,Math.max(20,Math.min(80,l+(i%2?8:-8))))
+      );
+
+    return `
+      <div class="harmony-card">
+        <h3>${set.title}</h3>
+        <p>${set.desc}</p>
+        <div class="harmony-strip">
+          ${colors.map(c=>`<button title="${c}" style="background:${c}" onclick="copyText('${c}')"></button>`).join('')}
+        </div>
+        <button class="copy-btn" style="margin-top:10px" onclick="copyText('${colors.join(', ')}')">کپی کدهای رنگ</button>
+      </div>
+    `;
+  }).join('');
+}
+
+$('harmonyColor').addEventListener('input',buildHarmonies);
+
+const libraryColors=[
+  {name:'قرمز اصلی',hex:'#FF0000',cat:'red'},
+  {name:'قرمز تیره',hex:'#9F1239',cat:'red'},
+  {name:'صورتی',hex:'#EC4899',cat:'red'},
+  {name:'مرجانی',hex:'#FF7F6A',cat:'red'},
+  {name:'نارنجی',hex:'#F97316',cat:'orange'},
+  {name:'هلویی',hex:'#FDBA9A',cat:'orange'},
+  {name:'کهربایی',hex:'#D97706',cat:'orange'},
+  {name:'زرد اصلی',hex:'#FFFF00',cat:'yellow'},
+  {name:'زرد طلایی',hex:'#EAB308',cat:'yellow'},
+  {name:'لیمویی',hex:'#D9E650',cat:'yellow'},
+  {name:'سبز زیتونی',hex:'#808000',cat:'green'},
+  {name:'سبز جنگلی',hex:'#166534',cat:'green'},
+  {name:'سبز نعنایی',hex:'#6EE7B7',cat:'green'},
+  {name:'سبز زمردی',hex:'#10B981',cat:'green'},
+  {name:'فیروزه‌ای',hex:'#06B6D4',cat:'blue'},
+  {name:'آبی آسمانی',hex:'#38BDF8',cat:'blue'},
+  {name:'آبی اصلی',hex:'#0000FF',cat:'blue'},
+  {name:'سرمه‌ای',hex:'#1E3A8A',cat:'blue'},
+  {name:'بنفش',hex:'#8B5CF6',cat:'purple'},
+  {name:'یاسی',hex:'#C4B5FD',cat:'purple'},
+  {name:'ارغوانی',hex:'#A21CAF',cat:'purple'},
+  {name:'قهوه‌ای',hex:'#92400E',cat:'neutral'},
+  {name:'کرم',hex:'#F5E6CA',cat:'neutral'},
+  {name:'خاکستری',hex:'#9CA3AF',cat:'neutral'},
+  {name:'ذغالی',hex:'#374151',cat:'neutral'},
+  {name:'سفید',hex:'#FFFFFF',cat:'neutral'},
+  {name:'مشکی',hex:'#000000',cat:'neutral'}
+];
+
+let activeFilter='all';
+
+function renderLibrary(){
+  const query=$('colorSearch').value.trim().toLowerCase();
+
+  const filtered=libraryColors.filter(c=>{
+    const matchCat=activeFilter==='all'||c.cat===activeFilter;
+    const matchQuery=c.name.toLowerCase().includes(query)||
+      c.hex.toLowerCase().includes(query)||
+      c.cat.toLowerCase().includes(query);
+
+    return matchCat&&matchQuery;
+  });
+
+  $('colorLibrary').innerHTML=filtered.length
+    ?filtered.map(c=>`
+      <div class="library-item" onclick="copyText('${c.hex}')">
+        <div class="library-color" style="background:${c.hex}"></div>
+        <strong>${c.name}</strong>
+        <small>${c.hex}</small>
+      </div>
+    `).join('')
+    :'<div class="empty">رنگی با این مشخصات پیدا نشد.</div>';
+}
+
+$('colorSearch').addEventListener('input',renderLibrary);
+
+document.querySelectorAll('#libraryFilters .chip').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#libraryFilters .chip').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter=btn.dataset.filter;
+    renderLibrary();
+  });
+});
+
+const presets=[
+  {name:'غروب تابستانی',desc:'گرم و پرانرژی',colors:['#FF6B6B','#FFA36C','#FFD56F','#939B62','#5B8266']},
+  {name:'اقیانوس آرام',desc:'آرام و متعادل',colors:['#03045E','#0077B6','#00B4D8','#90E0EF','#CAF0F8']},
+  {name:'مینیمال خنثی',desc:'ساده و مدرن',colors:['#22223B','#4A4E69','#9A8C98','#C9ADA7','#F2E9E4']},
+  {name:'باغ بهاری',desc:'طبیعی و تازه',colors:['#386641','#6A994E','#A7C957','#F2E8CF','#BC4749']},
+  {name:'توت‌فرنگی',desc:'شاد و لطیف',colors:['#590D22','#800F2F','#C9184A','#FF4D6D','#FFB3C1']},
+  {name:'شب بنفش',desc:'خاص و امروزی',colors:['#10002B','#3C096C','#7B2CBF','#C77DFF','#E0AAFF']},
+  {name:'قهوه و خامه',desc:'گرم و دلنشین',colors:['#432818','#6F4518','#99582A','#BB9457','#FFE6A7']},
+  {name:'پاستلی',desc:'ملایم و روشن',colors:['#FFD6E0','#FDE2A7','#D8F3DC','#CDE7F0','#E4D7FF']}
+];
+
+function renderPresets(){
+  $('presetGrid').innerHTML=presets.map(p=>`
+    <div class="preset">
+      <h3>${p.name}</h3>
+      <div class="preset-colors">
+        ${p.colors.map(c=>`<button title="${c}" style="background:${c}" onclick="copyText('${c}')"></button>`).join('')}
+      </div>
+      <div class="preset-bottom">
+        <span>${p.desc}</span>
+        <button class="copy-btn" onclick="copyText('${p.colors.join(', ')}')">کپی پالت</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+const homeColors=['#FF0000','#FFFF00','#0000FF','#16A34A','#FFFFFF'];
+
+function renderHomePalette(){
+  $('homePalette').innerHTML=homeColors.map(c=>`
+    <div class="palette-item" onclick="copyText('${c}')">
+      <div class="palette-color" style="background:${c};border:1px solid #0001"></div>
+      <small>${c}</small>
+    </div>
+  `).join('');
+}
+
+setupMixer();
+buildHarmonies();
+renderLibrary();
+renderPresets();
+renderHomePalette();
+</script>
+</body>
+</html>
+

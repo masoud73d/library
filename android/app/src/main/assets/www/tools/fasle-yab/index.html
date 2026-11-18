@@ -1,0 +1,605 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10172e">
+<title>فاصله‌یاب هوشمند ایران</title>
+<style>
+/* فونت آنلاین حذف شد تا صفحه بدون وابستگی به Google Fonts باز شود. */
+:root{
+ --bg:#10172e;--panel:rgba(255,255,255,.075);
+ --border:rgba(255,255,255,.13);
+ --blue:#438cff;--purple:#895cff;
+ --text:#f5f7ff;--muted:#a2aec8;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;padding:17px;color:var(--text);
+ font-family:Vazirmatn,Tahoma,sans-serif;
+ background:radial-gradient(ellipse at 10% 0%,#243d72,transparent 43%),
+ radial-gradient(ellipse at 90% 90%,#34235e,transparent 43%),var(--bg);
+}
+.container{max-width:680px;margin:20px auto}
+.header{text-align:center;margin-bottom:24px}
+.logo{
+ width:65px;height:65px;margin:auto;border-radius:20px;
+ display:grid;place-items:center;font-size:31px;
+ background:linear-gradient(135deg,var(--blue),var(--purple));
+ box-shadow:0 10px 35px #438cff55
+}
+h1{font-size:23px;margin:13px 0 5px}
+.subtitle{font-size:12px;color:var(--muted)}
+.panel{
+ background:var(--panel);border:1px solid var(--border);
+ border-radius:22px;padding:19px;margin-bottom:15px;
+ backdrop-filter:blur(15px)
+}
+.tabs{display:flex;gap:9px;margin-bottom:20px}
+.tab{
+ flex:1;padding:13px 5px;border:1px solid var(--border);
+ background:#ffffff09;color:var(--muted);border-radius:13px;
+ font-family:inherit;font-size:13px;cursor:pointer
+}
+.tab.active{
+ color:white;border-color:transparent;
+ background:linear-gradient(110deg,var(--blue),var(--purple))
+}
+.field{margin:15px 0}
+label{display:block;font-size:13px;margin-bottom:8px;color:#d5def5}
+select,input{
+ width:100%;padding:13px;border-radius:12px;
+ border:1px solid var(--border);background:#182440;
+ color:white;font-family:inherit;font-size:14px;outline:none
+}
+select:focus,input:focus{border-color:var(--blue)}
+select option{background:#182440;color:white}
+.swap{text-align:center;margin:0 0 5px}
+.swap button{
+ width:43px;height:43px;border-radius:14px;
+ border:1px solid var(--border);
+ background:#ffffff12;color:white;font-size:22px;cursor:pointer
+}
+.primary{
+ width:100%;padding:15px;border:0;border-radius:14px;
+ color:white;font-family:inherit;font-size:15px;font-weight:700;
+ background:linear-gradient(110deg,var(--blue),var(--purple));
+ cursor:pointer;margin-top:12px
+}
+.primary:disabled{opacity:.5}
+.status{text-align:center;color:var(--muted);font-size:12px;line-height:2;margin-top:13px}
+.results{display:none}
+.route{text-align:center;padding:15px 5px 20px;border-bottom:1px solid var(--border)}
+.route-names{font-size:13px;color:#d8e1f9;line-height:2}
+.distance{
+ font-size:39px;font-weight:800;margin:12px 0 0;
+ background:linear-gradient(90deg,#6bb7ff,#c09aff);
+ -webkit-background-clip:text;color:transparent
+}
+.unit{font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.stat{
+ background:#ffffff0a;border:1px solid var(--border);
+ border-radius:15px;padding:15px;text-align:center
+}
+.stat .icon{font-size:23px}
+.stat strong{display:block;font-size:19px;margin:7px 0}
+.stat small{color:var(--muted);font-size:11px}
+.map{
+ width:100%;height:260px;border:0;border-radius:15px;
+ margin-top:16px;background:#182440
+}
+.maplink{
+ display:block;text-align:center;text-decoration:none;
+ color:white;background:#ffffff12;border:1px solid var(--border);
+ padding:13px;border-radius:12px;margin-top:12px;font-size:13px
+}
+.note{font-size:11px;color:var(--muted);line-height:2;margin-top:14px}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:13px}
+.about-btn{
+ display:block;margin:12px auto 0;padding:9px 18px;
+ color:#dce7ff;background:#ffffff0b;
+ border:1px solid var(--border);border-radius:12px;
+ font-family:inherit;cursor:pointer;font-size:12px
+}
+.modal{
+ display:none;position:fixed;inset:0;z-index:10;
+ background:#000b;align-items:center;justify-content:center;padding:20px
+}
+.modal.show{display:flex}
+.modalbox{
+ width:100%;max-width:380px;background:#192541;
+ border:1px solid var(--border);border-radius:22px;
+ padding:25px;text-align:center;box-shadow:0 15px 60px #0008
+}
+.avatar{
+ width:70px;height:70px;margin:auto;border-radius:50%;
+ display:grid;place-items:center;font-size:29px;
+ background:linear-gradient(135deg,var(--blue),var(--purple))
+}
+.modalbox h2{font-size:19px;margin:13px 0}
+.modalbox p{font-size:13px;color:var(--muted);line-height:2}
+.close{
+ border:0;border-radius:12px;padding:11px 30px;
+ background:linear-gradient(110deg,var(--blue),var(--purple));
+ color:white;font-family:inherit;cursor:pointer;margin-top:10px
+}
+.spinner{
+ width:18px;height:18px;border:3px solid #ffffff40;
+ border-top-color:white;border-radius:50%;display:inline-block;
+ vertical-align:middle;animation:spin .8s linear infinite;margin-left:7px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="header">
+ <div class="logo">🗺️</div>
+ <h1>فاصله‌یاب هوشمند ایران</h1>
+ <div class="subtitle">محاسبه مسافت و زمان سفر بین شهرها و شهرستان‌های ایران</div>
+</header>
+
+<section class="panel">
+
+ <div class="tabs">
+  <button class="tab active" id="cityTab" onclick="changeMode('city')">🏙️ شهر به شهر</button>
+  <button class="tab" id="countyTab" onclick="changeMode('county')">📍 شهرستان به شهرستان</button>
+ </div>
+
+ <div class="field">
+  <label>استان مبدأ</label>
+  <select id="province1"><option value="">در حال بارگذاری...</option></select>
+ </div>
+
+ <div class="field">
+  <label id="originLabel">شهر مبدأ</label>
+  <input id="originSearch" placeholder="جستجوی نام شهر...">
+  <select id="origin"><option value="">ابتدا استان را انتخاب کنید</option></select>
+ </div>
+
+ <div class="swap">
+  <button onclick="swapLocations()" title="جابجایی">⇅</button>
+ </div>
+
+ <div class="field">
+  <label>استان مقصد</label>
+  <select id="province2"><option value="">در حال بارگذاری...</option></select>
+ </div>
+
+ <div class="field">
+  <label id="destinationLabel">شهر مقصد</label>
+  <input id="destinationSearch" placeholder="جستجوی نام شهر...">
+  <select id="destination"><option value="">ابتدا استان را انتخاب کنید</option></select>
+ </div>
+
+ <button class="primary" id="calculate" onclick="calculateRoute()">
+  محاسبه فاصله و زمان سفر
+ </button>
+
+ <div class="status" id="status">در حال دریافت اطلاعات...</div>
+
+ <button class="about-btn" onclick="showAbout()">ⓘ درباره من</button>
+</section>
+
+<section class="panel results" id="results">
+ <div class="route">
+  <div class="route-names" id="routeNames"></div>
+  <div class="distance" id="distance">--</div>
+  <div class="unit">کیلومتر مسافت جاده‌ای</div>
+ </div>
+
+ <div class="stats">
+  <div class="stat">
+   <div class="icon">🚗</div>
+   <strong id="duration">--</strong>
+   <small>زمان تقریبی رانندگی</small>
+  </div>
+  <div class="stat">
+   <div class="icon">📏</div>
+   <strong id="direct">--</strong>
+   <small>فاصله مستقیم هوایی</small>
+  </div>
+ </div>
+
+ <iframe class="map" id="map" loading="lazy" title="نقشه"></iframe>
+
+ <a class="maplink" id="maplink" target="_blank" rel="noopener">
+  🗺️ مشاهده مسیر و راهنمای رانندگی روی نقشه
+ </a>
+
+ <div class="note">
+  زمان رانندگی تخمینی و بدون احتساب ترافیک زنده است.
+  فاصله شهرستان‌ها بر اساس مراکز اداری آن‌ها محاسبه می‌شود.
+  مختصات شهرستان‌ها از داده‌های تکمیلی GeoNames گرفته شده‌اند.
+ </div>
+</section>
+
+<div class="footer">فاصله‌یاب ایران | داده‌های تقسیمات کشوری ۱۴۰۴</div>
+</div>
+
+<div class="modal" id="aboutModal" onclick="if(event.target===this)hideAbout()">
+ <div class="modalbox">
+  <div class="avatar">👨🏻‍💻</div>
+  <h2>درباره توسعه‌دهنده</h2>
+  <p>
+   نام توسعه‌دهنده:<br>
+   <strong style="color:white">masoud delavar</strong>
+  </p>
+  <p>
+   ایمیل:<br>
+   <strong style="color:white">masoud0098d@gmail.com</strong>
+  </p>
+  <p>طراحی و توسعه فاصله‌یاب هوشمند ایران</p>
+  <button class="close" onclick="hideAbout()">بستن</button>
+ </div>
+</div>
+
+<script>
+let mode='city';
+let provinces=[],cities=[],counties=[],centers=[];
+let ready=false;
+
+const $=id=>document.getElementById(id);
+
+function fa(n){
+ return Number(n).toLocaleString('fa-IR',{maximumFractionDigits:1});
+}
+function norm(s){
+ return String(s||'').replace(/ي/g,'ی').replace(/ك/g,'ک')
+ .replace(/ۀ/g,'ه').replace(/\u200c/g,' ')
+ .replace(/\s+/g,' ').trim().toLowerCase();
+}
+function setStatus(t){$('status').textContent=t}
+
+// دریافت اطلاعات با استفاده از حافظه موقت مرورگر
+async function getJSON(file){
+ const r=await fetch('./'+file,{cache:'force-cache'});
+ if(!r.ok)throw Error('HTTP '+r.status+' در دریافت '+file);
+ return await r.json();
+}
+
+async function loadData(){
+ try{
+  setStatus('در حال دریافت فهرست کامل ایران...');
+
+  const d=await Promise.all([
+   getJSON('provinces.json'),
+   getJSON('cities.json'),
+   getJSON('counties.json'),
+   getJSON('county-centers.json')
+  ]);
+
+  provinces=d[0];
+  cities=d[1];
+  counties=d[2];
+  centers=d[3];
+
+  if(!provinces.length||!cities.length||!counties.length)
+   throw Error('فهرست داده‌ها خالی است');
+
+  fillProvinces();
+  ready=true;
+  renderSelect('origin');
+  renderSelect('destination');
+
+  setStatus(`آماده استفاده | ${fa(cities.length)} شهر و ${fa(counties.length)} شهرستان`);
+
+ }catch(e){
+  console.error(e);
+  setStatus('خطا در دریافت اطلاعات: '+e.message+' | نام فایل‌ها و اتصال اینترنت را بررسی کنید.');
+ }
+}
+
+function fillProvinces(){
+ ['province1','province2'].forEach(id=>{
+  const s=$(id);
+  s.innerHTML='<option value="">انتخاب استان</option>';
+  provinces.forEach(p=>s.add(new Option(p.name,p.id)));
+ });
+}
+
+function items(){
+ return mode==='city'?cities:counties;
+}
+
+function provinceName(id){
+ return provinces.find(p=>String(p.id)===String(id))?.name||'';
+}
+
+function renderSelect(which,query=''){
+ const pid=$(which==='origin'?'province1':'province2').value;
+ const s=$(which);
+ s.innerHTML='';
+
+ if(!pid){
+  s.add(new Option('ابتدا استان را انتخاب کنید',''));
+  return;
+ }
+
+ const q=norm(query);
+ const list=items().filter(x=>
+  String(x.province_id)===String(pid) &&
+  (!q||norm(x.name).includes(q))
+ ).sort((a,b)=>a.name.localeCompare(b.name,'fa'));
+
+ s.add(new Option(
+  list.length?`انتخاب کنید (${fa(list.length)} مورد)`:'موردی یافت نشد',''
+ ));
+
+ list.forEach(x=>s.add(new Option(x.name,x.id)));
+}
+
+function changeMode(m){
+ mode=m;
+ $('cityTab').classList.toggle('active',m==='city');
+ $('countyTab').classList.toggle('active',m==='county');
+
+ $('originLabel').textContent=m==='city'?'شهر مبدأ':'شهرستان مبدأ';
+ $('destinationLabel').textContent=m==='city'?'شهر مقصد':'شهرستان مقصد';
+ $('originSearch').placeholder=m==='city'?'جستجوی شهر...':'جستجوی شهرستان...';
+ $('destinationSearch').placeholder=m==='city'?'جستجوی شهر...':'جستجوی شهرستان...';
+
+ $('originSearch').value='';
+ $('destinationSearch').value='';
+ $('results').style.display='none';
+
+ if(ready){
+  renderSelect('origin');
+  renderSelect('destination');
+ }
+}
+
+$('province1').addEventListener('change',()=>{
+ $('originSearch').value='';
+ renderSelect('origin');
+});
+$('province2').addEventListener('change',()=>{
+ $('destinationSearch').value='';
+ renderSelect('destination');
+});
+$('originSearch').addEventListener('input',e=>renderSelect('origin',e.target.value));
+$('destinationSearch').addEventListener('input',e=>renderSelect('destination',e.target.value));
+
+function selected(which){
+ return items().find(x=>String(x.id)===String($(which).value));
+}
+
+function swapLocations(){
+ const p1=$('province1').value;
+ const p2=$('province2').value;
+ const o=$('origin').value;
+ const d=$('destination').value;
+ const q1=$('originSearch').value;
+ const q2=$('destinationSearch').value;
+
+ $('province1').value=p2;
+ $('province2').value=p1;
+ $('originSearch').value=q2;
+ $('destinationSearch').value=q1;
+
+ renderSelect('origin',q2);
+ renderSelect('destination',q1);
+ $('origin').value=d;
+ $('destination').value=o;
+}
+
+function coordsOf(item){
+ const row=centers.find(c=>
+  String(c.county_id??c.id)===String(item.id)
+ );
+ if(!row)return null;
+
+ const lat=Number(row.latitude??row.lat);
+ const lon=Number(row.longitude??row.lon??row.lng);
+
+ if(!Number.isFinite(lat)||!Number.isFinite(lon))return null;
+ if(lat===0&&lon===0)return null;
+
+ return {lat,lon};
+}
+
+// مکان‌یابی شهر: دو سرویس مستقل با کنترل نام و استان
+async function geocodeCity(item){
+ const query=`${item.name}, ${provinceName(item.province_id)}, Iran`;
+
+ // سرویس اول: Nominatim
+ try{
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=ir&q='+
+    encodeURIComponent(query);
+
+  const r=await fetch(url);
+  if(!r.ok)throw Error('Nominatim unavailable');
+
+  const data=await r.json();
+  const expected=norm(item.name);
+
+  const match=data.find(x=>
+   norm(x.name).includes(expected) ||
+   norm(x.display_name).includes(expected)
+  )||data[0];
+
+  if(match){
+   return {lat:Number(match.lat),lon:Number(match.lon)};
+  }
+ }catch(e){
+  console.warn('Nominatim:',e);
+ }
+
+ // سرویس دوم: Photon
+ try{
+  const url='https://photon.komoot.io/api/?limit=10&lang=fa&q='+
+    encodeURIComponent(query);
+
+  const r=await fetch(url);
+  if(!r.ok)throw Error('Photon unavailable');
+
+  const data=await r.json();
+  const features=data.features||[];
+  const expected=norm(item.name);
+
+  const match=features.find(f=>{
+   const p=f.properties||{};
+   const name=norm(p.name||p.city||p.locality||'');
+   return name===expected;
+  })||features[0];
+
+  if(match){
+   const [lon,lat]=match.geometry.coordinates;
+   return {lat:Number(lat),lon:Number(lon)};
+  }
+ }catch(e){
+  console.warn('Photon:',e);
+ }
+
+ throw Error(`مختصات ${item.name} پیدا نشد. ممکن است سرویس مکان‌یابی در شبکه شما مسدود باشد.`);
+}
+
+function haversine(a,b){
+ const R=6371;
+ const rad=x=>x*Math.PI/180;
+ const d1=rad(b.lat-a.lat);
+ const d2=rad(b.lon-a.lon);
+ const h=Math.sin(d1/2)**2+
+ Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(d2/2)**2;
+ return 2*R*Math.asin(Math.sqrt(h));
+}
+
+function durationText(sec){
+ const min=Math.round(sec/60);
+ const h=Math.floor(min/60);
+ const m=min%60;
+ if(!h)return fa(m)+' دقیقه';
+ if(!m)return fa(h)+' ساعت';
+ return fa(h)+' ساعت و '+fa(m)+' دقیقه';
+}
+
+async function calculateRoute(){
+ if(!ready){
+  setStatus('فهرست اطلاعات هنوز بارگیری نشده است');
+  return;
+ }
+
+ const a=selected('origin');
+ const b=selected('destination');
+
+ if(!a||!b){
+  setStatus('لطفاً مبدأ و مقصد را انتخاب کنید');
+  return;
+ }
+ if(String(a.id)===String(b.id)){
+  setStatus('مبدأ و مقصد یکسان هستند');
+  return;
+ }
+
+ const btn=$('calculate');
+ btn.disabled=true;
+ btn.innerHTML='<span class="spinner"></span> در حال محاسبه...';
+ $('results').style.display='none';
+
+ try{
+  setStatus('در حال دریافت مختصات مبدأ و مقصد...');
+
+  let A,B;
+
+  if(mode==='county'){
+   A=coordsOf(a);
+   B=coordsOf(b);
+   if(!A||!B)throw Error('مختصات مرکز یکی از شهرستان‌ها در فایل داده موجود نیست');
+  }else{
+   [A,B]=await Promise.all([
+    geocodeCity(a),geocodeCity(b)
+   ]);
+  }
+
+  if(![A.lat,A.lon,B.lat,B.lon].every(Number.isFinite))
+   throw Error('مختصات معتبر نیست');
+
+  setStatus('مختصات پیدا شد؛ در حال محاسبه مسیر جاده‌ای...');
+
+  const coordinates=`${A.lon},${A.lat};${B.lon},${B.lat}`;
+
+  const routingUrls=[
+   `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=false&alternatives=false`,
+   `https://routing.openstreetmap.de/routed-car/route/v1/driving/${coordinates}?overview=false&alternatives=false`
+  ];
+
+  let result=null;
+  const routingErrors=[];
+
+  for(const url of routingUrls){
+   try{
+    const response=await fetch(url);
+
+    if(!response.ok)
+     throw Error('HTTP '+response.status);
+
+    const data=await response.json();
+
+    if(data.code==='Ok'&&data.routes?.length){
+     result=data;
+     break;
+    }
+
+    throw Error(data.message||data.code||'پاسخ نامعتبر');
+
+   }catch(error){
+    routingErrors.push(error.message||'خطای شبکه');
+   }
+  }
+
+  if(!result){
+   throw Error('اتصال به سرویس محاسبه مسیر برقرار نشد. اتصال اینترنت یا فیلترشکن را بررسی کنید.');
+  }
+
+  const route=result.routes[0];
+  const km=route.distance/1000;
+  const air=haversine(A,B);
+
+  $('routeNames').textContent=
+   `${a.name} (${provinceName(a.province_id)}) ← ${b.name} (${provinceName(b.province_id)})`;
+
+  $('distance').textContent=fa(km);
+  $('duration').textContent=durationText(route.duration);
+  $('direct').textContent=fa(air)+' کیلومتر';
+
+  const routeURL=
+   `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${A.lat}%2C${A.lon}%3B${B.lat}%2C${B.lon}`;
+
+  $('maplink').href=routeURL;
+
+  const minLon=Math.min(A.lon,B.lon)-.5;
+  const maxLon=Math.max(A.lon,B.lon)+.5;
+  const minLat=Math.min(A.lat,B.lat)-.5;
+  const maxLat=Math.max(A.lat,B.lat)+.5;
+
+  $('map').src=
+   `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${B.lat}%2C${B.lon}`;
+
+  $('results').style.display='block';
+  $('results').scrollIntoView({behavior:'smooth'});
+
+  setStatus('محاسبه با موفقیت انجام شد');
+
+ }catch(e){
+  console.error(e);
+  setStatus(e.message||'خطا در محاسبه مسیر');
+ }finally{
+  btn.disabled=false;
+  btn.textContent='محاسبه فاصله و زمان سفر';
+ }
+}
+
+function showAbout(){
+ $('aboutModal').classList.add('show');
+}
+function hideAbout(){
+ $('aboutModal').classList.remove('show');
+}
+
+loadData();
+</script>
+</body>
+</html>

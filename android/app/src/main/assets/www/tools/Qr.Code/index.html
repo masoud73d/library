@@ -1,0 +1,1006 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0b16">
+<title>QR Studio Pro</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+
+<style>
+:root {
+  --bg:#0b0b16;
+  --panel:#17172b;
+  --border:#34344f;
+  --purple:#9674ff;
+  --cyan:#55f1d0;
+  --text:#f7f6ff;
+  --muted:#a5a4bd;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:Tahoma,Arial,sans-serif;
+  background:
+    radial-gradient(ellipse at 5% 0%,#302052 0,transparent 40%),
+    radial-gradient(ellipse at 100% 40%,#102c38 0,transparent 35%),
+    var(--bg);
+}
+button,input,textarea,select { font:inherit; }
+button { cursor:pointer;transition:.2s; }
+button:hover { filter:brightness(1.12); }
+button:disabled { opacity:.45;cursor:not-allowed; }
+
+header {
+  max-width:950px;
+  margin:auto;
+  padding:20px 16px;
+  display:flex;
+}
+.about {
+  margin-right:auto;
+  color:var(--cyan);
+  background:#55f1d010;
+  border:1px solid #55f1d045;
+  border-radius:12px;
+  padding:11px 17px;
+}
+main {
+  max-width:950px;
+  margin:auto;
+  padding:8px 16px 35px;
+}
+.hero { text-align:center;padding:18px 0 28px; }
+.logo {
+  width:70px;height:70px;
+  margin:0 auto 17px;
+  display:grid;place-items:center;
+  border-radius:23px;
+  background:linear-gradient(140deg,#aa8cff,#5940d1);
+  box-shadow:0 10px 40px #8662ff45;
+  font-size:35px;
+}
+h1 { font-size:clamp(28px,6vw,41px);margin:0 0 12px; }
+.gradient {
+  background:linear-gradient(90deg,#b49bff,#55f1d0);
+  color:transparent;
+  background-clip:text;
+  -webkit-background-clip:text;
+}
+.hero p {
+  color:var(--muted);
+  font-size:13px;
+  line-height:2;
+  max-width:520px;
+  margin:auto;
+}
+.tabs {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  padding:6px;
+  margin-bottom:18px;
+  background:#10101e;
+  border:1px solid var(--border);
+  border-radius:17px;
+}
+.tab {
+  border:0;
+  border-radius:11px;
+  padding:13px 5px;
+  color:var(--muted);
+  background:transparent;
+  font-size:12px;
+  font-weight:bold;
+}
+.tab.active {
+  color:white;
+  background:linear-gradient(120deg,#9573ff,#6749df);
+}
+.panel {
+  background:linear-gradient(150deg,#1b1b30,#11111f);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:clamp(15px,4vw,26px);
+  margin-bottom:17px;
+}
+.hidden { display:none!important; }
+.panel-head {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:22px;
+}
+.panel-icon {
+  width:44px;height:44px;
+  display:grid;place-items:center;
+  flex-shrink:0;
+  border-radius:14px;
+  background:#9270ff18;
+  border:1px solid #9270ff50;
+  font-size:22px;
+}
+h2 { font-size:18px;margin:0 0 7px; }
+h3 { font-size:14px;margin:0 0 12px; }
+.subtitle {
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.9;
+}
+.field { margin-bottom:16px; }
+label {
+  display:block;
+  font-size:12px;
+  color:#c3c1dc;
+  margin-bottom:9px;
+}
+textarea,select,input[type="text"] {
+  width:100%;
+  border:1px solid var(--border);
+  background:#0e0e1b;
+  color:var(--text);
+  border-radius:13px;
+  padding:13px;
+  outline:none;
+}
+textarea { min-height:115px;resize:vertical;line-height:1.9; }
+textarea:focus,select:focus,input:focus { border-color:var(--purple); }
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.colorbox {
+  background:#0e0e1b;
+  border:1px solid var(--border);
+  padding:8px 12px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:12px;
+}
+input[type="color"] {
+  width:40px;height:30px;
+  border:0;background:transparent;padding:0;
+  cursor:pointer;
+}
+.primary,.secondary {
+  border-radius:12px;
+  padding:13px 15px;
+  min-height:46px;
+  font-weight:bold;
+}
+.primary {
+  color:white;
+  border:0;
+  background:linear-gradient(115deg,#9877ff,#694ce0);
+}
+.secondary {
+  background:#22223b;
+  color:var(--text);
+  border:1px solid #3b3b59;
+}
+.full { width:100%; }
+.actions { display:flex;gap:10px;margin-top:13px; }
+.actions>* { flex:1;min-width:0; }
+
+.dropzone {
+  border:1.5px dashed #7567ad;
+  border-radius:17px;
+  padding:25px 13px;
+  text-align:center;
+  background:#9270ff08;
+}
+.upload-icon {
+  width:60px;height:60px;
+  border-radius:19px;
+  display:grid;place-items:center;
+  font-size:27px;
+  background:#9270ff19;
+  border:1px solid #9270ff45;
+  margin:0 auto 14px;
+}
+.dropzone p {
+  font-size:12px;
+  line-height:2;
+  color:var(--muted);
+}
+.file-label {
+  display:inline-block;
+  background:var(--purple);
+  color:white;
+  border-radius:11px;
+  padding:12px 18px;
+  font-size:13px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.file-label input { display:none; }
+.image-preview {
+  display:none;
+  max-width:100%;
+  max-height:210px;
+  border-radius:12px;
+  margin:15px auto 0;
+}
+.status {
+  font-size:12px;
+  color:var(--muted);
+  line-height:2;
+  margin-top:13px;
+}
+.result {
+  margin-top:17px;
+  background:#0d0d1a;
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:15px;
+}
+.result pre {
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  font-family:inherit;
+  line-height:2;
+  font-size:13px;
+  margin:12px 0;
+  user-select:text;
+}
+.preview {
+  width:min(100%,360px);
+  min-height:230px;
+  margin:20px auto;
+  background:white;
+  border-radius:17px;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.preview canvas,.preview svg {
+  display:block;
+  max-width:100%;
+  height:auto;
+}
+.preview img { max-width:100%;height:auto; }
+.barcode-preview {
+  min-height:170px;
+  flex-direction:column;
+  gap:10px;
+}
+.barcode-preview svg {
+  width:100%;
+  height:auto;
+  max-height:180px;
+}
+.barcode-value {
+  color:#333;
+  direction:ltr;
+  font-size:13px;
+  overflow-wrap:anywhere;
+}
+.tip {
+  padding:14px;
+  border-radius:13px;
+  background:#55f1d00b;
+  border:1px solid #55f1d025;
+  color:#b8d0cb;
+  font-size:12px;
+  line-height:2;
+}
+footer {
+  text-align:center;
+  color:#73728d;
+  font-size:11px;
+  line-height:2;
+  padding:5px 15px 28px;
+}
+#toast {
+  display:none;
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:100;
+  background:#272741;
+  border:1px solid #454568;
+  color:white;
+  padding:13px 18px;
+  border-radius:13px;
+  width:max-content;
+  max-width:90%;
+  font-size:13px;
+  text-align:center;
+}
+#aboutModal {
+  position:fixed;
+  inset:0;
+  z-index:50;
+  background:#000b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  backdrop-filter:blur(7px);
+}
+#aboutModal.hidden { display:none!important; }
+.modal {
+  width:100%;
+  max-width:400px;
+  padding:25px;
+  background:#19192e;
+  border:1px solid var(--border);
+  border-radius:22px;
+  line-height:2;
+}
+.modal p {
+  font-size:13px;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+.modal a { color:var(--cyan); }
+
+@media(max-width:560px) {
+  .tabs { grid-template-columns:1fr 1fr; }
+  .grid { grid-template-columns:1fr;gap:0; }
+  .actions { flex-direction:column; }
+  .panel { border-radius:18px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="about" id="aboutBtn">درباره من</button>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="logo">▦</div>
+    <h1><span class="gradient">QR Studio Pro</span></h1>
+    <p>
+      ساخت و خواندن QR Code و بارکد در یک ابزار.
+      بدون فعال‌کردن دوربین؛ فقط با انتخاب تصویر.
+    </p>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" data-page="qrRead">⌕ QR خوان</button>
+    <button class="tab" data-page="qrCreate">▦ ساخت QR</button>
+    <button class="tab" data-page="barRead">▤ بارکدخوان</button>
+    <button class="tab" data-page="barCreate">▥ ساخت بارکد</button>
+  </div>
+
+  <!-- خواندن QR -->
+  <section class="panel" id="qrRead">
+    <div class="panel-head">
+      <div class="panel-icon">⌕</div>
+      <div>
+        <h2>QR Code خوان</h2>
+        <div class="subtitle">خواندن QR از روی عکس گالری</div>
+      </div>
+    </div>
+
+    <div class="dropzone">
+      <div class="upload-icon">▧</div>
+      <h3>تصویر QR رو انتخاب کن</h3>
+      <p>عکس واضحی انتخاب کن که کد داخلش مشخص باشه.</p>
+      <label class="file-label">
+        انتخاب تصویر
+        <input type="file" id="qrImage" accept="image/*">
+      </label>
+      <img id="qrImagePreview" class="image-preview" alt="پیش‌نمایش QR">
+    </div>
+
+    <p id="qrReadStatus" class="status" aria-live="polite">
+      هنوز تصویری انتخاب نشده.
+    </p>
+
+    <div id="qrReadResult" class="result hidden">
+      <h3>محتوای QR</h3>
+      <pre id="qrReadText"></pre>
+      <div class="actions">
+        <button class="primary" id="qrCopy">کپی محتوا</button>
+        <button class="secondary" id="qrOpen">بازکردن لینک</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ساخت QR -->
+  <section class="panel hidden" id="qrCreate">
+    <div class="panel-head">
+      <div class="panel-icon">✧</div>
+      <div>
+        <h2>ساخت QR Code</h2>
+        <div class="subtitle">متن یا لینک رو به QR تبدیل کن</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="qrText">متن یا لینک</label>
+      <textarea id="qrText" placeholder="سلام دنیا! یا https://example.com"></textarea>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label for="qrStyle">سبک کد</label>
+        <select id="qrStyle">
+          <option value="square">کلاسیک</option>
+          <option value="rounded">گوشه‌گرد</option>
+          <option value="dots">دایره‌ای</option>
+          <option value="extra-rounded">گرد نرم</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="qrSize">اندازه خروجی</label>
+        <select id="qrSize">
+          <option value="256">256 × 256</option>
+          <option value="512" selected>512 × 512</option>
+          <option value="1024">1024 × 1024</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>رنگ کد</label>
+        <div class="colorbox">
+          رنگ نقاط
+          <input type="color" id="qrColor" value="#111111">
+        </div>
+      </div>
+      <div class="field">
+        <label>رنگ زمینه</label>
+        <div class="colorbox">
+          پس‌زمینه
+          <input type="color" id="qrBg" value="#ffffff">
+        </div>
+      </div>
+      <div class="field">
+        <label for="qrError">تصحیح خطا</label>
+        <select id="qrError">
+          <option value="L">L ـ کم</option>
+          <option value="M" selected>M ـ متوسط</option>
+          <option value="Q">Q ـ زیاد</option>
+          <option value="H">H ـ خیلی زیاد</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="primary full" id="makeQR">✦ ساخت QR</button>
+
+    <div class="preview" id="qrPreview">
+      <div style="color:#777;text-align:center;font-size:13px">
+        پیش‌نمایش QR
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="qrDownload" disabled>دانلود PNG</button>
+      <button class="secondary" id="qrCopySource" disabled>کپی متن</button>
+    </div>
+  </section>
+
+  <!-- بارکدخوان -->
+  <section class="panel hidden" id="barRead">
+    <div class="panel-head">
+      <div class="panel-icon">▤</div>
+      <div>
+        <h2>بارکدخوان</h2>
+        <div class="subtitle">خواندن بارکد محصولات از روی تصویر</div>
+      </div>
+    </div>
+
+    <div class="dropzone">
+      <div class="upload-icon">▥</div>
+      <h3>تصویر بارکد رو انتخاب کن</h3>
+      <p>بارکد باید واضح، کامل و بدون تاری باشه.</p>
+      <label class="file-label">
+        انتخاب تصویر بارکد
+        <input type="file" id="barImage" accept="image/*">
+      </label>
+      <img id="barImagePreview" class="image-preview" alt="پیش‌نمایش بارکد">
+    </div>
+
+    <p id="barReadStatus" class="status" aria-live="polite">
+      هنوز تصویری انتخاب نشده.
+    </p>
+
+    <div id="barReadResult" class="result hidden">
+      <h3>نتیجه بارکدخوان</h3>
+      <pre id="barReadText"></pre>
+      <p class="subtitle" id="barFormat"></p>
+      <button class="primary full" id="barCopy">کپی شماره بارکد</button>
+    </div>
+  </section>
+
+  <!-- ساخت بارکد -->
+  <section class="panel hidden" id="barCreate">
+    <div class="panel-head">
+      <div class="panel-icon">▥</div>
+      <div>
+        <h2>ساخت بارکد</h2>
+        <div class="subtitle">تولید بارکد قابل چاپ و اسکن</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="barText">شماره یا متن بارکد</label>
+      <input type="text" id="barText" placeholder="مثلاً 123456789012">
+    </div>
+
+    <div class="field">
+      <label for="barType">نوع بارکد</label>
+      <select id="barType">
+        <option value="CODE128">Code 128 ـ متن و اعداد</option>
+        <option value="EAN13">EAN-13 ـ محصولات</option>
+        <option value="EAN8">EAN-8 ـ محصولات</option>
+        <option value="UPC">UPC ـ محصولات</option>
+        <option value="CODE39">Code 39</option>
+        <option value="ITF">ITF ـ اعداد زوج</option>
+        <option value="ITF14">ITF-14 ـ بسته‌بندی</option>
+        <option value="codabar">Codabar</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <div class="field">
+        <label>رنگ خطوط</label>
+        <div class="colorbox">
+          رنگ بارکد
+          <input type="color" id="barColor" value="#111111">
+        </div>
+      </div>
+      <div class="field">
+        <label>رنگ زمینه</label>
+        <div class="colorbox">
+          پس‌زمینه
+          <input type="color" id="barBg" value="#ffffff">
+        </div>
+      </div>
+      <div class="field">
+        <label for="barWidth">ضخامت خطوط</label>
+        <select id="barWidth">
+          <option value="1">نازک</option>
+          <option value="2" selected>معمولی</option>
+          <option value="3">ضخیم</option>
+          <option value="4">خیلی ضخیم</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="barHeight">ارتفاع خطوط</label>
+        <select id="barHeight">
+          <option value="50">50 پیکسل</option>
+          <option value="80" selected>80 پیکسل</option>
+          <option value="120">120 پیکسل</option>
+          <option value="160">160 پیکسل</option>
+        </select>
+      </div>
+    </div>
+
+    <label style="display:flex;align-items:center;gap:9px;margin-bottom:18px">
+      <input type="checkbox" id="showText" checked>
+      نمایش شماره زیر بارکد
+    </label>
+
+    <button class="primary full" id="makeBar">✦ ساخت بارکد</button>
+
+    <div class="preview barcode-preview" id="barPreview">
+      <div style="color:#777;font-size:13px">پیش‌نمایش بارکد</div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="barDownload" disabled>دانلود SVG</button>
+      <button class="secondary" id="barDownloadPNG" disabled>دانلود PNG</button>
+    </div>
+
+    <p class="status">
+      توجه: بارکد محصولات باید از نوع مورد قبول فروشگاه و سیستم
+      ثبت محصول باشه. ساخت بارکد به‌تنهایی به معنی ثبت رسمی محصول نیست.
+    </p>
+  </section>
+
+  <section class="tip">
+    اسکن و ساخت کدها از کتابخانه‌های استاندارد استفاده می‌کنه.
+    برای اجرای قابلیت‌ها، اتصال اینترنت لازمه.
+    این برنامه دوربین رو فعال نمی‌کنه و فقط تصویر انتخاب‌شده رو پردازش می‌کنه.
+  </section>
+</main>
+
+<footer>
+  QR Studio Pro · QR Code & Barcode Tools
+</footer>
+
+<div id="aboutModal" class="hidden">
+  <div class="modal">
+    <h2>درباره من</h2>
+    <p>Developer: Masoud delavar</p>
+    <p>Email:
+      <a href="mailto:masoud0098d@gmail.com">masoud0098d@gmail.com</a>
+    </p>
+    <button class="primary full" id="closeAbout">بستن</button>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let qrGenerator = null;
+let currentBarcode = "";
+let lastQRText = "";
+let lastQRSize = 512;
+let scanReader = null;
+let qrBusy = false;
+let barBusy = false;
+let lastBarcodeText = "";
+let lastBarcodeFormat = "";
+
+function toast(message) {
+  const el = $("toast");
+  el.textContent = message;
+  el.style.display = "block";
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => el.style.display = "none", 3000);
+}
+
+// تب‌ها
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x =>
+      x.classList.remove("active")
+    );
+    tab.classList.add("active");
+
+    ["qrRead","qrCreate","barRead","barCreate"].forEach(id => {
+      $(id).classList.toggle("hidden", id !== tab.dataset.page);
+    });
+  });
+});
+
+// درباره من
+$("aboutBtn").onclick = () =>
+  $("aboutModal").classList.remove("hidden");
+
+$("closeAbout").onclick = () =>
+  $("aboutModal").classList.add("hidden");
+
+$("aboutModal").addEventListener("click", e => {
+  if (e.target === $("aboutModal")) {
+    $("aboutModal").classList.add("hidden");
+  }
+});
+
+// ابزار انتخاب عکس و اسکن
+function previewImage(file, imgId) {
+  const img = $(imgId);
+  if (img.dataset.objectUrl) {
+    URL.revokeObjectURL(img.dataset.objectUrl);
+  }
+
+  const url = URL.createObjectURL(file);
+  img.dataset.objectUrl = url;
+  img.src = url;
+  img.style.display = "block";
+}
+
+function getReader() {
+  if (!window.ZXing || !ZXing.BrowserMultiFormatReader) {
+    throw new Error("LIBRARY");
+  }
+
+  if (!scanReader) {
+    scanReader = new ZXing.BrowserMultiFormatReader();
+  }
+
+  return scanReader;
+}
+
+async function decodeImage(file, kind) {
+  const statusId = kind === "qr" ? "qrReadStatus" : "barReadStatus";
+  const resultId = kind === "qr" ? "qrReadResult" : "barReadResult";
+  const inputId = kind === "qr" ? "qrImage" : "barImage";
+  const previewId = kind === "qr" ? "qrImagePreview" : "barImagePreview";
+
+  if ((kind === "qr" && qrBusy) || (kind === "bar" && barBusy)) return;
+
+  if (kind === "qr") qrBusy = true;
+  else barBusy = true;
+
+  $(resultId).classList.add("hidden");
+  $(statusId).textContent = "در حال خواندن تصویر...";
+
+  previewImage(file, previewId);
+
+  try {
+    const reader = getReader();
+    const img = $(previewId);
+
+    if (!img.complete) {
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+    }
+
+    const result = reader.decodeFromImageElement(img);
+    const text = result.getText();
+    const format = String(result.getBarcodeFormat());
+
+    if (kind === "qr") {
+      $("qrReadText").textContent = text;
+      $("qrOpen").disabled = !/^https?:\/\/\S+$/i.test(text.trim());
+      $("qrReadResult").classList.remove("hidden");
+      $("qrReadStatus").textContent = "QR Code با موفقیت خوانده شد.";
+      currentBarcode = text;
+    } else {
+      lastBarcodeText = text;
+      lastBarcodeFormat = format;
+      $("barReadText").textContent = text;
+      $("barFormat").textContent = "فرمت شناسایی‌شده: " + format;
+      $("barReadResult").classList.remove("hidden");
+      $("barReadStatus").textContent = "بارکد با موفقیت خوانده شد.";
+    }
+  } catch (error) {
+    const message = error.message === "LIBRARY"
+      ? "کتابخانه اسکن بارگذاری نشده؛ اتصال اینترنت رو بررسی کن."
+      : "کدی پیدا نشد. عکس واضح‌تر، با نور بهتر و کد کامل انتخاب کن.";
+
+    $(statusId).textContent = message;
+  } finally {
+    if (kind === "qr") qrBusy = false;
+    else barBusy = false;
+
+    $(inputId).value = "";
+  }
+}
+
+$("qrImage").addEventListener("change", e => {
+  if (e.target.files[0]) decodeImage(e.target.files[0], "qr");
+});
+
+$("barImage").addEventListener("change", e => {
+  if (e.target.files[0]) decodeImage(e.target.files[0], "bar");
+});
+
+// کپی و بازکردن نتیجه‌ها
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("متن کپی شد.");
+  } catch {
+    toast("کپی خودکار در دسترس نیست؛ متن رو دستی انتخاب کن.");
+  }
+}
+
+$("qrCopy").onclick = () => copyText($("qrReadText").textContent);
+$("barCopy").onclick = () => copyText(lastBarcodeText);
+
+$("qrOpen").onclick = () => {
+  const url = $("qrReadText").textContent.trim();
+  if (/^https?:\/\/\S+$/i.test(url)) {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+};
+
+// ساخت QR
+function makeQR() {
+  const text = $("qrText").value;
+
+  if (!text.trim()) {
+    toast("اول متن یا لینک رو وارد کن.");
+    return;
+  }
+
+  if (!window.QRCodeStyling) {
+    toast("کتابخانه ساخت QR بارگذاری نشده.");
+    return;
+  }
+
+  const size = Number($("qrSize").value);
+  const style = $("qrStyle").value;
+  const color = $("qrColor").value;
+  const bg = $("qrBg").value;
+
+  try {
+    qrGenerator = new QRCodeStyling({
+      width:size,
+      height:size,
+      type:"canvas",
+      data:text,
+      margin:12,
+      qrOptions:{
+        errorCorrectionLevel:$("qrError").value
+      },
+      dotsOptions:{
+        color,
+        type:style
+      },
+      cornersSquareOptions:{
+        color,
+        type:style === "dots" ? "dot" :
+          style === "square" ? "square" : "extra-rounded"
+      },
+      cornersDotOptions:{
+        color,
+        type:style === "square" ? "square" : "dot"
+      },
+      backgroundOptions:{color:bg}
+    });
+
+    $("qrPreview").replaceChildren();
+    qrGenerator.append($("qrPreview"));
+
+    lastQRText = text;
+    lastQRSize = size;
+    $("qrDownload").disabled = false;
+    $("qrCopySource").disabled = false;
+    toast("QR Code ساخته شد.");
+  } catch (error) {
+    console.error(error);
+    toast("ساخت QR ناموفق بود. متن کوتاه‌تری امتحان کن.");
+  }
+}
+
+$("makeQR").onclick = makeQR;
+
+$("qrDownload").onclick = () => {
+  if (qrGenerator) {
+    qrGenerator.download({
+      name:"QR-Studio",
+      extension:"png"
+    });
+  }
+};
+
+$("qrCopySource").onclick = () => copyText(lastQRText);
+
+["qrStyle","qrSize","qrColor","qrBg","qrError"].forEach(id => {
+  $(id).addEventListener("change", () => {
+    if (lastQRText && !$("qrCreate").classList.contains("hidden")) {
+      makeQR();
+    }
+  });
+});
+
+// ساخت بارکد
+function makeBarcode() {
+  const value = $("barText").value.trim();
+  const type = $("barType").value;
+
+  if (!value) {
+    toast("شماره یا متن بارکد رو وارد کن.");
+    return;
+  }
+
+  if (!window.JsBarcode) {
+    toast("کتابخانه ساخت بارکد بارگذاری نشده.");
+    return;
+  }
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+
+  try {
+    JsBarcode(svg, value, {
+      format:type,
+      lineColor:$("barColor").value,
+      background:$("barBg").value,
+      width:Number($("barWidth").value),
+      height:Number($("barHeight").value),
+      displayValue:$("showText").checked,
+      font:"Arial",
+      fontSize:16,
+      margin:12,
+      textMargin:5
+    });
+
+    $("barPreview").replaceChildren(svg);
+
+    const caption = document.createElement("div");
+    caption.className = "barcode-value";
+    caption.textContent = value;
+    $("barPreview").append(caption);
+
+    currentBarcode = value;
+    $("barDownload").disabled = false;
+    $("barDownloadPNG").disabled = false;
+
+    toast("بارکد ساخته شد.");
+  } catch (error) {
+    console.error(error);
+    toast("اطلاعات واردشده با این نوع بارکد سازگار نیست. شماره رو بررسی کن.");
+  }
+}
+
+$("makeBar").onclick = makeBarcode;
+
+$("barDownload").onclick = () => {
+  const svg = $("barPreview").querySelector("svg");
+  if (!svg) return;
+
+  const blob = new Blob(
+    [new XMLSerializer().serializeToString(svg)],
+    {type:"image/svg+xml;charset=utf-8"}
+  );
+
+  downloadBlob(blob, "Barcode.svg");
+};
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+$("barDownloadPNG").onclick = () => {
+  const svg = $("barPreview").querySelector("svg");
+  if (!svg) return;
+
+  const clone = svg.cloneNode(true);
+  const vb = clone.viewBox.baseVal;
+
+  let width = vb && vb.width ? vb.width : parseFloat(clone.getAttribute("width"));
+  let height = vb && vb.height ? vb.height : parseFloat(clone.getAttribute("height"));
+
+  if (!width || !height) {
+    const rect = svg.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+  }
+
+  clone.setAttribute("width", width);
+  clone.setAttribute("height", height);
+
+  const serialized = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([serialized], {type:"image/svg+xml;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(width * 2);
+    canvas.height = Math.ceil(height * 2);
+
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = $("barBg").value;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+    canvas.toBlob(png => {
+      if (png) downloadBlob(png,"Barcode.png");
+      URL.revokeObjectURL(url);
+    },"image/png");
+  };
+
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    toast("تبدیل بارکد به PNG انجام نشد.");
+  };
+
+  img.src = url;
+};
+
+["barType","barColor","barBg","barWidth","barHeight","showText"].forEach(id => {
+  $(id).addEventListener("change", () => {
+    if (currentBarcode && !$("barCreate").classList.contains("hidden")) {
+      makeBarcode();
+    }
+  });
+});
+</script>
+
+</body>
+</html>
+
