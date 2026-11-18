@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - offline-android
   workflow_dispatch:
 
 jobs:
@@ -20,7 +21,6 @@ jobs:
           mkdir -p "$ASSETS/vendor"
           curl -fL "https://raw.githubusercontent.com/masoud73d/library/main/library-bg.png" -o "$ASSETS/library-bg.png"
           curl -fL "https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js" -o "$ASSETS/vendor/qr-code-styling.js"
-          curl -fL "https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js" -o "$ASSETS/vendor/JsBarcode.all.min.js"
           curl -fL "https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js" -o "$ASSETS/vendor/zxing.min.js"
           curl -fL "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" -o "$ASSETS/vendor/tesseract.min.js"
 
