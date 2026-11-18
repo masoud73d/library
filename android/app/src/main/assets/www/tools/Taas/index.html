@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#081326">
+<title>تاس دیجیتال | Masoud</title>
+<style>
+:root{--bg:#07111f;--panel:#101f35;--panel2:#152943;--blue:#4f9cff;--cyan:#55e6e0;--text:#f4f8ff;--muted:#a9bad1;--gold:#ffc857}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Tahoma,Arial,sans-serif;color:var(--text);background:radial-gradient(ellipse at 50% 0%,#183d68 0%,#0b1b30 42%,#050b14 100%);display:flex;justify-content:center;padding:22px 14px 35px}
+.app{width:min(100%,560px)}
+header{text-align:center;margin:4px 0 20px}
+.logo{width:64px;height:64px;border-radius:20px;margin:0 auto 12px;display:grid;place-items:center;font-size:34px;background:linear-gradient(145deg,#69e7ed,#3981ff);box-shadow:0 10px 35px #2e9cff44}
+h1{font-size:clamp(23px,5vw,31px);margin:0 0 8px;letter-spacing:-.5px}
+.subtitle{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+.card{border:1px solid #7eb8ff25;background:linear-gradient(160deg,#132740eF,#0c192beF);border-radius:25px;padding:20px;box-shadow:0 20px 55px #0005;backdrop-filter:blur(10px)}
+.selector{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;cursor:pointer;border:0;transition:transform .16s,filter .16s,background .16s}
+button:active{transform:scale(.97)}
+.choice{border:1px solid #7893b633;background:#0b192b;color:#c8d7eb;border-radius:15px;padding:13px 8px;font-weight:bold}
+.choice.active{background:linear-gradient(135deg,#2679e8,#37b9d4);border-color:transparent;color:white;box-shadow:0 7px 22px #258fe944}
+.stage{position:relative;min-height:230px;display:flex;align-items:center;justify-content:center;gap:clamp(22px,8vw,48px);padding:26px 6px 14px;perspective:900px;overflow:hidden}
+.stage:after{content:"";position:absolute;bottom:12px;left:17%;right:17%;height:16px;background:#0008;filter:blur(15px);border-radius:50%}
+.die-wrap{--size:clamp(88px,24vw,112px);width:var(--size);height:var(--size);position:relative;z-index:1;flex:0 0 auto;filter:drop-shadow(0 13px 10px #0005)}
+.die{width:100%;height:100%;position:relative;transform-style:preserve-3d;transform:rotateX(0deg) rotateY(0deg);will-change:transform}
+/* هسته‌ی یکپارچه پشت وجه‌ها قرار می‌گیرد تا از گوشه‌ها فضای خالی یا داخل تاس دیده نشود. */
+.die::before{content:"";position:absolute;inset:3%;border-radius:13%;background:linear-gradient(145deg,#eaf1fb 0%,#cbd8e9 58%,#aebfd5 100%);transform:translateZ(0);box-shadow:inset 0 0 0 1px #9eafc5;pointer-events:none}
+.face{position:absolute;inset:-1.5px;border-radius:9%;background:linear-gradient(145deg,#ffffff 0%,#edf3fb 38%,#cbd8e9 100%);border:1px solid #ffffff;box-shadow:inset -7px -8px 12px #7186a344,inset 5px 5px 10px #fff,0 0 1px 1px #aabbd0;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:13%;gap:4%;backface-visibility:hidden;overflow:hidden}
+.face.front{transform:translateZ(calc(var(--size)/2 - .5px))}
+.face.back{background:linear-gradient(215deg,#dce6f3,#b9c9df);transform:rotateY(180deg) translateZ(calc(var(--size)/2 - .5px));box-shadow:inset 6px 6px 12px #7186a355,inset -4px -4px 9px #fff8}
+.face.right{background:linear-gradient(120deg,#d9e5f4,#aabdd5);transform:rotateY(90deg) translateZ(calc(var(--size)/2 - .5px));box-shadow:inset -7px -5px 12px #60758e55,inset 3px 3px 8px #fff9}
+.face.left{background:linear-gradient(240deg,#f8fbff,#c1d0e4);transform:rotateY(-90deg) translateZ(calc(var(--size)/2 - .5px));box-shadow:inset 6px -4px 12px #6d829b44,inset -3px 3px 8px #fff}
+.face.top{background:linear-gradient(145deg,#fff,#e4edf8);transform:rotateX(90deg) translateZ(calc(var(--size)/2 - .5px));box-shadow:inset 5px 5px 10px #fff,inset -5px -6px 10px #7b8fa844}
+.face.bottom{background:linear-gradient(145deg,#b8c8dd,#e0e9f5);transform:rotateX(-90deg) translateZ(calc(var(--size)/2 - .5px));box-shadow:inset 5px 5px 12px #60758e66,inset -3px -3px 8px #fff8}
+.pip{border-radius:50%;background:radial-gradient(circle at 32% 28%,#34455d,#071326 70%);box-shadow:inset 1px 2px 3px #0008,0 1px 1px #fff8;align-self:center;justify-self:center;width:100%;height:100%;max-width:13px;max-height:13px;visibility:hidden}
+.pip.on{visibility:visible}
+.roll-btn{width:100%;border-radius:16px;padding:16px 12px;color:#071323;font-size:17px;font-weight:900;background:linear-gradient(100deg,#65f0dc,#62b8ff 60%,#a2a1ff);box-shadow:0 9px 25px #43b8e533}
+.roll-btn:disabled{opacity:.65;cursor:wait}
+.status{text-align:center;color:var(--muted);font-size:12px;min-height:21px;margin:12px 0 0}
+.result{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#071426aa;border:1px solid #80b8ff22;border-radius:16px;margin-top:16px;padding:14px 16px}
+.result-label{color:var(--muted);font-size:13px}
+.result-value{font-size:26px;font-weight:900;color:var(--cyan);direction:ltr}
+.result-total{font-size:12px;color:var(--gold);margin-top:4px}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.secondary{border:1px solid #7e9dbb33;background:#142841;color:#dbe9fa;padding:12px 8px;border-radius:13px;font-size:13px}
+.secondary:hover,.choice:hover{filter:brightness(1.12)}
+.about-panel{display:none;margin-top:13px;border:1px solid #64d9e455;border-radius:15px;padding:15px;background:#07182a}
+.about-panel.open{display:block}
+.about-panel h2{font-size:15px;margin:0 0 10px;color:var(--cyan)}
+.about-panel p{margin:6px 0;color:#d4e2f3;font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+footer{text-align:center;color:#8296b0;font-size:11px;margin:16px 0 0}
+@keyframes bounce{0%{transform:translateY(0) rotate(0)}20%{transform:translateY(-25px) rotate(7deg)}42%{transform:translateY(4px) rotate(-8deg)}60%{transform:translateY(-12px) rotate(5deg)}78%{transform:translateY(2px) rotate(-3deg)}100%{transform:translateY(0) rotate(0)}}
+.die-wrap.rolling{animation:bounce .72s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+  <div class="logo" aria-hidden="true">🎲</div>
+  <h1>تاس دیجیتال</h1>
+  <p class="subtitle">تاس بنداز، نتیجه رو ببین!<br>یک یا دو تاس با حرکت و صدای طبیعی</p>
+</header>
+<section class="card" aria-label="تاس دیجیتال">
+  <div class="selector" role="group" aria-label="تعداد تاس">
+    <button type="button" class="choice active" id="oneBtn" aria-pressed="true">🎲 یک تاس</button>
+    <button type="button" class="choice" id="twoBtn" aria-pressed="false">🎲🎲 دو تاس</button>
+  </div>
+  <div class="stage" id="stage" aria-live="polite">
+    <div class="die-wrap" id="wrap1"><div class="die" id="die1"></div></div>
+    <div class="die-wrap" id="wrap2" style="display:none"><div class="die" id="die2"></div></div>
+  </div>
+  <button type="button" class="roll-btn" id="rollBtn">🎲 انداختن تاس</button>
+  <p class="status" id="status">برای شروع، دکمه انداختن تاس رو بزن.</p>
+  <div class="result">
+    <div><div class="result-label">نتیجه نهایی</div><div class="result-total" id="resultTotal">آماده‌ای؟</div></div>
+    <div class="result-value" id="resultValue">—</div>
+  </div>
+  <div class="tools">
+    <button type="button" class="secondary" id="soundBtn" aria-pressed="true">🔊 صدا: روشن</button>
+    <button type="button" class="secondary" id="aboutBtn" aria-expanded="false">ⓘ درباره من</button>
+  </div>
+  <div class="about-panel" id="aboutPanel">
+    <h2>درباره من</h2>
+    <p><strong>Developer:</strong> Masoud delavar</p>
+    <p><strong>Email:</strong> masoud0098d@gmail.com</p>
+  </div>
+</section>
+<footer>ساخته‌شده با HTML، CSS و JavaScript • بدون نیاز به اینترنت</footer>
+</main>
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const pipPatterns = {
+    1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8],
+    5:[0,2,4,6,8], 6:[0,2,3,5,6,8]
+  };
+  const faceNames = ['front','back','right','left','top','bottom'];
+  const dice = [
+    {die:$('die1'),wrap:$('wrap1'),value:1},
+    {die:$('die2'),wrap:$('wrap2'),value:1}
+  ];
+  let count=1, rolling=false, soundOn=true, audioCtx=null;
+
+  function buildDie(die){
+    die.innerHTML='';
+    faceNames.forEach(name=>{
+      const face=document.createElement('div');
+      face.className='face '+name;
+      face.setAttribute('aria-hidden','true');
+      for(let i=0;i<9;i++){
+        const pip=document.createElement('span');
+        pip.className='pip';
+        face.appendChild(pip);
+      }
+      die.appendChild(face);
+    });
+    showFaceValue(die,1);
+  }
+  // Front-face pips are the visible result; other faces are decorative cube faces.
+  function showFaceValue(die,value){
+    const front=die.querySelector('.face.front');
+    if(!front)return;
+    [...front.children].forEach((pip,i)=>pip.classList.toggle('on',pipPatterns[value].includes(i)));
+    const otherValues={back:7-value,right:((value+1)%6)+1,left:((value+3)%6)+1,top:((value+4)%6)+1,bottom:((value+2)%6)+1};
+    Object.keys(otherValues).forEach(name=>{
+      const face=die.querySelector('.face.'+name);
+      if(face)[...face.children].forEach((pip,i)=>pip.classList.toggle('on',pipPatterns[otherValues[name]].includes(i)));
+    });
+  }
+  function setCount(n){
+    if(rolling)return;
+    count=n;
+    $('wrap2').style.display=n===2?'block':'none';
+    $('oneBtn').classList.toggle('active',n===1);
+    $('twoBtn').classList.toggle('active',n===2);
+    $('oneBtn').setAttribute('aria-pressed',String(n===1));
+    $('twoBtn').setAttribute('aria-pressed',String(n===2));
+    $('resultValue').textContent='—';
+    $('resultTotal').textContent=n===1?'یک تاس انتخاب شده':'دو تاس انتخاب شده';
+    $('status').textContent='برای شروع، دکمه انداختن تاس رو بزن.';
+  }
+  function playRollSound(){
+    if(!soundOn)return;
+    try{
+      const AudioContext=window.AudioContext||window.webkitAudioContext;
+      if(!AudioContext)return;
+      if(!audioCtx)audioCtx=new AudioContext();
+      if(audioCtx.state==='suspended')audioCtx.resume();
+      const now=audioCtx.currentTime;
+      for(let i=0;i<5;i++){
+        const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+        osc.type='triangle';
+        osc.frequency.setValueAtTime(160+Math.random()*260,now+i*.085);
+        osc.frequency.exponentialRampToValueAtTime(65,now+i*.085+.055);
+        gain.gain.setValueAtTime(.0001,now+i*.085);
+        gain.gain.exponentialRampToValueAtTime(.07,now+i*.085+.008);
+        gain.gain.exponentialRampToValueAtTime(.0001,now+i*.085+.065);
+        osc.connect(gain);gain.connect(audioCtx.destination);
+        osc.start(now+i*.085);osc.stop(now+i*.085+.07);
+      }
+    }catch(e){}
+  }
+  function rollOne(item,value,index){
+    item.value=value;
+    // نتیجه روی وجه جلو قرار می‌گیرد؛ چرخش با چند دور کامل تمام می‌شود، بنابراین در پایان هیچ پرش یا چرخش اصلاحی نداریم.
+    showFaceValue(item.die,value);
+    item.die.style.transition='none';
+    item.die.style.transform='rotateX(0deg) rotateY(0deg)';
+    void item.die.offsetWidth;
+    const turnsX=720 + (index ? 360 : 0);
+    const turnsY=1080 + (index ? 360 : 0);
+    item.die.style.transition='transform 1.85s cubic-bezier(.14,.72,.18,1)';
+    requestAnimationFrame(()=>{
+      item.die.style.transform=`rotateX(${turnsX}deg) rotateY(${turnsY}deg)`;
+    });
+  }
+  function roll(){
+    if(rolling)return;
+    rolling=true;
+    $('rollBtn').disabled=true;
+    $('oneBtn').disabled=true;$('twoBtn').disabled=true;
+    $('status').textContent='تاس‌ها دارن می‌غلتن…';
+    $('resultValue').textContent='…';$('resultTotal').textContent='در حال انداختن';
+    const values=[];
+    for(let i=0;i<count;i++){
+      const value=1+Math.floor(Math.random()*6);
+      values.push(value);
+      dice[i].wrap.classList.add('rolling');
+      rollOne(dice[i],value,i);
+    }
+    playRollSound();
+    window.setTimeout(()=>{
+      dice.forEach((item,i)=>{
+        item.wrap.classList.remove('rolling');
+        if(i<count) showFaceValue(item.die,values[i]);
+      });
+      const total=values.reduce((a,b)=>a+b,0);
+      $('resultValue').textContent=values.join(' + ');
+      $('resultTotal').textContent=count===2?'مجموع: '+total:'عدد تاس';
+      $('status').textContent='انجام شد! دوباره هم می‌تونی تاس بندازی.';
+      $('rollBtn').disabled=false;$('oneBtn').disabled=false;$('twoBtn').disabled=false;
+      rolling=false;
+    },2050);
+  }
+  $('oneBtn').addEventListener('click',()=>setCount(1));
+  $('twoBtn').addEventListener('click',()=>setCount(2));
+  $('rollBtn').addEventListener('click',roll);
+  $('soundBtn').addEventListener('click',()=>{
+    soundOn=!soundOn;
+    $('soundBtn').textContent=soundOn?'🔊 صدا: روشن':'🔇 صدا: خاموش';
+    $('soundBtn').setAttribute('aria-pressed',String(soundOn));
+    if(soundOn)playRollSound();
+  });
+  $('aboutBtn').addEventListener('click',()=>{
+    const open=$('aboutPanel').classList.toggle('open');
+    $('aboutBtn').setAttribute('aria-expanded',String(open));
+  });
+  dice.forEach(item=>buildDie(item.die));
+})();
+</script>
+</body>
+</html>

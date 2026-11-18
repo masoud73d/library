@@ -1,0 +1,1250 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#160a06">
+<title>اتاق جعبه‌ابزار | مسعود</title>
+<link rel="preload" as="image" href="./library-bg.png" fetchpriority="high">
+
+<style>
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: #160a06;
+  color: #f8e4bd;
+  font-family: Tahoma, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* صفحه خوش‌آمدگویی */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  padding: 28px;
+  text-align: center;
+  color: #f8e4bd;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(126,79,37,.34), transparent 48%),
+    linear-gradient(145deg,#24130b 0%,#100805 58%,#1d100a 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .45s ease, visibility .45s ease;
+}
+
+.splash-screen.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-emblem {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 8px;
+}
+
+.splash-emblem::before,
+.splash-emblem::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(226,184,112,.7);
+  border-radius: 50%;
+  animation: emblemPulse 2.4s ease-in-out infinite;
+}
+
+.splash-emblem::after {
+  inset: -7px;
+  border-color: rgba(226,184,112,.25);
+  animation-delay: .6s;
+}
+
+.splash-book {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #bd8a43;
+  border-radius: 24px;
+  color: #f7d99e;
+  font-size: 43px;
+  background: linear-gradient(145deg,#684323,#29170d);
+  box-shadow: 0 8px 35px #0009, inset 0 1px 0 #ffffff30;
+}
+
+.splash-title {
+  margin: 8px 0 0;
+  color: #f8d99f;
+  font-size: clamp(22px,6vw,29px);
+  font-weight: bold;
+}
+
+.splash-subtitle {
+  margin: 0;
+  color: #c9ad83;
+  font-size: 13px;
+}
+
+.splash-loader {
+  width: 148px;
+  height: 3px;
+  margin-top: 17px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #62472d;
+}
+
+.splash-loader span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,#b47b36,#ffe3a1,#b47b36);
+  animation: loadingSweep 1.15s ease-in-out infinite;
+}
+
+.splash-status {
+  color: #bda17b;
+  font-size: 11px;
+}
+
+@keyframes loadingSweep {
+  0% { transform: translateX(160%); }
+  100% { transform: translateX(-260%); }
+}
+
+@keyframes emblemPulse {
+  0%,100% { transform: scale(1); opacity: .5; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+/* صفحه اصلی */
+.page {
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #160a06;
+}
+
+.scene {
+  position: relative;
+  width: 100%;
+  max-width: 1024px;
+  line-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.scene-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* محدوده‌های شفاف کلیک */
+.hotspot {
+  position: absolute;
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  z-index: 5;
+  line-height: normal;
+}
+
+.hotspot:focus-visible {
+  outline: 2px solid #ffe3a1;
+  background: #ffffff12;
+}
+
+/* ردیف اول */
+.book-1 {
+  left: 11.7%;
+  top: 24.2%;
+  width: 11.7%;
+  height: 9.8%;
+}
+
+.book-2 {
+  left: 26.6%;
+  top: 24.2%;
+  width: 13.0%;
+  height: 9.8%;
+}
+
+.book-3 {
+  left: 44.9%;
+  top: 24.2%;
+  width: 11.8%;
+  height: 9.8%;
+}
+
+.book-4 {
+  left: 61.4%;
+  top: 24.2%;
+  width: 11.5%;
+  height: 9.8%;
+}
+
+.book-5 {
+  left: 75.6%;
+  top: 24.2%;
+  width: 13.5%;
+  height: 9.8%;
+}
+
+/* ردیف دوم */
+.book-6 {
+  left: 9.9%;
+  top: 39.3%;
+  width: 14.3%;
+  height: 10.5%;
+}
+
+.book-7 {
+  left: 26.5%;
+  top: 39.3%;
+  width: 14.3%;
+  height: 10.5%;
+}
+
+.book-8 {
+  left: 43.7%;
+  top: 39.3%;
+  width: 13.7%;
+  height: 10.5%;
+}
+
+.book-9 {
+  left: 62.1%;
+  top: 39.3%;
+  width: 12.5%;
+  height: 10.5%;
+}
+
+.book-10 {
+  left: 76.9%;
+  top: 39.3%;
+  width: 13.1%;
+  height: 10.5%;
+}
+
+/* ردیف سوم */
+.book-11 {
+  left: 17.1%;
+  top: 53.9%;
+  width: 15.0%;
+  height: 10.5%;
+}
+
+.book-12 {
+  left: 34.9%;
+  top: 53.9%;
+  width: 15.0%;
+  height: 10.5%;
+}
+
+.book-13 {
+  left: 52.4%;
+  top: 53.9%;
+  width: 14.7%;
+  height: 10.5%;
+}
+
+.book-14 {
+  left: 67.9%;
+  top: 53.9%;
+  width: 15.0%;
+  height: 10.5%;
+}
+
+/* دکمه‌های روی تصویر */
+.list-hotspot {
+  left: 65.5%;
+  top: 7.7%;
+  width: 21%;
+  height: 4.8%;
+  border-radius: 20px;
+}
+
+.about-hotspot {
+  left: 87.6%;
+  top: 7.8%;
+  width: 11%;
+  height: 6.2%;
+  border-radius: 20px;
+}
+
+/* دکمه خروج */
+.exit-button {
+  position: absolute;
+  left: 50%;
+  bottom: 2.2%;
+  transform: translateX(-50%);
+  z-index: 8;
+  min-width: 170px;
+  padding: 11px 25px;
+  border: 1px solid #d0a35e;
+  border-radius: 12px;
+  color: #ffe7bd;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.5;
+  white-space: nowrap;
+  background: linear-gradient(145deg,rgba(104,67,35,.97),rgba(43,25,15,.98));
+  box-shadow: 0 5px 18px #0009, inset 0 1px 0 #ffffff30;
+}
+
+.exit-button:active {
+  transform: translateX(-50%) scale(.97);
+}
+
+/* پنجره تأیید خروج */
+.exit-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.exit-confirm.show {
+  display: flex;
+}
+
+.exit-confirm-box {
+  width: min(100%, 340px);
+  padding: 24px 20px 18px;
+  text-align: center;
+  border: 1px solid #bd8a43;
+  border-radius: 16px;
+  color: #f8e4bd;
+  background: linear-gradient(145deg,#2b190f,#160a06);
+  box-shadow: 0 18px 55px #000c;
+}
+
+.exit-confirm-title {
+  margin: 0 0 10px;
+  color: #f8d99f;
+  font-size: 18px;
+}
+
+.exit-confirm-message {
+  margin: 0 0 22px;
+  color: #e5d3b7;
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.exit-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.exit-confirm-actions button {
+  min-width: 105px;
+  padding: 10px 15px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.exit-cancel {
+  border: 1px solid #987044;
+  color: #f5dfbd;
+  background: #382316;
+}
+
+.exit-accept {
+  border: 1px solid #d0a35e;
+  color: #fff0d2;
+  background: linear-gradient(145deg,#80552c,#4c2d18);
+}
+
+/* پنجره‌ها */
+.overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.dialog {
+  width: min(100%, 1100px);
+  max-height: 94vh;
+  max-height: 94dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #bd8a43;
+  border-radius: 14px;
+  background: #20130d;
+  box-shadow: 0 20px 70px #000;
+}
+
+.app-dialog {
+  height: 88vh;
+  height: 88dvh;
+  min-height: 0;
+}
+
+.dialog-head {
+  min-height: 52px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 13px;
+  background: linear-gradient(90deg,#553018,#24150d);
+  border-bottom: 1px solid #a8793e;
+  position: relative;
+  z-index: 2;
+}
+
+.dialog-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffe0a1;
+}
+
+.actions {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  border: 1px solid #c39755;
+  border-radius: 8px;
+  padding: 8px 11px;
+  color: #ffe9c2;
+  background: #58371d;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.action-btn:active {
+  transform: scale(.97);
+}
+
+/* iframe */
+#appFrame {
+  display: block;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: white;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* اعلان کوچک نسخه جدید؛ بالای تمام کتاب‌ها و بدون پوشاندن قفسه‌ها */
+.update-banner {
+  position: absolute;
+  z-index: 7;
+  top: 10.3%;
+  left: 8%;
+  width: 84%;
+  min-height: 6.4%;
+  padding: 5px 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #e0b66e;
+  border-radius: 12px;
+  color: #17345e;
+  text-align: center;
+  line-height: 1.25;
+  background: linear-gradient(180deg,#ffffff 0%,#dce8ff 100%);
+  box-shadow: 0 3px 10px #0008, inset 0 1px 0 #ffffff;
+}
+.update-banner[hidden] { display: none; }
+.update-banner-icon {
+  flex: 0 0 auto;
+  font-size: clamp(16px, 3.4vw, 25px);
+  line-height: 1;
+}
+.update-banner-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: 5px;
+  row-gap: 2px;
+}
+.update-banner-title {
+  color: #17345e;
+  font-size: clamp(9px, 2.1vw, 13px);
+  font-weight: bold;
+}
+.update-banner-version {
+  color: #294c7b;
+  font-size: clamp(8px, 1.8vw, 11px);
+  font-weight: bold;
+}
+.update-banner-notes,
+.update-banner-guide { display: none; }
+.update-banner-download {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid #168d27;
+  border-radius: 8px;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: clamp(8px, 1.9vw, 11px);
+  font-weight: bold;
+  line-height: 1.4;
+  background: linear-gradient(180deg,#20c83a,#07931e);
+  box-shadow: 0 2px 4px #0003;
+}
+.update-banner-close {
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 25px;
+  background: #aabbd5;
+}
+@media (max-width: 380px) {
+  .update-banner { left: 5%; width: 90%; gap: 5px; padding: 4px 6px; }
+  .update-banner-icon { display: none; }
+  .update-banner-download { padding: 4px 7px; }
+  .update-banner-close { width: 21px; height: 21px; line-height: 21px; }
+}
+
+/* بخش به‌روزرسانی */
+.update-entry {
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 13px 10px;
+  border: 1px solid #c39755;
+  border-radius: 10px;
+  color: #ffe9c2;
+  background: linear-gradient(145deg,#684323,#2b190f);
+  font-size: 13px;
+  font-weight: bold;
+}
+.update-content {
+  padding: 24px 20px 28px;
+  text-align: center;
+  color: #e5d3b7;
+  line-height: 2;
+  overflow-y: auto;
+}
+.update-version {
+  color: #f5d293;
+  font-weight: bold;
+  font-size: 17px;
+  margin: 8px 0;
+}
+.update-notes {
+  white-space: pre-wrap;
+  font-size: 13px;
+  margin: 12px 0 20px;
+}
+.update-download {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid #d0a35e;
+  border-radius: 9px;
+  color: #fff0d2;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: bold;
+  background: linear-gradient(145deg,#80552c,#4c2d18);
+}
+.update-download[hidden] { display: none; }
+
+/* درباره من */
+.about-content {
+  padding: 28px 20px 30px;
+  text-align: center;
+  line-height: 2.2;
+  overflow-y: auto;
+}
+
+.about-content h3 {
+  color: #f5d293;
+  font-size: 20px;
+  margin: 0 0 14px;
+}
+
+.about-content p {
+  color: #e5d3b7;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.about-content .developer {
+  color: #f4d49c;
+  font-size: 13px;
+  font-weight: bold;
+  direction: ltr;
+  display: block;
+  margin-top: 14px;
+}
+
+.email-link {
+  display: inline-block;
+  direction: ltr;
+  color: #f5d293;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #987044;
+  border-radius: 9px;
+  padding: 7px 13px;
+  margin-top: 5px;
+  background: linear-gradient(145deg,#54351e,#28170e);
+}
+
+.email-link:hover {
+  background: #80552c;
+}
+
+/* فهرست کتاب‌ها */
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.list-item {
+  padding: 12px 8px;
+  border: 1px solid #987044;
+  border-radius: 9px;
+  color: #ffe4b4;
+  background: linear-gradient(145deg,#54351e,#28170e);
+  font-size: 12px;
+  text-align: center;
+}
+
+.list-item:active {
+  background: #80552c;
+}
+
+/* موبایل */
+@media (max-width: 600px) {
+  .overlay {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .app-dialog {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    min-height: 0;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .app-dialog .dialog-head {
+    min-height: 54px;
+    padding-top: max(9px, env(safe-area-inset-top));
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .app-dialog .dialog-title {
+    font-size: 12px;
+  }
+
+  .app-dialog .action-btn {
+    padding: 7px 8px;
+    font-size: 10px;
+  }
+
+  #appFrame {
+    width: 100%;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 0;
+  }
+
+  .overlay:not(#appOverlay) {
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .overlay:not(#appOverlay) .dialog {
+    width: 100%;
+    max-height: 85vh;
+    max-height: 85dvh;
+  }
+
+  .book-list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 601px) {
+  .scene {
+    box-shadow: 0 0 50px #000;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- صفحه خوش‌آمدگویی -->
+<div class="splash-screen" id="splashScreen" role="status" aria-live="polite">
+  <div class="splash-emblem">
+    <div class="splash-book" aria-hidden="true">📖</div>
+  </div>
+
+  <h1 class="splash-title">درحال ورود به کتابخانه</h1>
+  <p class="splash-subtitle">کتابخانه‌ای از ابزارهای کاربردی</p>
+
+  <div class="splash-loader" aria-hidden="true">
+    <span></span>
+  </div>
+
+  <small class="splash-status">در حال آماده‌سازی کتابخانه...</small>
+</div>
+
+<main class="page">
+  <div class="scene">
+
+    <img
+      class="scene-image"
+      src="./library-bg.png"
+      alt="کتابخانه دیجیتال"
+      fetchpriority="high"
+      loading="eager"
+      decoding="async"
+      draggable="false"
+    >
+
+    <!-- اعلان نسخه جدید؛ فقط پس از انتشار تأییدشده نمایش داده می‌شود -->
+    <section class="update-banner" id="updateBanner" hidden aria-live="polite">
+      <span class="update-banner-icon" aria-hidden="true">🚀</span>
+      <div class="update-banner-copy">
+        <span class="update-banner-title" id="bannerTitle">نسخه جدید منتشر شد!</span>
+        <span class="update-banner-version" id="bannerVersion"></span>
+      </div>
+      <a class="update-banner-download" id="bannerDownload" href="#" target="_blank" rel="noopener noreferrer">⬇ دانلود نسخه جدید</a>
+      <button class="update-banner-close" type="button" aria-label="بستن اعلان" onclick="document.getElementById('updateBanner').hidden=true">×</button>
+    </section>
+
+    <!-- فهرست و درباره من -->
+    <button
+      class="hotspot list-hotspot"
+      type="button"
+      aria-label="فهرست کتاب‌ها"
+      onclick="showList()">
+    </button>
+
+    <button
+      class="hotspot about-hotspot"
+      type="button"
+      aria-label="درباره من"
+      onclick="showAbout()">
+    </button>
+
+    <!-- ردیف اول -->
+    <button class="hotspot book-1" type="button" aria-label="قرعه کشی" onclick="openBook(0)"></button>
+    <button class="hotspot book-2" type="button" aria-label="ماشین حساب" onclick="openBook(1)"></button>
+    <button class="hotspot book-3" type="button" aria-label="اطلس خودشناسی" onclick="openBook(2)"></button>
+    <button class="hotspot book-4" type="button" aria-label="عدد خوان" onclick="openBook(3)"></button>
+    <button class="hotspot book-5" type="button" aria-label="تاس دیجیتال" onclick="openBook(4)"></button>
+
+    <!-- ردیف دوم -->
+    <button class="hotspot book-6" type="button" aria-label="استودیو QR Code" onclick="openBook(5)"></button>
+    <button class="hotspot book-7" type="button" aria-label="استودیو رنگ" onclick="openBook(6)"></button>
+    <button class="hotspot book-8" type="button" aria-label="استخراج متن از عکس" onclick="openBook(7)"></button>
+    <button class="hotspot book-9" type="button" aria-label="مترجم چند زبانه" onclick="openBook(8)"></button>
+    <button class="hotspot book-10" type="button" aria-label="زبان‌های رمزی" onclick="openBook(9)"></button>
+
+    <!-- ردیف سوم -->
+    <button class="hotspot book-11" type="button" aria-label="آب و هوا" onclick="openBook(10)"></button>
+    <button class="hotspot book-12" type="button" aria-label="دانشنامه جهان شناسی" onclick="openBook(11)"></button>
+    <button class="hotspot book-13" type="button" aria-label="مرکز زمان" onclick="openBook(12)"></button>
+    <button class="hotspot book-14" type="button" aria-label="فاصله یاب" onclick="openBook(13)"></button>
+
+    <button class="exit-button" type="button" onclick="showExitConfirm()">
+      خروج از برنامه
+    </button>
+
+  </div>
+</main>
+
+<!-- تأیید خروج -->
+<div class="exit-confirm" id="exitConfirm" role="dialog" aria-modal="true" aria-labelledby="exitConfirmTitle">
+  <div class="exit-confirm-box">
+    <h2 class="exit-confirm-title" id="exitConfirmTitle">خروج از برنامه</h2>
+    <p class="exit-confirm-message">آیا مطمئن هستید که می‌خواهید از برنامه خارج شوید؟</p>
+    <div class="exit-confirm-actions">
+      <button class="exit-cancel" type="button" onclick="hideExitConfirm()">انصراف</button>
+      <button class="exit-accept" type="button" onclick="confirmExit()">خروج</button>
+    </div>
+  </div>
+</div>
+
+<!-- پنجره اجرای ابزارها -->
+<div class="overlay" id="appOverlay" onclick="outsideClose(event,'appOverlay')">
+  <div class="dialog app-dialog">
+    <div class="dialog-head">
+      <span class="dialog-title" id="appTitle">عنوان برنامه</span>
+
+      <div class="actions">
+        <button class="action-btn" type="button" onclick="closeApp()">
+          بستن ✕
+        </button>
+      </div>
+    </div>
+
+    <iframe
+      id="appFrame"
+      title="برنامه انتخاب‌شده"
+      allow="clipboard-read; clipboard-write; fullscreen">
+    </iframe>
+  </div>
+</div>
+
+<!-- فهرست کتاب‌ها -->
+<div class="overlay" id="listOverlay" onclick="outsideClose(event,'listOverlay')">
+  <div class="dialog">
+    <div class="dialog-head">
+      <span class="dialog-title">فهرست کتاب‌های من</span>
+
+      <button class="action-btn" type="button" onclick="hideList()">
+        بستن ✕
+      </button>
+    </div>
+
+    <div class="book-list" id="bookList"></div>
+    <div style="padding:0 15px 15px">
+      <button class="update-entry" type="button" onclick="showUpdate()">به‌روزرسانی برنامه</button>
+    </div>
+  </div>
+</div>
+
+<!-- پنجره به‌روزرسانی -->
+<div class="overlay" id="updateOverlay" onclick="outsideClose(event,'updateOverlay')">
+  <div class="dialog">
+    <div class="dialog-head">
+      <span class="dialog-title">به‌روزرسانی برنامه</span>
+      <button class="action-btn" type="button" onclick="hideUpdate()">بستن ✕</button>
+    </div>
+    <div class="update-content">
+      <div id="updateStatus">در حال بررسی نسخه‌های جدید...</div>
+      <div class="update-version" id="updateVersion" hidden></div>
+      <div class="update-notes" id="updateNotes" hidden></div>
+      <a class="update-download" id="updateDownload" href="#" target="_blank" rel="noopener noreferrer" hidden>دانلود نسخه جدید</a>
+    </div>
+  </div>
+</div>
+
+<!-- درباره من -->
+<div class="overlay" id="aboutOverlay" onclick="outsideClose(event,'aboutOverlay')">
+  <div class="dialog">
+    <div class="dialog-head">
+      <span class="dialog-title">درباره من</span>
+
+      <button class="action-btn" type="button" onclick="hideAbout()">
+        بستن ✕
+      </button>
+    </div>
+
+    <div class="about-content">
+      <h3>درباره من</h3>
+      <p>توسعه‌دهنده وب و طراح پروژه‌های دیجیتال</p>
+
+      <span class="developer">
+        Developer: Masoud delavar
+      </span>
+
+      <p>راه ارتباطی:</p>
+
+      <a class="email-link" href="mailto:masoud0098d@gmail.com">
+        masoud0098d@gmail.com
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const books = [
+  {
+    name: "قرعه کشی",
+    url: "tools/ghoree-keshi/index.html"
+  },
+  {
+    name: "ماشین حساب",
+    url: "tools/calculator/index.html"
+  },
+  {
+    name: "اطلس خودشناسی",
+    url: "tools/Khodshenasi-va-taghvim/index.html"
+  },
+  {
+    name: "عدد خوان",
+    url: "tools/adad-khan/index.html"
+  },
+  {
+    name: "تاس دیجیتال",
+    url: "tools/Taas/index.html"
+  },
+  {
+    name: "استودیو QR Code",
+    url: "tools/Qr.Code/index.html"
+  },
+  {
+    name: "استودیو رنگ",
+    url: "tools/Colors/index.html"
+  },
+  {
+    name: "استخراج متن از عکس",
+    url: "tools/Text-reader/index.html"
+  },
+  {
+    name: "مترجم چند زبانه",
+    url: "tools/dictionary/index.html"
+  },
+  {
+    name: "زبان‌های رمزی",
+    url: "tools/motarjeme-ramzi/index.html"
+  },
+  {
+    name: "آب و هوا",
+    url: "tools/weather/index.html"
+  },
+  {
+    name: "دانشنامه جهان‌شناسی",
+    url: "tools/Jaahaan-shenasi/index.html"
+  },
+  {
+    name: "مرکز زمان",
+    url: "tools/markaz-zaman/index.html"
+  },
+  {
+    name: "فاصله‌یاب",
+    url: "tools/fasle-yab/index.html"
+  }
+];
+
+let activeUrl = "";
+
+/* نمایش پنجره تأیید خروج */
+function showExitConfirm() {
+  document.getElementById("exitConfirm").classList.add("show");
+}
+
+/* بستن پنجره تأیید خروج */
+function hideExitConfirm() {
+  document.getElementById("exitConfirm").classList.remove("show");
+}
+
+/* تأیید خروج */
+function confirmExit() {
+  hideExitConfirm();
+
+  if (
+    window.AndroidApp &&
+    typeof window.AndroidApp.exitApp === "function"
+  ) {
+    window.AndroidApp.exitApp();
+  } else {
+    window.close();
+  }
+}
+
+/* بررسی نسخه جدید و نمایش اعلان بالای کتاب‌ها */
+async function checkUpdateBanner() {
+  const banner = document.getElementById("updateBanner");
+  const version = document.getElementById("bannerVersion");
+  const notes = document.getElementById("bannerNotes");
+  const download = document.getElementById("bannerDownload");
+
+  try {
+    const response = await fetch("./update.json?t=" + Date.now(), {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Update information unavailable");
+
+    const info = await response.json();
+    const validUrl = typeof info.downloadUrl === "string" &&
+      /^https:\/\//i.test(info.downloadUrl);
+
+    if (info.published === true && validUrl) {
+      version.textContent = info.version ? "نسخه " + info.version : "";
+      notes.textContent = info.releaseNotes || "";
+      download.href = info.downloadUrl;
+      banner.hidden = false;
+    } else {
+      banner.hidden = true;
+    }
+  } catch (error) {
+    banner.hidden = true;
+  }
+}
+
+/* مدیریت صفحه شروع */
+async function finishStartup() {
+  const splash = document.getElementById("splashScreen");
+  const image = document.querySelector(".scene-image");
+  const startedAt = Date.now();
+
+  try {
+    if (image && typeof image.decode === "function") {
+      await image.decode();
+    } else if (image && !image.complete) {
+      await new Promise(resolve => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      });
+    }
+  } catch (error) {
+    // در صورت خطای تصویر، صفحه اصلی همچنان باز می‌شود.
+  }
+
+  const remaining = Math.max(
+    0,
+    700 - (Date.now() - startedAt)
+  );
+
+  setTimeout(() => {
+    splash.classList.add("hide");
+    document.body.style.overflow = "";
+
+    setTimeout(() => {
+      splash.remove();
+    }, 500);
+  }, remaining);
+}
+
+/* بازکردن ابزار */
+function openBook(index) {
+  const book = books[index];
+
+  if (!book) return;
+
+  activeUrl = book.url;
+
+  document.getElementById("appTitle").textContent = book.name;
+
+  const frame = document.getElementById("appFrame");
+
+  frame.src = "about:blank";
+
+  document.getElementById("appOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+
+  requestAnimationFrame(() => {
+    frame.src = book.url;
+  });
+}
+
+/* بستن ابزار */
+function closeApp() {
+  document.getElementById("appOverlay").classList.remove("show");
+  document.getElementById("appFrame").src = "about:blank";
+  document.body.style.overflow = "";
+}
+
+/* بازکردن ابزار در مرورگر */
+function openExternal() {
+  if (activeUrl) {
+    window.open(activeUrl, "_blank", "noopener,noreferrer");
+  }
+}
+
+/* فهرست */
+function showList() {
+  document.getElementById("listOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function hideList() {
+  document.getElementById("listOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+/* پنجره به‌روزرسانی */
+function showUpdate() {
+  hideList();
+  document.getElementById("updateOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+  loadUpdateInfo();
+}
+
+function hideUpdate() {
+  document.getElementById("updateOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+async function loadUpdateInfo() {
+  const status = document.getElementById("updateStatus");
+  const version = document.getElementById("updateVersion");
+  const notes = document.getElementById("updateNotes");
+  const download = document.getElementById("updateDownload");
+
+  status.textContent = "در حال بررسی نسخه‌های جدید...";
+  version.hidden = true;
+  notes.hidden = true;
+  download.hidden = true;
+  download.removeAttribute("href");
+
+  try {
+    const response = await fetch("./update.json?t=" + Date.now(), {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Update information unavailable");
+
+    const info = await response.json();
+    const safeUrl = typeof info.downloadUrl === "string" &&
+      /^https:\/\//i.test(info.downloadUrl);
+
+    if (info.published === true && safeUrl) {
+      status.textContent = "نسخه جدیدی برای دریافت منتشر شده است.";
+      version.textContent = "نسخه " + (info.version || "جدید");
+      version.hidden = false;
+
+      if (info.releaseNotes) {
+        notes.textContent = info.releaseNotes;
+        notes.hidden = false;
+      }
+
+      download.href = info.downloadUrl;
+      download.hidden = false;
+    } else {
+      status.textContent = "در حال حاضر به‌روزرسانی جدیدی منتشر نشده است.";
+    }
+  } catch (error) {
+    status.textContent = "بررسی به‌روزرسانی ممکن نشد. لطفاً بعداً دوباره تلاش کنید.";
+  }
+}
+
+/* درباره من */
+function showAbout() {
+  document.getElementById("aboutOverlay").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function hideAbout() {
+  document.getElementById("aboutOverlay").classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+/* بستن با لمس بیرون پنجره */
+function outsideClose(event, id) {
+  if (event.target.id === id) {
+    if (id === "appOverlay") closeApp();
+    if (id === "listOverlay") hideList();
+    if (id === "aboutOverlay") hideAbout();
+    if (id === "updateOverlay") hideUpdate();
+  }
+}
+
+/* ساخت فهرست کتاب‌ها */
+function renderList() {
+  const container = document.getElementById("bookList");
+
+  books.forEach((book, index) => {
+    const button = document.createElement("button");
+
+    button.className = "list-item";
+    button.type = "button";
+    button.textContent = book.name;
+
+    button.addEventListener("click", () => {
+      hideList();
+      openBook(index);
+    });
+
+    container.appendChild(button);
+  });
+}
+
+/* کلید برگشت */
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeApp();
+    hideList();
+    hideAbout();
+    hideExitConfirm();
+  }
+});
+
+/* شروع برنامه */
+renderList();
+checkUpdateBanner();
+finishStartup();
+</script>
+
+</body>
+</html>

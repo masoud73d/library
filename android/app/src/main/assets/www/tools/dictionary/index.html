@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>مترجم چندزبانه</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:rgba(255,255,255,.075);--line:rgba(255,255,255,.14);--text:#f4f7ff;--muted:#aab4cc;--accent:#7c5cff;--accent2:#22d3ee}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Tahoma,Arial,sans-serif;color:var(--text);background:radial-gradient(ellipse at 15% 0%,#26336b 0,transparent 42%),radial-gradient(ellipse at 100% 50%,#123c55 0,transparent 35%),var(--bg);padding:18px}
+.wrap{max-width:850px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 20px}.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:25px;box-shadow:0 10px 30px #5145cd55}h1{font-size:22px;margin:0 0 5px}.sub{color:var(--muted);font-size:12px}.glass{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 20px 60px #0003;backdrop-filter:blur(18px)}.controls{padding:14px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}.field label{display:block;color:var(--muted);font-size:12px;margin:0 0 7px}select,textarea{width:100%;color:var(--text);background:#121a30;border:1px solid var(--line);border-radius:13px;padding:12px;font:inherit;outline:none}select:focus,textarea:focus{border-color:var(--accent2)}select{font-size:13px}.swap{border:1px solid var(--line);background:#ffffff12;color:white;border-radius:13px;width:44px;height:44px;font-size:22px;cursor:pointer;margin-top:17px}.editor{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.pane{padding:14px;min-width:0}.pane-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:13px;font-weight:bold}.hint{font-size:11px;color:var(--muted);font-weight:normal}textarea{height:210px;resize:vertical;line-height:1.8;font-size:15px}#output{background:#0e1729;color:#dce8ff;white-space:pre-wrap;overflow:auto}button{font-family:inherit;cursor:pointer;transition:transform .15s,filter .15s}button:active{transform:scale(.98)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{border:1px solid var(--line);background:#ffffff0d;color:var(--text);padding:10px 13px;border-radius:12px;font-size:12px}.btn.primary{background:linear-gradient(110deg,var(--accent),#4e7cff);border:0;font-weight:bold;padding:12px 20px;box-shadow:0 8px 25px #6d5df455}.btn:disabled{opacity:.55;cursor:wait}.status{font-size:12px;color:var(--muted);min-height:22px;margin-top:10px}.foot{color:var(--muted);font-size:11px;text-align:center;margin:16px 0 6px;line-height:1.8}.about{position:fixed;inset:0;background:#020617bb;display:none;align-items:center;justify-content:center;padding:20px;z-index:5}.about.show{display:flex}.modal{width:min(100%,380px);padding:22px;background:#121a30;border:1px solid var(--line);border-radius:22px;box-shadow:0 25px 80px #0008}.modal h2{font-size:18px;margin:0 0 18px}.about-text{direction:ltr;text-align:left;white-space:pre-line;line-height:2;font:14px monospace;color:#e5e7eb}.modal .btn{width:100%;margin-top:18px}.note{color:var(--muted);font-size:11px;line-height:1.8;margin-top:12px}
+@media(max-width:620px){body{padding:12px}.top{margin-bottom:14px}h1{font-size:19px}.editor{grid-template-columns:1fr}.controls{gap:7px;padding:10px}.swap{width:38px;height:42px}.pane{padding:12px}textarea{height:155px}.pane.output-pane textarea{height:155px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">文</div><div><h1>مترجم چندزبانه</h1><div class="sub">ترجمه سریع کلمه، جمله و متن</div></div></div>
+    <button class="btn" id="aboutBtn">درباره من</button>
+  </header>
+
+  <section class="glass controls">
+    <div class="field"><label for="sourceLang">ترجمه از</label><select id="sourceLang"><option value="auto">تشخیص خودکار زبان</option></select></div>
+    <button class="swap" id="swapBtn" title="جابه‌جایی زبان‌ها" aria-label="جابه‌جایی زبان‌ها">⇄</button>
+    <div class="field"><label for="targetLang">ترجمه به</label><select id="targetLang"></select></div>
+  </section>
+
+  <section class="editor">
+    <div class="glass pane">
+      <div class="pane-head"><span>متن شما</span><span class="hint" id="count">۰ کاراکتر</span></div>
+      <textarea id="input" placeholder="کلمه، جمله یا متن خود را اینجا بنویسید..." spellcheck="false"></textarea>
+      <div class="actions">
+        <button class="btn primary" id="translateBtn">ترجمه کن ✨</button>
+        <button class="btn" id="clearBtn">پاک کردن</button>
+        <button class="btn" id="pasteBtn">چسباندن</button>
+      </div>
+    </div>
+    <div class="glass pane output-pane">
+      <div class="pane-head"><span>ترجمه</span><span class="hint" id="resultLabel">آماده</span></div>
+      <textarea id="output" placeholder="نتیجه ترجمه اینجا نمایش داده می‌شود..." readonly></textarea>
+      <div class="actions">
+        <button class="btn" id="copyBtn">کپی ترجمه</button>
+        <button class="btn" id="useBtn">انتقال به متن شما</button>
+      </div>
+    </div>
+  </section>
+  <div class="status" id="status" role="status"></div>
+  <div class="foot">برای ترجمه به اینترنت نیاز دارید. متن از طریق سرویس ترجمه آنلاین ارسال می‌شود.</div>
+</div>
+
+<div class="about" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+  <div class="modal"><h2 id="aboutTitle">درباره من</h2><div class="about-text">developer: masoud delavar
+email: masoud0098d@gmail.com</div><button class="btn" id="closeAbout">بستن</button></div>
+</div>
+<script>
+const languages = [
+['فارسی','fa'],['انگلیسی','en'],['عربی','ar'],['آلمانی','de'],['فرانسوی','fr'],['اسپانیایی','es'],['ایتالیایی','it'],['پرتغالی','pt'],['روسی','ru'],['ترکی','tr'],['چینی ساده‌شده','zh'],['ژاپنی','ja'],['کره‌ای','ko'],['هندی','hi'],['اردو','ur'],['هلندی','nl'],['سوئدی','sv'],['نروژی','no'],['دانمارکی','da'],['فنلاندی','fi'],['یونانی','el'],['عبری','he'],['اندونزیایی','id'],['مالایی','ms'],['تایلندی','th'],['ویتنامی','vi'],['بنگالی','bn'],['اوکراینی','uk'],['لهستانی','pl'],['چکی','cs'],['رومانیایی','ro'],['مجارستانی','hu'],['بلغاری','bg'],['صربی','sr'],['کرواتی','hr'],['اسلواکی','sk'],['اسلوونیایی','sl'],['لتونیایی','lv'],['لیتوانیایی','lt'],['استونیایی','et'],['ایسلندی','is'],['ایرلندی','ga'],['ولزی','cy'],['آلبانیایی','sq'],['ارمنی','hy'],['گرجی','ka'],['آذربایجانی','az'],['قزاقی','kk'],['ازبکی','uz'],['پشتو','ps'],['کردی','ku'],['سواحیلی','sw'],['آفریکانس','af'],['امهری','am'],['نپالی','ne'],['تامیل','ta'],['تلوگو','te'],['مراتی','mr'],['گجراتی','gu'],['پنجابی','pa'],['کانادا','kn'],['مالایالم','ml'],['سینهالی','si'],['خِمِر','km'],['لائوسی','lo'],['برمه‌ای','my'],['لاتین','la'],['اسپرانتو','eo'],['باسکی','eu'],['کاتالان','ca'],['گالیسی','gl'],['بوسنیایی','bs'],['مقدونی','mk'],['بلاروسی','be'],['قرقیزی','ky'],['تاجیکی','tg'],['مغولی','mn'],['ییدیش','yi'],['لوکزامبورگی','lb'],['مالتی','mt'],['هاوسا','ha'],['یوروبا','yo'],['ایگبو','ig'],['زولو','zu'],['خوسا','xh'],['سومالیایی','so'],['مالاگاسی','mg'],['لینگالا','ln'],['فریزی','fy'],['گوارانی','gn'],['هاوایی','haw'],['ساموآیی','sm'],['مائوری','mi'],['فیلیپینی','tl'],['آلبانیایی','sq']
+];
+const source = document.getElementById('sourceLang'), target = document.getElementById('targetLang');
+for (const [name,code] of languages) {
+  const a = new Option(name,code); source.add(a);
+  target.add(new Option(name,code));
+}
+source.value='auto'; target.value='en';
+const input=document.getElementById('input'), output=document.getElementById('output');
+const status=document.getElementById('status'), translateBtn=document.getElementById('translateBtn');
+const count=document.getElementById('count'), resultLabel=document.getElementById('resultLabel');
+function setStatus(s){status.textContent=s}
+input.addEventListener('input',()=>{count.textContent=input.value.length.toLocaleString('fa-IR')+' کاراکتر'});
+async function translate(){
+ const text=input.value.trim();
+ if(!text){setStatus('لطفاً ابتدا متن یا کلمه‌ای وارد کنید.');input.focus();return}
+ if(text.length>4500){setStatus('برای پایداری بهتر، متن را به بخش‌های کوتاه‌تر تقسیم کنید (حداکثر ۴۵۰۰ کاراکتر).');return}
+ translateBtn.disabled=true; translateBtn.textContent='در حال ترجمه…'; resultLabel.textContent='در حال انجام'; setStatus('در حال اتصال به سرویس ترجمه…');
+ try{
+   const sl=source.value==='auto'?'auto':source.value, tl=target.value;
+   const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+encodeURIComponent(sl)+'&tl='+encodeURIComponent(tl)+'&dt=t&q='+encodeURIComponent(text);
+   const response=await fetch(url);
+   if(!response.ok) throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   const result=(data[0]||[]).map(part=>part[0]||'').join('');
+   if(!result) throw new Error('empty');
+   output.value=result; resultLabel.textContent='انجام شد'; setStatus('ترجمه آماده است.');
+ }catch(e){
+   resultLabel.textContent='ناموفق';
+   setStatus('ترجمه انجام نشد. اتصال اینترنت را بررسی کنید یا کمی بعد دوباره تلاش کنید. ممکن است سرویس در دسترس نباشد.');
+ }finally{translateBtn.disabled=false;translateBtn.textContent='ترجمه کن ✨'}
+}
+translateBtn.addEventListener('click',translate);
+input.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')translate()});
+document.getElementById('swapBtn').addEventListener('click',()=>{
+ if(source.value==='auto'){setStatus('برای جابه‌جایی، ابتدا زبان مبدأ را به‌جای تشخیص خودکار انتخاب کنید.');return}
+ const old=source.value;source.value=target.value;target.value=old;
+ const a=input.value;input.value=output.value;output.value=a;
+ count.textContent=input.value.length.toLocaleString('fa-IR')+' کاراکتر';setStatus('زبان‌ها جابه‌جا شدند.');
+});
+document.getElementById('clearBtn').addEventListener('click',()=>{input.value='';output.value='';count.textContent='۰ کاراکتر';resultLabel.textContent='آماده';setStatus('');input.focus()});
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+ if(!output.value){setStatus('هنوز ترجمه‌ای برای کپی وجود ندارد.');return}
+ try{await navigator.clipboard.writeText(output.value);setStatus('ترجمه کپی شد.')}
+ catch(e){output.focus();output.select();setStatus('متن ترجمه انتخاب شد؛ آن را کپی کنید.')}
+});
+document.getElementById('pasteBtn').addEventListener('click',async()=>{
+ try{input.value=await navigator.clipboard.readText();input.dispatchEvent(new Event('input'));setStatus('متن چسبانده شد.')}
+ catch(e){setStatus('اجازه دسترسی به کلیپ‌بورد داده نشد؛ متن را نگه دارید و چسباندن را انتخاب کنید.')}
+});
+document.getElementById('useBtn').addEventListener('click',()=>{if(!output.value){setStatus('ترجمه‌ای برای انتقال وجود ندارد.');return}input.value=output.value;input.dispatchEvent(new Event('input'));output.value='';resultLabel.textContent='آماده';setStatus('ترجمه به کادر متن منتقل شد.')});
+const modal=document.getElementById('aboutModal');
+document.getElementById('aboutBtn').addEventListener('click',()=>modal.classList.add('show'));
+document.getElementById('closeAbout').addEventListener('click',()=>modal.classList.remove('show'));
+modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('show')});
+</script>
+</body>
+</html>

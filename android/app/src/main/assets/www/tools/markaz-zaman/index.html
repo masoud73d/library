@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مرکز زمان</title>
+<style>
+:root{--bg1:#e8eeff;--bg2:#fbe9ff;--card:rgba(255,255,255,.65);--bd:rgba(80,80,160,.18);--tx:#1b1b3a;--mu:#5d5d86;--a:#6a5cff;--b:#00b4d8;--c:#ff4d8d;--blob:.45;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#0b0d24;--bg2:#1c0f3a;--card:rgba(255,255,255,.07);--bd:rgba(255,255,255,.14);--tx:#f1f1ff;--mu:#a5a8d0;--blob:.6;color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#0b0d24;--bg2:#1c0f3a;--card:rgba(255,255,255,.07);--bd:rgba(255,255,255,.14);--tx:#f1f1ff;--mu:#a5a8d0;--blob:.6;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:Vazirmatn,Tahoma,"Segoe UI",system-ui,sans-serif;color:var(--tx);background:linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;overflow-x:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:var(--blob);z-index:-1;animation:fl 14s ease-in-out infinite alternate}
+.b1{width:340px;height:340px;background:var(--a);top:-80px;right:-60px}
+.b2{width:300px;height:300px;background:var(--c);bottom:-80px;left:-60px;animation-delay:-5s}
+.b3{width:240px;height:240px;background:var(--b);top:45%;left:35%;animation-delay:-9s}
+@keyframes fl{to{transform:translate(60px,-50px) scale(1.25)}}
+header{text-align:center;padding:54px 16px 6px}
+h1{margin:0;font-size:clamp(26px,6vw,40px);background:linear-gradient(90deg,var(--a),var(--c),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mu);margin:6px 0 0;font-size:14px}
+.top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:5;border:1px solid var(--bd);background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--tx);border-radius:999px;padding:7px 13px;font:inherit;font-size:12px;cursor:pointer}
+#about{left:12px}#theme{right:12px}
+.top:hover{border-color:var(--a)}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:640px;margin:14px auto 10px;padding:0 14px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid var(--bd);background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--tx);padding:12px 6px;border-radius:18px;font:inherit;font-size:13px;cursor:pointer;transition:.25s}nav button span{font-size:22px;line-height:1}
+nav button.on{background:linear-gradient(135deg,var(--a),var(--c));color:#fff;border-color:transparent;box-shadow:0 8px 22px rgba(91,91,214,.4)}
+main{max-width:1000px;margin:0 auto;padding:6px 14px 40px}
+.panel{display:none;animation:in .45s ease}.panel.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 35px rgba(0,0,0,.12)}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:700px){.hero{grid-template-columns:1fr}}
+.big{font-family:ui-monospace,Consolas,monospace;direction:ltr;font-size:clamp(34px,9vw,54px);font-weight:700;letter-spacing:2px;text-align:center}
+.mu{color:var(--mu);font-size:13px;text-align:center}
+svg.an{width:190px;height:190px;display:block;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:14px}
+.city{cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+.city:hover,.city.sel{transform:translateY(-4px);border-color:var(--a);box-shadow:0 12px 30px rgba(106,92,255,.3)}
+.city .n{font-weight:700}.city .t{font-family:ui-monospace,Consolas,monospace;direction:ltr;font-size:28px;margin:6px 0;text-align:right}
+.city .g{display:inline-block;direction:ltr;font-size:12px;padding:3px 9px;border-radius:99px;background:linear-gradient(135deg,var(--a),var(--b));color:#fff}
+.city .ic{position:absolute;left:12px;top:10px;font-size:26px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center}
+select,input{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:12px;padding:9px 12px}
+.ringbox{position:relative;width:260px;height:260px;margin:6px auto 14px}
+.ringbox svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringbox .tr{fill:none;stroke:var(--bd);stroke-width:12}
+.ringbox .pg{fill:none;stroke:url(#g1);stroke-width:12;stroke-linecap:round;stroke-dasharray:565.5;stroke-dashoffset:565.5;transition:stroke-dashoffset .12s linear;filter:drop-shadow(0 0 8px var(--a))}
+.ringbox .big{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:36px;letter-spacing:0}
+.btn{border:0;padding:12px 26px;border-radius:14px;font:inherit;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--c));box-shadow:0 8px 20px rgba(106,92,255,.35);transition:.2s}
+.btn:active{transform:scale(.95)}
+.btn.g2{background:var(--card);color:var(--tx);border:1px solid var(--bd);box-shadow:none}
+.laps{max-height:220px;overflow:auto;margin-top:14px;padding:0;list-style:none;direction:ltr;font-family:ui-monospace,Consolas,monospace}
+.laps li{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--bd)}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 14px;border-radius:99px;cursor:pointer;font:inherit;font-size:13px}
+.chip.on,.chip:hover{border-color:var(--a);background:var(--a);color:#fff}
+.flash{animation:fs .5s 6 alternate}
+@keyframes fs{to{box-shadow:0 0 0 6px var(--c),0 0 50px var(--c)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal.on{display:flex}
+.mbox{max-width:360px;width:100%;background:var(--bg1);border:1px solid var(--bd);border-radius:22px;padding:24px;text-align:center;animation:in .3s}
+.mbox p{direction:ltr;margin:10px 0;font-size:15px}
+.mbox a{color:var(--a)}
+.av{width:70px;height:70px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,var(--a),var(--c));display:flex;align-items:center;justify-content:center;font-size:32px}
+.st{font-size:20px;margin:10px 0;text-align:center}
+:root{--a:#5b5bd6;--b:#22b8cf;--c:#c2410c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--a:#8b8bff;--b:#5eead4;--c:#f0abfc;--bg1:#0a0c1c;--bg2:#15122e}}
+:root[data-theme="dark"]{--a:#8b8bff;--b:#5eead4;--c:#f0abfc;--bg1:#0a0c1c;--bg2:#15122e}
+:root:not([data-theme="dark"]){--c:#9333ea}
+nav button.on,.btn{background:linear-gradient(135deg,var(--a),var(--c))}
+:root[data-theme="dark"] nav button.on,:root[data-theme="dark"] .btn{color:#10102a}
+.card{border-radius:24px}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6a5cff"/><stop offset=".5" stop-color="#ff4d8d"/><stop offset="1" stop-color="#00b4d8"/></linearGradient></defs></svg>
+
+<button class="top" id="about">👤 درباره من</button>
+<button class="top" id="theme">🌓 تم</button>
+
+<header><h1>⏱ مرکز زمان</h1><p class="sub">ساعت جهانی، استاپ‌واچ، تایمر، پومودورو و ابزارهای بیشتر</p></header>
+
+<nav id="nav">
+<button class="on" data-t="world"><span>🌍</span>ساعت جهانی</button>
+<button data-t="sw"><span>⏱</span>استاپ‌واچ</button>
+<button data-t="tm"><span>⏳</span>تایمر</button>
+<button data-t="pm"><span>🍅</span>پومودورو</button>
+<button data-t="al"><span>⏰</span>هشدار</button>
+<button data-t="dc"><span>🧮</span>محاسبه زمان</button>
+</nav>
+
+<main>
+<section class="panel on" id="world">
+ <div class="hero">
+  <div class="card"><div class="mu">زمان دستگاه شما</div><div class="big" id="local">--:--:--</div><div class="mu" id="ldate"></div><div class="mu" id="lgmt"></div></div>
+  <div class="card"><svg class="an" viewBox="-100 -100 200 200" id="analog"></svg><div class="mu" id="acity"></div></div>
+ </div>
+ <div class="card"><div class="row"><b>مقایسه اختلاف ساعت:</b><select id="ca"></select><span>⇄</span><select id="cb"></select></div><div class="st" id="cres"></div></div>
+ <div class="grid" id="cities"></div>
+</section>
+
+<section class="panel" id="sw"><div class="card">
+ <div class="ringbox"><svg viewBox="0 0 200 200"><circle class="tr" cx="100" cy="100" r="90"/><circle class="pg" id="swr" cx="100" cy="100" r="90"/></svg><div class="big" id="swt">00:00.00</div></div>
+ <div class="row"><button class="btn" id="sws">شروع</button><button class="btn g2" id="swl">دور</button><button class="btn g2" id="swx">ریست</button></div>
+ <ul class="laps" id="laps"></ul>
+</div></section>
+
+<section class="panel" id="tm"><div class="card" id="tmcard">
+ <div class="chips" id="tmch"></div>
+ <div class="row" style="margin-bottom:12px"><input id="th" type="number" min="0" max="99" value="0" style="width:72px"> ساعت <input id="tmi" type="number" min="0" max="59" value="5" style="width:72px"> دقیقه <input id="ts" type="number" min="0" max="59" value="0" style="width:72px"> ثانیه</div>
+ <div class="ringbox"><svg viewBox="0 0 200 200"><circle class="tr" cx="100" cy="100" r="90"/><circle class="pg" id="tmr" cx="100" cy="100" r="90"/></svg><div class="big" id="tmt">00:05:00</div></div>
+ <div class="row"><button class="btn" id="tms">شروع</button><button class="btn g2" id="tmx">ریست</button></div>
+</div></section>
+
+<section class="panel" id="pm"><div class="card" id="pmcard">
+ <div class="chips" id="pmch"><button class="chip on" data-m="25">🎯 تمرکز ۲۵</button><button class="chip" data-m="5">☕ استراحت ۵</button><button class="chip" data-m="15">🛋 استراحت بلند ۱۵</button></div>
+ <div class="ringbox"><svg viewBox="0 0 200 200"><circle class="tr" cx="100" cy="100" r="90"/><circle class="pg" id="pmr" cx="100" cy="100" r="90"/></svg><div class="big" id="pmt">25:00</div></div>
+ <div class="row"><button class="btn" id="pms">شروع</button><button class="btn g2" id="pmx">ریست</button></div>
+ <div class="st" id="pmc">🍅 جلسه‌های کامل‌شده: 0</div>
+</div></section>
+
+<section class="panel" id="al"><div class="card">
+ <div class="row"><b>ساعت هشدار:</b><input type="time" id="at" value="07:00"><button class="btn" id="aa">افزودن</button></div>
+ <ul class="laps" id="alist" style="direction:rtl"></ul>
+ <div class="mu">برای کار کردن هشدار، این صفحه باید باز بماند.</div>
+</div></section>
+
+<section class="panel" id="dc"><div class="card">
+ <div class="row"><b>فاصله تا تاریخ:</b><input type="datetime-local" id="dd"></div>
+ <div class="st" id="dres">یک تاریخ انتخاب کنید</div>
+ <hr style="border:0;border-top:1px solid var(--bd);margin:16px 0">
+ <div class="row"><b>تبدیل زمان:</b><input type="time" id="cv" value="12:00"><select id="cf"></select><span>←</span><select id="ct"></select></div>
+ <div class="st" id="cvr"></div>
+</div></section>
+</main>
+
+<div class="modal" id="modal"><div class="mbox"><div class="av">👨‍💻</div><b>درباره من</b><p>developer : Masoud delavar</p><p>email : <a href="mailto:masoud0098d@gmail.com">masoud0098d@gmail.com</a></p><button class="btn" id="mc">بستن</button></div></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const pad=n=>String(n).padStart(2,'0');
+const CITIES=[["تهران","Asia/Tehran","🇮🇷"],["لندن (گرینویچ)","Europe/London","🇬🇧"],["پاریس","Europe/Paris","🇫🇷"],["استانبول","Europe/Istanbul","🇹🇷"],["دبی","Asia/Dubai","🇦🇪"],["مسکو","Europe/Moscow","🇷🇺"],["دهلی","Asia/Kolkata","🇮🇳"],["پکن","Asia/Shanghai","🇨🇳"],["توکیو","Asia/Tokyo","🇯🇵"],["سیدنی","Australia/Sydney","🇦🇺"],["قاهره","Africa/Cairo","🇪🇬"],["نیویورک","America/New_York","🇺🇸"],["لس‌آنجلس","America/Los_Angeles","🇺🇸"],["تورنتو","America/Toronto","🇨🇦"],["سائوپائولو","America/Sao_Paulo","🇧🇷"]];
+function offMin(tz,d=new Date()){const p={};new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}).formatToParts(d).forEach(x=>p[x.type]=+x.value);return Math.round((Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second)-Math.floor(d/1000)*1000)/60000)}
+const gmt=m=>'GMT'+(m<0?'−':'+')+pad(Math.floor(Math.abs(m)/60))+':'+pad(Math.abs(m)%60);
+const hm=(tz,d,s)=>new Intl.DateTimeFormat('en-GB',{timeZone:tz,hourCycle:'h23',hour:'2-digit',minute:'2-digit',...(s?{second:'2-digit'}:{})}).format(d);
+const hourOf=(tz,d)=>+new Intl.DateTimeFormat('en-GB',{timeZone:tz,hourCycle:'h23',hour:'2-digit'}).format(d);
+
+/* tabs */
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;$$('#nav button').forEach(x=>x.classList.toggle('on',x===b));$$('.panel').forEach(p=>p.classList.toggle('on',p.id===t))};
+/* modal & theme */
+$('#about').onclick=()=>$('#modal').classList.add('on');$('#mc').onclick=()=>$('#modal').classList.remove('on');$('#modal').onclick=e=>{if(e.target.id=='modal')e.target.classList.remove('on')};
+$('#theme').onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark'};
+
+/* world clock */
+const grid=$('#cities');let sel=0;
+CITIES.forEach((c,i)=>{grid.insertAdjacentHTML('beforeend',`<div class="card city" data-i="${i}"><span class="ic"></span><div class="n">${c[2]} ${c[0]}</div><div class="t"></div><div class="mu" style="text-align:right"></div><span class="g"></span></div>`)});
+grid.onclick=e=>{const c=e.target.closest('.city');if(c){sel=+c.dataset.i;tick()}};
+['#ca','#cb','#cf','#ct'].forEach((id,k)=>$(id).innerHTML=CITIES.map((c,i)=>`<option value="${i}">${c[2]} ${c[0]}</option>`).join(''));
+$('#ca').value=0;$('#cb').value=11;$('#cf').value=0;$('#ct').value=11;
+const an=$('#analog');let h='<circle r="96" fill="none" stroke="var(--bd)" stroke-width="3"/>';
+for(let i=0;i<60;i++){const a=i*6*Math.PI/180,l=i%5?3:8;h+=`<line x1="${Math.sin(a)*(92-l)}" y1="${-Math.cos(a)*(92-l)}" x2="${Math.sin(a)*92}" y2="${-Math.cos(a)*92}" stroke="var(--mu)" stroke-width="${i%5?1:2.5}"/>`}
+h+='<line id="hh" y2="-48" stroke="var(--tx)" stroke-width="5" stroke-linecap="round"/><line id="mm" y2="-70" stroke="var(--a)" stroke-width="3.5" stroke-linecap="round"/><line id="ss" y2="-78" y1="12" stroke="var(--c)" stroke-width="1.8"/><circle r="5" fill="var(--c)"/>';an.innerHTML=h;
+function diffText(a,b,out){const d=offMin(CITIES[b][1])-offMin(CITIES[a][1]);const ab=Math.abs(d);out.textContent=d==0?'هر دو ساعت یکسان دارند':`${CITIES[b][0]} ${Math.floor(ab/60)} ساعت${ab%60?' و '+ab%60+' دقیقه':''} ${d>0?'جلوتر':'عقب‌تر'} از ${CITIES[a][0]} است`}
+function tick(){const n=new Date();
+ $('#local').textContent=n.toLocaleTimeString('en-GB');
+ $('#ldate').textContent=n.toLocaleDateString('fa-IR',{dateStyle:'full'});
+ $('#lgmt').textContent=Intl.DateTimeFormat().resolvedOptions().timeZone+' · '+gmt(-n.getTimezoneOffset());
+ $$('.city').forEach((el,i)=>{const [nm,tz]=CITIES[i],hr=hourOf(tz,n);el.classList.toggle('sel',i==sel);el.querySelector('.t').textContent=hm(tz,n,1);el.querySelector('.mu').textContent=n.toLocaleDateString('fa-IR',{timeZone:tz,weekday:'long',day:'numeric',month:'long'});el.querySelector('.g').textContent=gmt(offMin(tz,n));el.querySelector('.ic').textContent=hr>=6&&hr<18?'☀️':'🌙'});
+ const tz=CITIES[sel][1],p=hm(tz,n,1).split(':').map(Number);
+ $('#hh').style.transform=`rotate(${(p[0]%12)*30+p[1]/2}deg)`;$('#mm').style.transform=`rotate(${p[1]*6+p[2]/10}deg)`;$('#ss').style.transform=`rotate(${p[2]*6}deg)`;
+ $('#acity').textContent=CITIES[sel][2]+' '+CITIES[sel][0];
+ diffText(+$('#ca').value,+$('#cb').value,$('#cres'));
+ $('#cvr').textContent=convert();
+}
+function convert(){const [H,M]=$('#cv').value.split(':').map(Number);if(isNaN(H))return'';const f=+$('#cf').value,t=+$('#ct').value;let m=H*60+M+offMin(CITIES[t][1])-offMin(CITIES[f][1]);const day=Math.floor(m/1440);m=((m%1440)+1440)%1440;return `${pad(Math.floor(m/60))}:${pad(m%60)} در ${CITIES[t][0]}${day?(day>0?' (فردا)':' (دیروز)'):''}`}
+setInterval(tick,500);tick();
+
+/* audio */
+let ac,master,stopT;
+const AC=()=>{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state!='running')ac.resume();return ac};
+document.addEventListener('pointerdown',()=>{try{AC()}catch(e){}});
+const sb=document.createElement('button');sb.className='btn';sb.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 24px);z-index:60;display:none;font-size:18px;padding:16px 34px;animation:fs .5s infinite alternate';document.body.appendChild(sb);
+function stopRing(){clearTimeout(stopT);sb.style.display='none';if(master){try{master.gain.cancelScheduledValues(0);master.gain.value=0;master.disconnect()}catch(e){}master=null}}
+sb.onclick=stopRing;
+function tone(m,t,f,d){const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+t;o.type='square';o.frequency.value=f;o.connect(g);g.connect(m);g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(.9,s+.01);g.gain.setValueAtTime(.9,s+d-.03);g.gain.exponentialRampToValueAtTime(.0001,s+d);o.start(s);o.stop(s+d+.02)}
+function beep(n=8,label='🔕 توقف صدا'){try{AC();stopRing();master=ac.createGain();master.gain.value=1;master.connect(ac.destination);
+ for(let i=0;i<n;i++){const b=i*1.2;tone(master,b,1046,.18);tone(master,b+.25,1318,.18);tone(master,b+.5,1046,.18);tone(master,b+.75,1318,.3)}
+ sb.textContent=label;sb.style.display='block';stopT=setTimeout(stopRing,n*1200+300);if(navigator.vibrate)navigator.vibrate(Array(n).fill([400,300]).flat())}catch(e){}}
+const C=565.5;
+
+/* stopwatch */
+let sw={on:0,el:0,st:0,laps:[],last:0};
+const fmt=ms=>{const c=Math.floor(ms/10)%100,s=Math.floor(ms/1000)%60,m=Math.floor(ms/60000);return `${pad(m)}:${pad(s)}.${pad(c)}`};
+function swr(){const e=sw.el+(sw.on?performance.now()-sw.st:0);$('#swt').textContent=fmt(e);$('#swr').style.strokeDashoffset=C*(1-(e%60000)/60000);return e}
+setInterval(()=>{if(sw.on)swr()},40);
+$('#sws').onclick=()=>{if(sw.on){sw.el+=performance.now()-sw.st;sw.on=0;$('#sws').textContent='ادامه'}else{sw.st=performance.now();sw.on=1;$('#sws').textContent='توقف'}};
+$('#swl').onclick=()=>{if(!sw.on&&!sw.el)return;const e=swr();sw.laps.unshift([sw.laps.length+1,e-sw.last,e]);sw.last=e;$('#laps').innerHTML=sw.laps.map(l=>`<li><span>دور ${l[0]}</span><span>${fmt(l[1])}</span><span style="color:var(--mu)">${fmt(l[2])}</span></li>`).join('')};
+$('#swx').onclick=()=>{sw={on:0,el:0,st:0,laps:[],last:0};$('#laps').innerHTML='';$('#sws').textContent='شروع';swr()};
+
+/* countdown factory */
+function CD(o){const s={tot:0,left:0,on:0,end:0};
+ function draw(){const l=Math.max(0,s.left);o.txt.textContent=o.fmt(Math.ceil(l/1000));o.ring.style.strokeDashoffset=C*(1-(s.tot?l/s.tot:0))}
+ setInterval(()=>{if(!s.on)return;s.left=s.end-Date.now();if(s.left<=0){s.left=0;s.on=0;o.btn.textContent='شروع';draw();beep();o.card.classList.add('flash');setTimeout(()=>o.card.classList.remove('flash'),3200);o.done&&o.done()}else draw()},100);
+ return{set(sec){s.tot=s.left=sec*1000;s.on=0;o.btn.textContent='شروع';draw()},toggle(){if(s.on){s.on=0;o.btn.textContent='ادامه'}else{if(s.left<=0)return;s.end=Date.now()+s.left;s.on=1;o.btn.textContent='توقف'}},draw}}
+const f3=t=>`${pad(Math.floor(t/3600))}:${pad(Math.floor(t/60)%60)}:${pad(t%60)}`,f2=t=>`${pad(Math.floor(t/60))}:${pad(t%60)}`;
+const tmv=()=>(+$('#th').value||0)*3600+(+$('#tmi').value||0)*60+(+$('#ts').value||0);
+const tm=CD({txt:$('#tmt'),ring:$('#tmr'),btn:$('#tms'),card:$('#tmcard'),fmt:f3});
+tm.set(tmv());['#th','#tmi','#ts'].forEach(i=>$(i).oninput=()=>tm.set(tmv()));
+$('#tmch').innerHTML=[['۱ دقیقه',60],['۵ دقیقه',300],['۱۰ دقیقه',600],['۳۰ دقیقه',1800],['۱ ساعت',3600]].map(c=>`<button class="chip" data-s="${c[1]}">${c[0]}</button>`).join('');
+$('#tmch').onclick=e=>{const s=e.target.dataset.s;if(!s)return;$('#th').value=Math.floor(s/3600);$('#tmi').value=Math.floor(s/60)%60;$('#ts').value=s%60;tm.set(+s)};
+$('#tms').onclick=tm.toggle;$('#tmx').onclick=()=>tm.set(tmv());
+
+/* pomodoro */
+let pmM=25,pmN=0;
+const pm=CD({txt:$('#pmt'),ring:$('#pmr'),btn:$('#pms'),card:$('#pmcard'),fmt:f2,done(){if(pmM==25){pmN++;$('#pmc').textContent='🍅 جلسه‌های کامل‌شده: '+pmN}}});
+pm.set(1500);
+$('#pmch').onclick=e=>{const m=e.target.dataset.m;if(!m)return;pmM=+m;$$('#pmch .chip').forEach(c=>c.classList.toggle('on',c===e.target));pm.set(pmM*60)};
+$('#pms').onclick=pm.toggle;$('#pmx').onclick=()=>pm.set(pmM*60);
+
+/* alarms */
+let alarms=[];
+function rAl(){$('#alist').innerHTML=alarms.map((a,i)=>`<li><span>⏰ ${a.t}</span><button class="chip" data-i="${i}">حذف</button></li>`).join('')||'<li class="mu" style="justify-content:center">هشداری تنظیم نشده</li>'}
+$('#aa').onclick=()=>{alarms.push({t:$('#at').value,fired:''});rAl()};
+$('#alist').onclick=e=>{const i=e.target.dataset.i;if(i!=null){alarms.splice(i,1);rAl()}};
+setInterval(()=>{const n=new Date(),k=pad(n.getHours())+':'+pad(n.getMinutes());alarms.forEach(a=>{if(a.t==k&&a.fired!=k+n.getDate()){a.fired=k+n.getDate();beep(30,'⏰ هشدار '+a.t+' — توقف')}})},1000);rAl();
+
+/* date countdown + convert inputs */
+const dd=$('#dd');dd.oninput=dc;setInterval(dc,1000);
+function dc(){if(!dd.value)return;let d=new Date(dd.value)-Date.now(),neg=d<0;d=Math.abs(d)/1000|0;$('#dres').textContent=`${neg?'گذشته: ':'باقی‌مانده: '}${Math.floor(d/86400)} روز، ${Math.floor(d/3600)%24} ساعت، ${Math.floor(d/60)%60} دقیقه، ${d%60} ثانیه`}
+['#cv','#cf','#ct','#ca','#cb'].forEach(i=>$(i).oninput=tick);
+</script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import android.os.Message;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.webkit.WebViewAssetLoader;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.CookieManager;
@@ -27,7 +28,9 @@ public class MainActivity extends Activity {
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
     private static final String WEBSITE_URL =
-            "https://masoud73d.github.io/library/";
+            "https://appassets.androidplatform.net/assets/www/index.html";
+
+    private WebViewAssetLoader assetLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,10 @@ public class MainActivity extends Activity {
             window.setNavigationBarContrastEnforced(false);
         }
 
+        assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
+
         webView = new WebView(this);
         webView.setBackgroundColor(0xFF160A06);
         setContentView(webView);
@@ -65,7 +72,7 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
 
-        settings.setAllowFileAccess(true);
+        settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
 
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -80,6 +87,12 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidApp");
 
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public android.webkit.WebResourceResponse shouldInterceptRequest(
+                    WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
 
             @Override
             public boolean shouldOverrideUrlLoading(
