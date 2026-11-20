@@ -1023,6 +1023,36 @@ function confirmExit() {
   }
 }
 
+/* دریافت اطلاعات به‌روزرسانی از سایت و منبع پشتیبان گیت‌هاب */
+async function fetchUpdateInfo() {
+  const stamp = Date.now();
+  const sources = [
+    "./update.json?t=" + stamp,
+    "https://raw.githubusercontent.com/masoud73d/library/main/update.json?t=" + stamp
+  ];
+  let lastInfo = null;
+  let lastError = null;
+
+  for (const source of sources) {
+    try {
+      const response = await fetch(source, { cache: "no-store" });
+      if (!response.ok) throw new Error("Update source unavailable");
+      const info = await response.json();
+      lastInfo = info;
+
+      const validUrl = typeof info.downloadUrl === "string" &&
+        /^https:\/\//i.test(info.downloadUrl);
+
+      if (info.published === true && validUrl) return info;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastInfo) return lastInfo;
+  throw lastError || new Error("Update information unavailable");
+}
+
 /* بررسی نسخه جدید و نمایش اعلان بالای کتاب‌ها */
 async function checkUpdateBanner() {
   const banner = document.getElementById("updateBanner");
@@ -1031,12 +1061,7 @@ async function checkUpdateBanner() {
   const download = document.getElementById("bannerDownload");
 
   try {
-    const response = await fetch("./update.json?t=" + Date.now(), {
-      cache: "no-store"
-    });
-    if (!response.ok) throw new Error("Update information unavailable");
-
-    const info = await response.json();
+    const info = await fetchUpdateInfo();
     const validUrl = typeof info.downloadUrl === "string" &&
       /^https:\/\//i.test(info.downloadUrl);
 
@@ -1160,12 +1185,7 @@ async function loadUpdateInfo() {
   download.removeAttribute("href");
 
   try {
-    const response = await fetch("./update.json?t=" + Date.now(), {
-      cache: "no-store"
-    });
-    if (!response.ok) throw new Error("Update information unavailable");
-
-    const info = await response.json();
+    const info = await fetchUpdateInfo();
     const safeUrl = typeof info.downloadUrl === "string" &&
       /^https:\/\//i.test(info.downloadUrl);
 
