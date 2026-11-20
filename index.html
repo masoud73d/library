@@ -1053,7 +1053,38 @@ async function fetchUpdateInfo() {
   throw lastError || new Error("Update information unavailable");
 }
 
-/* بررسی نسخه جدید و نمایش اعلان بالای کتاب‌ها */
+/* مقایسه نسخه منتشرشده با نسخه نصب‌شده روی گوشی */
+function getInstalledAppVersion() {
+  try {
+    if (window.AndroidApp &&
+        typeof window.AndroidApp.getAppVersion === "function") {
+      return window.AndroidApp.getAppVersion();
+    }
+  } catch (error) {}
+  return null;
+}
+
+function isNewerVersion(latest, installed) {
+  if (!latest || !installed) return false;
+
+  const latestParts = String(latest).replace(/^v/i, "").split(".").map(Number);
+  const installedParts = String(installed).replace(/^v/i, "").split(".").map(Number);
+
+  if (latestParts.some(Number.isNaN) || installedParts.some(Number.isNaN)) {
+    return false;
+  }
+
+  const count = Math.max(latestParts.length, installedParts.length);
+  for (let i = 0; i < count; i++) {
+    const a = latestParts[i] || 0;
+    const b = installedParts[i] || 0;
+    if (a > b) return true;
+    if (a < b) return false;
+  }
+  return false;
+}
+
+/* بررسی نسخه جدید و نمایش اعلان فقط در صورت جدیدتر بودن آن */
 async function checkUpdateBanner() {
   const banner = document.getElementById("updateBanner");
   const version = document.getElementById("bannerVersion");
@@ -1061,11 +1092,13 @@ async function checkUpdateBanner() {
 
   try {
     const info = await fetchUpdateInfo();
+    const installedVersion = getInstalledAppVersion();
     const validUrl = typeof info.downloadUrl === "string" &&
       /^https:\/\//i.test(info.downloadUrl);
 
-    if (info.published === true && validUrl) {
-      version.textContent = info.version ? "نسخه " + info.version : "";
+    if (info.published === true && validUrl &&
+        isNewerVersion(info.version, installedVersion)) {
+      version.textContent = "نسخه " + info.version;
       download.href = info.downloadUrl;
       banner.hidden = false;
     } else {
@@ -1187,9 +1220,13 @@ async function loadUpdateInfo() {
     const safeUrl = typeof info.downloadUrl === "string" &&
       /^https:\/\//i.test(info.downloadUrl);
 
-    if (info.published === true && safeUrl) {
+    const installedVersion = getInstalledAppVersion();
+    const hasNewVersion = info.published === true && safeUrl &&
+      isNewerVersion(info.version, installedVersion);
+
+    if (hasNewVersion) {
       status.textContent = "نسخه جدیدی برای دریافت منتشر شده است.";
-      version.textContent = "نسخه " + (info.version || "جدید");
+      version.textContent = "نسخه " + info.version;
       version.hidden = false;
 
       if (info.releaseNotes) {
@@ -1199,6 +1236,9 @@ async function loadUpdateInfo() {
 
       download.href = info.downloadUrl;
       download.hidden = false;
+    } else if (installedVersion && info.version &&
+               !isNewerVersion(info.version, installedVersion)) {
+      status.textContent = "برنامه شما به‌روز است.";
     } else {
       status.textContent = "در حال حاضر به‌روزرسانی جدیدی منتشر نشده است.";
     }
