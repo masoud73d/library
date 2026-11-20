@@ -1096,8 +1096,13 @@ async function checkUpdateBanner() {
     const validUrl = typeof info.downloadUrl === "string" &&
       /^https:\/\//i.test(info.downloadUrl);
 
-    if (info.published === true && validUrl &&
-        isNewerVersion(info.version, installedVersion)) {
+    const isAndroidApp = !!(window.AndroidApp &&
+      typeof window.AndroidApp.exitApp === "function");
+    const needsUpdate = installedVersion
+      ? isNewerVersion(info.version, installedVersion)
+      : isAndroidApp;
+
+    if (info.published === true && validUrl && needsUpdate) {
       version.textContent = "نسخه " + info.version;
       download.href = info.downloadUrl;
       banner.hidden = false;
@@ -1221,8 +1226,12 @@ async function loadUpdateInfo() {
       /^https:\/\//i.test(info.downloadUrl);
 
     const installedVersion = getInstalledAppVersion();
-    const hasNewVersion = info.published === true && safeUrl &&
-      isNewerVersion(info.version, installedVersion);
+    const isAndroidApp = !!(window.AndroidApp &&
+      typeof window.AndroidApp.exitApp === "function");
+    const needsUpdate = installedVersion
+      ? isNewerVersion(info.version, installedVersion)
+      : isAndroidApp;
+    const hasNewVersion = info.published === true && safeUrl && needsUpdate;
 
     if (hasNewVersion) {
       status.textContent = "نسخه جدیدی برای دریافت منتشر شده است.";
