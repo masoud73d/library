@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.webkit.GeolocationPermissions;
 
 public class MainActivity extends Activity {
+    // Version-aware update banner release.
 
     private WebView webView;
     private WebView popupWebView;
