@@ -71,7 +71,8 @@ public class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setSupportMultipleWindows(true);
 
-        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        webView.clearCache(true);
 
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
@@ -197,7 +198,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        webView.loadUrl(WEBSITE_URL);
+        webView.loadUrl(WEBSITE_URL + "?refresh=" + System.currentTimeMillis());
     }
 
     private void openExternalUrl(Uri uri) {
