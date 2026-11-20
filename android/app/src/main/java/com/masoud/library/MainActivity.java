@@ -122,6 +122,7 @@ public class MainActivity extends Activity {
 
         webView.setWebChromeClient(new WebChromeClient() {
 
+            // Allow the weather page to request Android location permission through WebView.
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
                 if (origin == null || !origin.startsWith("https://masoud73d.github.io")) {
