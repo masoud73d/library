@@ -1057,7 +1057,6 @@ async function fetchUpdateInfo() {
 async function checkUpdateBanner() {
   const banner = document.getElementById("updateBanner");
   const version = document.getElementById("bannerVersion");
-  const notes = document.getElementById("bannerNotes");
   const download = document.getElementById("bannerDownload");
 
   try {
@@ -1067,7 +1066,6 @@ async function checkUpdateBanner() {
 
     if (info.published === true && validUrl) {
       version.textContent = info.version ? "نسخه " + info.version : "";
-      notes.textContent = info.releaseNotes || "";
       download.href = info.downloadUrl;
       banner.hidden = false;
     } else {
