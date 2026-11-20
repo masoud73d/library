@@ -6,6 +6,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -69,11 +72,41 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle --no-daemon --stacktrace :app:assembleDebug -PappVersionCode=${{ github.run_number }}
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: library-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Publish approved APK release and update in-app updater
+        if: contains(github.event.head_commit.message, '[publish-apk]')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="1.0.${GITHUB_RUN_NUMBER}"
+          TAG="v${VERSION}"
+          APK_SOURCE="android/app/build/outputs/apk/debug/app-debug.apk"
+          APK_NAME="library-${VERSION}.apk"
+          cp "$APK_SOURCE" "$APK_NAME"
+
+          gh release create "$TAG" "$APK_NAME#Library APK ${VERSION}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Library ${VERSION}" \
+            --notes "نسخه مستقل و امضاشده کتابخانه، آماده نصب و به‌روزرسانی."
+
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${APK_NAME}"
+          UPDATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          JSON="$(jq -n --arg version "$VERSION" --arg url "$DOWNLOAD_URL" --arg date "$UPDATED_AT" '{version:$version,published:true,downloadUrl:$url,releaseNotes:"انتشار نسخه جدید کتابخانه؛ بهبودها و اصلاحات ابزارها.",updatedAt:$date}')"
+          CONTENT="$(printf '%s' "$JSON" | base64 -w 0)"
+          FILE_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/contents/update.json" --jq '.sha')"
+
+          gh api "repos/${GITHUB_REPOSITORY}/contents/update.json" \
+            --method PUT \
+            -f message="Publish Library ${VERSION} in app updater [skip ci]" \
+            -f content="$CONTENT" \
+            -f sha="$FILE_SHA"
 
       - name: Remove signing key from runner
         if: always()
