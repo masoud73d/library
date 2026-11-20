@@ -259,6 +259,17 @@ public class MainActivity extends Activity {
     private class AndroidBridge {
 
         @JavascriptInterface
+        public String getAppVersion() {
+            try {
+                android.content.pm.PackageInfo packageInfo =
+                        getPackageManager().getPackageInfo(getPackageName(), 0);
+                return packageInfo.versionName != null ? packageInfo.versionName : "1.0.0";
+            } catch (Exception e) {
+                return "1.0.0";
+            }
+        }
+
+        @JavascriptInterface
         public void exitApp() {
             runOnUiThread(() -> finish());
         }
