@@ -17,12 +17,16 @@ import android.webkit.JavascriptInterface;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
+import android.webkit.GeolocationPermissions;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
     private WebView popupWebView;
     private ValueCallback<Uri[]> filePathCallback;
+    private GeolocationPermissions.Callback pendingGeoCallback;
+    private String pendingGeoOrigin;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1002;
 
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
@@ -54,6 +58,7 @@ public class MainActivity extends Activity {
         WebSettings settings = webView.getSettings();
 
         settings.setJavaScriptEnabled(true);
+        settings.setGeolocationEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
 
@@ -116,6 +121,23 @@ public class MainActivity extends Activity {
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                if (origin == null || !origin.startsWith("https://masoud73d.github.io")) {
+                    callback.invoke(origin, false, false);
+                    return;
+                }
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+                        || (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        || checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED)) {
+                    callback.invoke(origin, true, false);
+                } else {
+                    pendingGeoOrigin = origin;
+                    pendingGeoCallback = callback;
+                    requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+                }
+            }
 
             @Override
             public boolean onCreateWindow(
@@ -238,6 +260,20 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void exitApp() {
             runOnUiThread(() -> finish());
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && pendingGeoCallback != null) {
+            boolean granted = false;
+            for (int result : grantResults) {
+                if (result == android.content.pm.PackageManager.PERMISSION_GRANTED) { granted = true; break; }
+            }
+            pendingGeoCallback.invoke(pendingGeoOrigin, granted, false);
+            pendingGeoCallback = null;
+            pendingGeoOrigin = null;
         }
     }
 
