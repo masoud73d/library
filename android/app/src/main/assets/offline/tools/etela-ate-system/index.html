@@ -492,10 +492,7 @@
 
         </main>
 
-        <!-- Footer -->
-        <footer class="mt-6 text-center text-[11px] text-slate-500 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800/60 pt-4 w-full px-2">
-            طراحی شده با جداول فیکس ریسپانسیو • تمام اطلاعات به صورت محلی در دستگاه شما پردازش می‌شوند.
-        </footer>
+
 
     </div>
 
@@ -826,70 +823,118 @@
                 : (navigator.deviceMemory ? `حدود ${navigator.deviceMemory} GB` : 'محدود در مرورگر');
         }
 
-        // 3. Detailed Camera & Lens Scanning (With Permissions & Capabilities)
+        // 3. Camera reporting: use verified manufacturer specs for known models.
+        // Camera2 metadata may expose logical streams or processed arrays; it is not
+        // a definitive lens megapixel specification.
         async function scanCamerasDetailed() {
             const btn = document.getElementById('scan-cam-btn');
             const container = document.getElementById('camera-lenses-container');
             btn.disabled = true;
-            btn.textContent = 'در حال شناسایی مستقل دوربین‌ها...';
+            btn.textContent = 'در حال بررسی دوربین‌ها...';
             container.innerHTML = '';
             try {
+                const nativeInfo = readNativeDeviceInfo(true) || {};
+                const modelHints = [
+                    nativeInfo.model, nativeInfo.device, nativeInfo.product,
+                    navigator.userAgent || ''
+                ].join(' ').toUpperCase();
+
+                // Official specification for Redmi Note 13 Pro 5G, model family 2312DRA50.
+                const isRedmiNote13Pro5G =
+                    modelHints.includes('2312DRA50G') ||
+                    modelHints.includes('2312DRA50C') ||
+                    modelHints.includes('REDMI NOTE 13 PRO 5G');
+
+                if (isRedmiNote13Pro5G) {
+                    const verifiedCameras = [
+                        {name:'دوربین اصلی پشت',mp:'۲۰۰ مگاپیکسل',detail:'OIS • f/1.65'},
+                        {name:'دوربین فوق‌عریض پشت',mp:'۸ مگاپیکسل',detail:'زاویه دید ۱۱۸٫۲ درجه • f/2.2'},
+                        {name:'دوربین ماکرو پشت',mp:'۲ مگاپیکسل',detail:'f/2.4'},
+                        {name:'دوربین سلفی',mp:'۱۶ مگاپیکسل',detail:'f/2.45'}
+                    ];
+                    verifiedCameras.forEach(cam => {
+                        container.insertAdjacentHTML('beforeend', `
+                          <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
+                            <div class="font-bold text-xs text-rose-600 dark:text-rose-400 mb-1">${cam.name}</div>
+                            <div class="text-sm font-bold">${cam.mp}</div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400">${cam.detail}</div>
+                          </div>`);
+                    });
+                    document.getElementById('media-counts').textContent = '۳ دوربین پشت + ۱ دوربین سلفی';
+                    container.insertAdjacentHTML('beforeend',
+                        '<p class="text-[11px] text-slate-500 dark:text-slate-400 text-center p-2">مشخصات این مدل بر اساس اطلاعات رسمی سازنده است؛ داده‌های Camera2 برای شمارش لنزها جایگزین مشخصات رسمی نشده‌اند.</p>');
+                    btn.textContent = '✓ بررسی مشخصات کامل شد (بررسی مجدد)';
+                    return;
+                }
+
                 if (window.AndroidApp && typeof AndroidApp.getCameraHardwareInfo === 'function') {
-                    const nativeCameras = JSON.parse(AndroidApp.getCameraHardwareInfo() || '[]');
-                    if (nativeCameras.length) {
-                        nativeCameras.forEach((cam, index) => {
+                    const allCameras = JSON.parse(AndroidApp.getCameraHardwareInfo() || '[]');
+                    if (allCameras.length) {
+                        const physicalCameras = allCameras.filter(c => c.physical);
+                        const camerasToShow = physicalCameras.length
+                            ? physicalCameras
+                            : allCameras.filter(c => !c.physical);
+
+                        camerasToShow.forEach((cam, index) => {
                             const facing = cam.facing === 1 ? 'جلو' : cam.facing === 0 ? 'پشت' : 'نامشخص';
                             const focalValues = cam.focalLengthsMm || [];
-                            const name = cam.facing === 1 ? 'دوربین سلفی' :
-                                (focalValues.length ? (Math.min(...focalValues) < 2.2 ? 'اولتراواید' :
-                                 Math.max(...focalValues) > 4.5 ? 'تله‌فوتو' : 'دوربین اصلی') : 'دوربین ' + (index + 1));
                             const focal = focalValues.length ? focalValues.join(' / ') + ' mm' : 'نامشخص';
-                            const mp = cam.megapixels ? cam.megapixels + ' مگاپیکسل' : 'نامشخص';
+                            const mp = cam.megapixels ? cam.megapixels + ' مگاپیکسل (گزارش Camera2)' : 'نامشخص';
                             const sensor = cam.sensorWidthMm ? cam.sensorWidthMm + ' × ' + cam.sensorHeightMm + ' mm' : 'نامشخص';
+                            const title = cam.physical
+                                ? 'اطلاعات سنسور فیزیکی ' + (index + 1)
+                                : (cam.facing === 1 ? 'دوربین سلفی (منطقی)' : 'دوربین پشت (منطقی)');
                             container.insertAdjacentHTML('beforeend', `
                               <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
                                 <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
-                                  <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${name} — ${facing}</span>
-                                  <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">${cam.physical ? 'لنز فیزیکی مستقل' : 'دوربین منطقی'}</span>
+                                  <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${title} — ${facing}</span>
+                                  <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">${cam.physical ? 'شناسه سنسور فیزیکی' : 'دوربین منطقی'}</span>
                                 </div>
                                 <table class="sys-table text-xs"><tbody>
-                                  <tr class="table-row-custom"><td class="text-slate-500">شناسه دوربین:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
-                                  <tr class="table-row-custom"><td class="text-slate-500">رزولوشن سنسور:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'} (${mp})</td></tr>
-                                  <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">شناسه:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">آرایه پیکسلی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'} (${mp})</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
                                   <tr class="table-row-custom"><td class="text-slate-500">ابعاد سنسور:</td><td class="font-semibold text-left dir-ltr">${sensor}</td></tr>
                                 </tbody></table>
                               </div>`);
                         });
-                        document.getElementById('media-counts').textContent = nativeCameras.length + ' دوربین قابل‌شناسایی در Camera2';
-                        if (!nativeCameras.some(c => c.physical)) {
-                            container.insertAdjacentHTML('beforeend', '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">اندروید این گوشی لنزهای فیزیکی را جداگانه در اختیار برنامه نگذاشته؛ اطلاعات بالا مربوط به دوربین‌هایی است که سیستم گزارش کرده است.</p>');
-                        }
+                        document.getElementById('media-counts').textContent =
+                            camerasToShow.length + ' رکورد سخت‌افزاری Camera2';
+                        container.insertAdjacentHTML('beforeend',
+                            '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">اعداد Camera2 ممکن است مربوط به آرایه پردازش‌شده یا دوربین منطقی باشند؛ نوع لنز و مگاپیکسل واقعی فقط با مشخصات معتبر سازنده قابل تأیید است.</p>');
                         btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
                         return;
                     }
                 }
+
                 const permissionStream = await navigator.mediaDevices.getUserMedia({video:true});
                 permissionStream.getTracks().forEach(t => t.stop());
                 const devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
                 document.getElementById('media-counts').textContent = devices.length + ' ورودی ویدیویی مرورگر';
                 for (let i = 0; i < devices.length; i++) {
-                    const dev = devices[i]; let stream = null;
+                    const dev = devices[i];
+                    let stream = null;
                     try {
                         stream = await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:dev.deviceId}}});
-                        const track = stream.getVideoTracks()[0], caps = track.getCapabilities ? track.getCapabilities() : {}, settings = track.getSettings ? track.getSettings() : {};
-                        const w = caps.width ? caps.width.max : settings.width || 'نامشخص', h = caps.height ? caps.height.max : settings.height || 'نامشخص';
-                        const mp = typeof w === 'number' && typeof h === 'number' ? ((w*h)/1e6).toFixed(1)+' MP' : 'نامشخص';
-                        container.insertAdjacentHTML('beforeend', `<div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-xs"><b>${dev.label || 'دوربین '+(i+1)}</b><p>رزولوشن: ${w} × ${h} (${mp})</p><p>شناسه: <span dir="ltr">${dev.deviceId}</span></p></div>`);
+                        const track = stream.getVideoTracks()[0];
+                        const settings = track && track.getSettings ? track.getSettings() : {};
+                        const w = settings.width || 'نامشخص';
+                        const h = settings.height || 'نامشخص';
+                        container.insertAdjacentHTML('beforeend', `<div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-xs"><b>${dev.label || 'ورودی دوربین '+(i+1)}</b><p>ابعاد تصویر قابل دریافت: ${w} × ${h}</p><p class="text-slate-500">مرورگر تعداد مگاپیکسل واقعی سنسور را اعلام نمی‌کند.</p></div>`);
                     } catch(e) {
-                        container.insertAdjacentHTML('beforeend', `<p class="text-xs text-amber-600">اطلاعات ${dev.label || 'دوربین '+(i+1)} در دسترس نیست.</p>`);
-                    } finally { if (stream) stream.getTracks().forEach(t => t.stop()); }
+                        container.insertAdjacentHTML('beforeend', `<p class="text-xs text-amber-600">اطلاعات ${dev.label || 'ورودی دوربین '+(i+1)} در دسترس نیست.</p>`);
+                    } finally {
+                        if (stream) stream.getTracks().forEach(t => t.stop());
+                    }
                 }
                 if (!devices.length) container.textContent = 'هیچ ورودی دوربینی توسط مرورگر شناسایی نشد.';
                 btn.textContent = '✓ اسکن کامل شد (اسکن مجدد)';
             } catch (err) {
                 container.innerHTML = `<p class="text-xs text-rose-500 text-center">اسکن دوربین‌ها ناموفق بود: ${err.message || 'خطای دسترسی'}</p>`;
                 btn.textContent = 'تلاش مجدد برای اسکن';
-            } finally { btn.disabled = false; }
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         // 4. Sensors & Hardware Probing
