@@ -109,6 +109,8 @@ jobs:
           curl -fLsS https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js -o "$ROOT/vendor/zxing.min.js"
           curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js -o "$ROOT/vendor/tesseract.min.js"
           curl -fLsS https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css -o "$ROOT/vendor/all.min.css"
+          sed -i 's#../webfonts/#webfonts/#g' "$ROOT/vendor/all.min.css"
+          curl -fLsS https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json -o "$ROOT/tools/etela-ate-system-/devices.json"
           mkdir -p "$ROOT/vendor/webfonts"
           for font in fa-solid-900.woff2 fa-regular-400.woff2 fa-brands-400.woff2; do
             curl -fLsS "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/$font" -o "$ROOT/vendor/webfonts/$font"
@@ -118,6 +120,7 @@ jobs:
           sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js#../../vendor/three.min.js#g' "$ROOT/tools/darooshenas/index.html"
           sed -i 's#https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js#../../vendor/qr-code-styling.js#g; s#https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js#../../vendor/JsBarcode.all.min.js#g; s#https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js#../../vendor/zxing.min.js#g' "$ROOT/tools/Qr.Code/index.html"
           sed -i 's#https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js#../../vendor/tesseract.min.js#g' "$ROOT/tools/Text-reader/index.html"
+          sed -i "s#https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json#./devices.json#g" "$ROOT/tools/etela-ate-system-/index.html"
           # Remove optional remote font imports; Android system fonts are used as fallback.
           sed -i '/fonts.googleapis.com/d; /fonts.gstatic.com/d; /Vazirmatn-font-face.css/d' "$ROOT/tools/"*/index.html
           sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css#../../vendor/all.min.css#g; s#https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css#../../vendor/all.min.css#g' "$ROOT/tools/"*/index.html
