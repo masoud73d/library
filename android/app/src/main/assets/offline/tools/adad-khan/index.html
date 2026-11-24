@@ -1,0 +1,528 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1220">
+<title>تبدیل عدد به حروف فارسی</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px 14px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, #25345b, transparent 40%),
+    #0b1220;
+  color: #f3f6fc;
+  font-family: Tahoma, Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  width: 100%;
+  max-width: 650px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.logo {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  font-size: 27px;
+  font-weight: bold;
+  color: #101827;
+  background: linear-gradient(135deg, #9db4ff, #b6a1ff);
+}
+
+h1 {
+  font-size: 26px;
+  margin: 0 0 12px;
+}
+
+.subtitle {
+  color: #a8b4c8;
+  font-size: 13px;
+  line-height: 2;
+}
+
+.card {
+  background: rgba(20, 31, 51, 0.95);
+  border: 1px solid #ffffff18;
+  border-radius: 25px;
+  padding: 24px;
+  box-shadow: 0 20px 60px #0005;
+}
+
+label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 18px;
+  border-radius: 15px;
+  border: 1px solid #ffffff20;
+  outline: none;
+  background: #0d1728;
+  color: white;
+  font: 19px Tahoma, Arial, sans-serif;
+  direction: ltr;
+  text-align: left;
+}
+
+input:focus {
+  border-color: #9db4ff;
+}
+
+.hint {
+  color: #a8b4c8;
+  font-size: 12px;
+  line-height: 2;
+  margin-top: 10px;
+}
+
+.result-title {
+  margin: 25px 0 12px;
+  font-size: 14px;
+}
+
+.result {
+  min-height: 110px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #0d1728;
+  border: 1px solid #ffffff15;
+  line-height: 2.2;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.placeholder {
+  color: #77869d;
+  font-size: 14px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+button {
+  border: 0;
+  border-radius: 13px;
+  padding: 14px 10px;
+  font-family: Tahoma, Arial, sans-serif;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(.98);
+}
+
+.main-button {
+  background: linear-gradient(135deg, #9db4ff, #b6a1ff);
+  color: #101827;
+}
+
+.secondary {
+  background: #25334b;
+  border: 1px solid #ffffff12;
+  color: #f3f6fc;
+}
+
+.examples {
+  margin-top: 25px;
+}
+
+.examples h2 {
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.example {
+  background: #25334b;
+  color: #e2eaff;
+  border: 1px solid #ffffff12;
+  border-radius: 30px;
+  padding: 10px 13px;
+  font-size: 12px;
+}
+
+.footer {
+  color: #77869d;
+  font-size: 11px;
+  text-align: center;
+  line-height: 2;
+  margin-top: 20px;
+}
+
+/* پنجره درباره برنامه */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, .75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.about-box {
+  width: 100%;
+  max-width: 430px;
+  padding: 25px;
+  border-radius: 22px;
+  background: #192740;
+  border: 1px solid #ffffff25;
+  color: white;
+  direction: ltr;
+  text-align: left;
+  font: 16px/2 Tahoma, Arial, sans-serif;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  box-shadow: 0 20px 60px #0007;
+}
+
+@media (max-width: 420px) {
+  .card {
+    padding: 18px;
+  }
+
+  .buttons {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .buttons button:first-child {
+    grid-column: 1 / -1;
+  }
+
+  h1 {
+    font-size: 23px;
+  }
+}
+
+/* MASOUD_VISUAL_REDESIGN_V1 */
+body{background:radial-gradient(circle at 50% 0%,#146b55,transparent 42%),linear-gradient(145deg,#061c19,#092c27 55%,#041512)!important;color:#effff8!important}.card,.result,.example-list,.examples{background:linear-gradient(145deg,#10483d,#092c27)!important;border-color:#2a9277!important;box-shadow:0 18px 48px #001b16aa!important}.logo,.main-button{background:linear-gradient(135deg,#7be0b2,#1a9d78)!important;color:#06291f!important}button{background:linear-gradient(135deg,#16896c,#0b5949)!important;color:#effff8!important;border:1px solid #42b994!important}input{background:#06231e!important;border-color:#27866c!important;color:#eafff5!important}h1,.result-title{color:#a7f2d0!important}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+  <header class="header">
+    <div class="logo">۱۲۳</div>
+    <h1>تبدیل عدد به حروف فارسی</h1>
+    <div class="subtitle">
+      عدد دلخواهت را وارد کن تا به حروف فارسی تبدیل شود.
+    </div>
+  </header>
+
+  <section class="card">
+
+    <label for="numberInput">عدد موردنظر را وارد کن</label>
+
+    <input
+      id="numberInput"
+      type="text"
+      inputmode="decimal"
+      autocomplete="off"
+      placeholder="مثلاً 123456789"
+    >
+
+    <div class="hint">
+      اعداد فارسی و انگلیسی پشتیبانی می‌شوند.
+      برای اعداد اعشاری از نقطه استفاده کن.
+    </div>
+
+    <div class="result-title">● نتیجه به حروف</div>
+
+    <div class="result" id="result" aria-live="polite">
+      <span class="placeholder">
+        نتیجه اینجا نمایش داده می‌شود...
+      </span>
+    </div>
+
+    <div class="buttons">
+      <button class="main-button" id="copyBtn">
+        کپی نتیجه
+      </button>
+
+      <button class="secondary" id="clearBtn">
+        پاک کردن
+      </button>
+
+      <button class="secondary" id="aboutBtn">
+        درباره برنامه
+      </button>
+    </div>
+
+    <div class="examples">
+      <h2>برای امتحان، یکی را انتخاب کن</h2>
+
+      <div class="example-list">
+        <button class="example" data-num="13">۱۳</button>
+        <button class="example" data-num="1250">۱٬۲۵۰</button>
+        <button class="example" data-num="1000000">یک میلیون</button>
+        <button class="example" data-num="123.45">۱۲۳٫۴۵</button>
+        <button class="example" data-num="987654321012345678901234567890">
+          عدد خیلی بزرگ
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <div class="footer">
+    تبدیل اعداد در مرورگر انجام می‌شود و به اینترنت نیاز ندارد.
+  </div>
+
+</main>
+
+<script>
+const input = document.getElementById("numberInput");
+const result = document.getElementById("result");
+
+const ones = [
+  "صفر", "یک", "دو", "سه", "چهار",
+  "پنج", "شش", "هفت", "هشت", "نه"
+];
+
+const teens = [
+  "ده", "یازده", "دوازده", "سیزده", "چهارده",
+  "پانزده", "شانزده", "هفده", "هجده", "نوزده"
+];
+
+const tens = [
+  "", "", "بیست", "سی", "چهل",
+  "پنجاه", "شصت", "هفتاد", "هشتاد", "نود"
+];
+
+const hundreds = [
+  "", "یکصد", "دویست", "سیصد", "چهارصد",
+  "پانصد", "ششصد", "هفتصد", "هشتصد", "نهصد"
+];
+
+const scales = [
+  "", "هزار", "میلیون", "میلیارد", "تریلیون",
+  "کوادریلیون", "کوینتیلیون", "سکستیلیون",
+  "سپتیلیون", "اکتیلیون", "نونیلیون",
+  "دسیلیون", "آندسیلیون", "دودسیلیون",
+  "تریدسیلیون", "کواتوردسیلیون", "کویندسیلیون",
+  "سکسدسیلیون", "سپتندسیلیون", "اکتودسیلیون",
+  "نودسیلیون", "ویجینتیلیون"
+];
+
+function normalizeDigits(text) {
+  const fa = "۰۱۲۳۴۵۶۷۸۹";
+  const ar = "٠١٢٣٤٥٦٧٨٩";
+
+  return text
+    .replace(/[۰-۹]/g, d => fa.indexOf(d))
+    .replace(/[٠-٩]/g, d => ar.indexOf(d))
+    .replace(/[٬،,]/g, "")
+    .replace(/٫/g, ".")
+    .replace(/\s+/g, "");
+}
+
+function underThousand(number) {
+  if (number === 0) return "";
+
+  const parts = [];
+  const h = Math.floor(number / 100);
+  const rest = number % 100;
+
+  if (h) parts.push(hundreds[h]);
+
+  if (rest >= 10 && rest < 20) {
+    parts.push(teens[rest - 10]);
+  } else {
+    const t = Math.floor(rest / 10);
+    const o = rest % 10;
+
+    if (t) parts.push(tens[t]);
+    if (o) parts.push(ones[o]);
+  }
+
+  return parts.join(" و ");
+}
+
+function integerToWords(digits) {
+  digits = digits.replace(/^0+(?=\d)/, "");
+
+  if (!digits || /^0+$/.test(digits)) {
+    return "صفر";
+  }
+
+  const groups = [];
+
+  for (let end = digits.length; end > 0; end -= 3) {
+    groups.push(
+      digits.slice(Math.max(0, end - 3), end)
+    );
+  }
+
+  if (groups.length > scales.length) {
+    return "عدد واردشده بیش از محدوده این نسخه است.";
+  }
+
+  const parts = [];
+
+  for (let i = groups.length - 1; i >= 0; i--) {
+    const number = Number(groups[i]);
+
+    if (number === 0) continue;
+
+    let phrase = underThousand(number);
+
+    if (i > 0) {
+      phrase += " " + scales[i];
+    }
+
+    parts.push(phrase);
+  }
+
+  return parts.join(" و ");
+}
+
+function numberToWords(raw) {
+  let text = normalizeDigits(raw);
+
+  if (!text) return "";
+
+  let sign = "";
+
+  if (text.startsWith("-") || text.startsWith("+")) {
+    if (text.startsWith("-")) sign = "منفی ";
+    text = text.slice(1);
+  }
+
+  if (!/^\d+(\.\d*)?$/.test(text)) {
+    return "لطفاً یک عدد معتبر وارد کن.";
+  }
+
+  const parts = text.split(".");
+  let words = integerToWords(parts[0]);
+
+  if (words.startsWith("عدد واردشده")) {
+    return words;
+  }
+
+  if (parts.length === 2 && parts[1].length > 0) {
+    const decimalWords = parts[1]
+      .split("")
+      .map(digit => ones[Number(digit)])
+      .join(" و ");
+
+    words += " ممیز " + decimalWords;
+  } else if (parts.length === 2) {
+    words += " ممیز";
+  }
+
+  return sign + words;
+}
+
+function updateResult() {
+  const value = input.value.trim();
+
+  if (!value) {
+    result.innerHTML =
+      '<span class="placeholder">نتیجه اینجا نمایش داده می‌شود...</span>';
+    return;
+  }
+
+  result.textContent = numberToWords(value);
+}
+
+input.addEventListener("input", updateResult);
+
+document.querySelectorAll("[data-num]").forEach(button => {
+  button.addEventListener("click", () => {
+    input.value = button.dataset.num;
+    updateResult();
+  });
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  input.value = "";
+  updateResult();
+  input.focus();
+});
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  if (!input.value.trim()) {
+    alert("اول یک عدد وارد کن.");
+    return;
+  }
+
+  const text = result.innerText.trim();
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("نتیجه کپی شد.");
+  } catch (error) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    textarea.remove();
+    alert("نتیجه کپی شد.");
+  }
+});
+
+/* بخش درباره برنامه: فقط دو خط موردنظر */
+document.getElementById("aboutBtn").addEventListener("click", () => {
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+
+  const box = document.createElement("div");
+  box.className = "about-box";
+
+  box.textContent =
+    "developer: masoud delavar" +
+    String.fromCharCode(10) +
+    "email: masoud0098d@gmail.com";
+
+  overlay.appendChild(box);
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) {
+      overlay.remove();
+    }
+  });
+
+  document.body.appendChild(overlay);
+});
+</script>
+
+</body>
+</html>
+
