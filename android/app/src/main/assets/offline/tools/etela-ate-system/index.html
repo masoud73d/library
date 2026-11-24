@@ -823,6 +823,83 @@
                 : (navigator.deviceMemory ? `حدود ${navigator.deviceMemory} GB` : 'محدود در مرورگر');
         }
 
+        // Online fallback: search reputable phone-spec sources when Android/Camera2
+        // does not expose enough hardware details. Search results are shown as sourced
+        // excerpts, never silently treated as hardware measurements.
+        function escapeOnlineText(value) {
+            return String(value || '').replace(/[&<>"']/g, ch => ({
+                '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+            }[ch]));
+        }
+
+        async function lookupOnlineDeviceSpecs(modelName, container) {
+            if (!container) return;
+            const section = document.createElement('section');
+            section.className = 'mt-3 p-3 rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50/70 dark:bg-sky-950/20 space-y-2';
+            section.innerHTML = '<div class="font-bold text-xs text-sky-700 dark:text-sky-300">اطلاعات تکمیلی آنلاین</div><p class="text-[11px] text-slate-500 dark:text-slate-400">در حال جست‌وجوی مشخصات مدل گوشی در منابع مقایسه موبایل...</p>';
+            container.appendChild(section);
+
+            const searchLinks = [
+                {name:'GSMArena', url:'https://www.google.com/search?q=' + encodeURIComponent('site:gsmarena.com ' + modelName + ' specifications camera')},
+                {name:'Kimovil', url:'https://www.google.com/search?q=' + encodeURIComponent('site:kimovil.com ' + modelName + ' camera specifications')},
+                {name:'PhoneArena', url:'https://www.google.com/search?q=' + encodeURIComponent('site:phonearena.com ' + modelName + ' camera specs')},
+                {name:'سایت سازنده', url:'https://www.google.com/search?q=' + encodeURIComponent(modelName + ' official specifications camera')}
+            ];
+
+            if (!navigator.onLine) {
+                section.innerHTML = '<div class="font-bold text-xs text-sky-700 dark:text-sky-300">اطلاعات تکمیلی آنلاین</div><p class="text-[11px] text-amber-600">برای جست‌وجوی مشخصات مدل، اتصال اینترنت لازم است.</p>';
+            } else {
+                try {
+                    const query = modelName + ' smartphone specifications camera lens megapixel site:gsmarena.com OR site:kimovil.com OR site:phonearena.com OR site:mi.com';
+                    const targetUrl = 'https://www.bing.com/search?format=rss&q=' + encodeURIComponent(query);
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 18000);
+                    let response;
+                    try {
+                        response = await fetch(proxyUrl, {cache:'no-store', signal:controller.signal});
+                    } finally {
+                        clearTimeout(timeout);
+                    }
+                    if (!response.ok) throw new Error('Search service unavailable');
+                    const xmlText = await response.text();
+                    const xml = new DOMParser().parseFromString(xmlText, 'text/xml');
+                    if (xml.querySelector('parsererror')) throw new Error('Invalid search response');
+                    const items = Array.from(xml.querySelectorAll('item'));
+                    const cameraTerms = /camera|cameras|lens|megapixel|\bmp\b|دوربین|مگاپیکسل|سنسور/i;
+                    const results = items.map(item => ({
+                        title: item.querySelector('title')?.textContent?.trim() || '',
+                        link: item.querySelector('link')?.textContent?.trim() || '',
+                        description: item.querySelector('description')?.textContent?.trim() || ''
+                    })).filter(item => item.title && item.link && cameraTerms.test(item.title + ' ' + item.description))
+                      .slice(0, 5);
+
+                    if (results.length) {
+                        section.innerHTML = '<div class="font-bold text-xs text-sky-700 dark:text-sky-300">اطلاعات تکمیلی آنلاین برای ' + escapeOnlineText(modelName) + '</div>' +
+                            '<p class="text-[10px] text-slate-500 dark:text-slate-400">این موارد خلاصه نتایج جست‌وجو از وب‌سایت‌ها هستند؛ داده آنلاین‌اند و مستقیماً از سنسور گوشی خوانده نشده‌اند.</p>' +
+                            results.map(item => {
+                                let host = '';
+                                try { host = new URL(item.link).hostname.replace(/^www\./, ''); } catch(e) {}
+                                return '<article class="rounded-lg bg-white/80 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 p-2 text-right">' +
+                                    '<a class="text-xs font-bold text-sky-700 dark:text-sky-300 underline" href="' + escapeOnlineText(item.link) + '" target="_blank" rel="noopener noreferrer">' + escapeOnlineText(item.title) + '</a>' +
+                                    '<div class="text-[10px] text-slate-400 mt-0.5">' + escapeOnlineText(host) + '</div>' +
+                                    '<p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">' + escapeOnlineText(item.description) + '</p>' +
+                                    '</article>';
+                            }).join('');
+                    } else {
+                        section.innerHTML = '<div class="font-bold text-xs text-sky-700 dark:text-sky-300">اطلاعات تکمیلی آنلاین</div><p class="text-[11px] text-amber-600">نتیجه قابل اتکایی از جست‌وجوی خودکار دریافت نشد. می‌توانی منابع زیر را جداگانه بررسی کنی.</p>';
+                    }
+                } catch (error) {
+                    section.innerHTML = '<div class="font-bold text-xs text-sky-700 dark:text-sky-300">اطلاعات تکمیلی آنلاین</div><p class="text-[11px] text-amber-600">جست‌وجوی خودکار در دسترس نبود؛ ممکن است سرویس جست‌وجو یا پراکسی در شبکه مسدود باشد.</p>';
+                }
+            }
+
+            section.insertAdjacentHTML('beforeend',
+                '<div class="flex flex-wrap gap-x-3 gap-y-1 pt-1">' +
+                searchLinks.map(link => '<a class="text-[10px] text-sky-700 dark:text-sky-300 underline" href="' + escapeOnlineText(link.url) + '" target="_blank" rel="noopener noreferrer">' + escapeOnlineText(link.name) + '</a>').join('') +
+                '</div>');
+        }
+
         // 3. Camera reporting: use verified manufacturer specs for known models.
         // Camera2 metadata may expose logical streams or processed arrays; it is not
         // a definitive lens megapixel specification.
@@ -866,6 +943,7 @@
                     document.getElementById('media-counts').textContent = '۳ دوربین پشت + ۱ دوربین سلفی';
                     container.insertAdjacentHTML('beforeend',
                         '<p class="text-[11px] text-slate-500 dark:text-slate-400 text-center p-2">مشخصات این مدل بر اساس اطلاعات رسمی سازنده است؛ داده‌های Camera2 برای شمارش لنزها جایگزین مشخصات رسمی نشده‌اند.</p>');
+                    await lookupOnlineDeviceSpecs('Xiaomi Redmi Note 13 Pro 5G', container);
                     btn.textContent = '✓ بررسی مشخصات کامل شد (بررسی مجدد)';
                     return;
                 }
@@ -918,6 +996,11 @@
                         container.insertAdjacentHTML('beforeend',
                             '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">' +
                             explanation + ' وضوح گزارش‌شده نیز لزوماً مگاپیکسل واقعی سنسور نیست.</p>');
+                        if (!physicalCameras.length || logicalCameras.some(cam => !cam.width || !cam.focalLengthsMm?.length)) {
+                            const onlineModelName = [nativeInfo.manufacturer, nativeInfo.brand, nativeInfo.model, nativeInfo.product]
+                                .filter(Boolean).join(' ') || modelHints;
+                            await lookupOnlineDeviceSpecs(onlineModelName, container);
+                        }
                         btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
                         return;
                     }
@@ -944,6 +1027,9 @@
                     }
                 }
                 if (!devices.length) container.textContent = 'هیچ ورودی دوربینی توسط مرورگر شناسایی نشد.';
+                const onlineModelName = [nativeInfo.manufacturer, nativeInfo.brand, nativeInfo.model, nativeInfo.product]
+                    .filter(Boolean).join(' ') || modelHints;
+                await lookupOnlineDeviceSpecs(onlineModelName, container);
                 btn.textContent = '✓ اسکن کامل شد (اسکن مجدد)';
             } catch (err) {
                 container.innerHTML = `<p class="text-xs text-rose-500 text-center">اسکن دوربین‌ها ناموفق بود: ${err.message || 'خطای دسترسی'}</p>`;
