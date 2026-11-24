@@ -1053,6 +1053,16 @@ function openBook(index) {
 
   activeUrl = book.url;
 
+  // تقویم داخل APK بسته‌بندی شده و بدون اینترنت هم اجرا می‌شود.
+  let targetUrl = book.url;
+  try {
+    if (index === 2 && window.AndroidApp &&
+        typeof window.AndroidApp.isNetworkAvailable === "function" &&
+        !window.AndroidApp.isNetworkAvailable()) {
+      targetUrl = "file:///android_asset/offline/taghvim/index.html";
+    }
+  } catch (error) {}
+
   document.getElementById("appTitle").textContent = book.name;
 
   const frame = document.getElementById("appFrame");
@@ -1063,7 +1073,7 @@ function openBook(index) {
   document.body.style.overflow = "hidden";
 
   requestAnimationFrame(() => {
-    frame.src = book.url;
+    frame.src = targetUrl;
   });
 }
 
