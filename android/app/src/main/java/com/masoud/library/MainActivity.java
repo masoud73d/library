@@ -37,6 +37,7 @@ public class MainActivity extends Activity {
     private WebView webView;
     private WebView popupWebView;
     private boolean offlineFallbackLoaded = false;
+    private volatile boolean trustedLocalPageLoaded = false;
     private WebViewAssetLoader assetLoader;
     private ValueCallback<Uri[]> filePathCallback;
     private GeolocationPermissions.Callback pendingGeoCallback;
@@ -114,6 +115,12 @@ public class MainActivity extends Activity {
             }
 
             @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                if (view == webView) trustedLocalPageLoaded = isTrustedLocalOrigin(url);
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
             public void onReceivedError(WebView view, WebResourceRequest request,
                     android.webkit.WebResourceError error) {
                 if (request.isForMainFrame()
@@ -128,9 +135,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (url != null && url.startsWith(WEBSITE_URL)) {
-                    offlineFallbackLoaded = false;
-                }
+                if (isLibraryWebsiteUrl(url)) offlineFallbackLoaded = false;
+                if (view == webView) trustedLocalPageLoaded = isTrustedLocalOrigin(url);
             }
 
             @Override
@@ -148,21 +154,9 @@ public class MainActivity extends Activity {
             }
 
             private boolean handleUrl(Uri uri) {
-                String url = uri.toString();
-
-                if (url.startsWith("http://")
-                        || url.startsWith("https://")
-                        || url.startsWith("file:///android_asset/")) {
-                    return false;
-                }
-
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+                if (uri == null) return true;
+                if (isTrustedLocalOrigin(uri.toString()) || isLibraryWebsiteUrl(uri.toString())) return false;
+                openExternalUrl(uri);
                 return true;
             }
         });
@@ -175,8 +169,7 @@ public class MainActivity extends Activity {
                 runOnUiThread(() -> {
                     Uri origin = request.getOrigin();
                     String host = origin == null ? "" : origin.getHost();
-                    boolean trustedOrigin = "appassets.androidplatform.net".equals(host)
-                            || "masoud73d.github.io".equals(host);
+                    boolean trustedOrigin = isTrustedLocalOrigin(origin == null ? null : origin.toString());
                     boolean asksForCamera = false;
                     for (String resource : request.getResources()) {
                         if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
@@ -217,8 +210,7 @@ public class MainActivity extends Activity {
             // Allow the weather page to request Android location permission through WebView.
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                if (origin == null || !(origin.startsWith("https://masoud73d.github.io")
-                        || origin.startsWith("https://appassets.androidplatform.net"))) {
+                if (!isTrustedLocalOrigin(origin)) {
                     callback.invoke(origin, false, false);
                     return;
                 }
@@ -318,6 +310,28 @@ public class MainActivity extends Activity {
         webView.loadUrl("https://appassets.androidplatform.net/assets/offline/index.html");
     }
 
+    private boolean isTrustedLocalOrigin(String rawUrl) {
+        if (rawUrl == null) return false;
+        try {
+            Uri uri = Uri.parse(rawUrl);
+            String path = uri.getPath();
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && "appassets.androidplatform.net".equalsIgnoreCase(uri.getHost())
+                    && path != null && path.startsWith("/assets/offline/");
+        } catch (Exception ignored) { return false; }
+    }
+
+    private boolean isLibraryWebsiteUrl(String rawUrl) {
+        if (rawUrl == null) return false;
+        try {
+            Uri uri = Uri.parse(rawUrl);
+            String path = uri.getPath();
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && "masoud73d.github.io".equalsIgnoreCase(uri.getHost())
+                    && path != null && (path.equals("/library") || path.startsWith("/library/"));
+        } catch (Exception ignored) { return false; }
+    }
+
     private boolean isNetworkAvailable() {
         try {
             ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
@@ -380,6 +394,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String getNativeDeviceInfo() {
+            if (!trustedLocalPageLoaded) return "{}";
             try {
                 JSONObject info = new JSONObject();
 
@@ -544,11 +559,12 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public boolean isNetworkAvailable() {
-            return MainActivity.this.isNetworkAvailable();
+            return trustedLocalPageLoaded && MainActivity.this.isNetworkAvailable();
         }
 
         @JavascriptInterface
         public String getAppVersion() {
+            if (!trustedLocalPageLoaded) return "";
             try {
                 android.content.pm.PackageInfo packageInfo =
                         getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -560,7 +576,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void exitApp() {
-            runOnUiThread(() -> finish());
+            if (trustedLocalPageLoaded) runOnUiThread(() -> finish());
         }
     }
 
