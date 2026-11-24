@@ -111,8 +111,11 @@ jobs:
           curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js -o "$ROOT/vendor/tesseract.min.js"
           mkdir -p "$ROOT/vendor/tesseract" "$ROOT/vendor/tessdata"
           curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js -o "$ROOT/vendor/tesseract/worker.min.js"
-          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core.wasm.js -o "$ROOT/vendor/tesseract/tesseract-core.wasm.js"
-          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core.wasm -o "$ROOT/vendor/tesseract/tesseract-core.wasm"
+          # Tesseract 5 may select the SIMD+LSTM core at runtime; bundle every supported core variant.
+          for core in tesseract-core tesseract-core-simd tesseract-core-lstm tesseract-core-simd-lstm; do
+            curl -fLsS "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/${core}.wasm.js" -o "$ROOT/vendor/tesseract/${core}.wasm.js"
+            curl -fLsS "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/${core}.wasm" -o "$ROOT/vendor/tesseract/${core}.wasm"
+          done
           curl -fLsS https://tessdata.projectnaptha.com/4.0.0/fas.traineddata.gz -o "$ROOT/vendor/tessdata/fas.traineddata.gz"
           curl -fLsS https://tessdata.projectnaptha.com/4.0.0/eng.traineddata.gz -o "$ROOT/vendor/tessdata/eng.traineddata.gz"
           curl -fLsS https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css -o "$ROOT/vendor/all.min.css"
@@ -173,8 +176,10 @@ jobs:
           test -s "$ROOT/vendor/tesseract/worker.min.js"
           test -s "$ROOT/vendor/tessdata/fas.traineddata.gz"
           test -s "$ROOT/vendor/tessdata/eng.traineddata.gz"
-          test -s "$ROOT/vendor/tesseract/tesseract-core.wasm.js"
-          test -s "$ROOT/vendor/tesseract/tesseract-core.wasm"
+          for core in tesseract-core tesseract-core-simd tesseract-core-lstm tesseract-core-simd-lstm; do
+            test -s "$ROOT/vendor/tesseract/${core}.wasm.js"
+            test -s "$ROOT/vendor/tesseract/${core}.wasm"
+          done
           python3 - <<'PY'
           from pathlib import Path
           import re
