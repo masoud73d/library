@@ -137,8 +137,12 @@ jobs:
           p = Path("android/app/src/main/assets/offline/tools/Text-reader/index.html")
           s = p.read_text(encoding="utf-8")
           import re
-          pattern = r'Tesseract\\.createWorker\\(\\s*["\\']fas\\+eng["\\']\\s*,\\s*1\\s*,\\s*\\{'
-          replacement = 'Tesseract.createWorker("fas+eng", 1, {\\n          workerPath: "../../vendor/tesseract/worker.min.js",\\n          corePath: "../../vendor/tesseract",\\n          langPath: "../../vendor/tessdata",\\n          gzip: true,'
+          pattern = r"""Tesseract\.createWorker\(\s*["']fas\+eng["']\s*,\s*1\s*,\s*\{"""
+          replacement = """Tesseract.createWorker("fas+eng", 1, {
+                    workerPath: "../../vendor/tesseract/worker.min.js",
+                    corePath: "../../vendor/tesseract",
+                    langPath: "../../vendor/tessdata",
+                    gzip: true,"""
           s, count = re.subn(pattern, lambda _: replacement, s, count=1)
           if count != 1:
               raise SystemExit("Could not find OCR worker configuration in bundled Text-reader")
