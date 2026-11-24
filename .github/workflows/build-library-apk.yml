@@ -64,6 +64,7 @@ jobs:
             echo "::warning::Persistent signing key is not fully configured. This APK will use a temporary debug key and must NOT be installed as the update version."
           fi
 
+      # Keep the same visual library and its calendar available from APK assets.
       - name: Prepare offline Android assets
         run: |
           mkdir -p android/app/src/main/assets/offline
