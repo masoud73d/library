@@ -532,13 +532,12 @@ public class MainActivity extends Activity {
         }
 
         private int readBatteryDesignCapacityMah() {
-            String[] paths = {
+            String[] chargePaths = {
                     "/sys/class/power_supply/battery/charge_full_design",
                     "/sys/class/power_supply/Battery/charge_full_design",
-                    "/sys/class/power_supply/bms/charge_full_design",
-                    "/sys/class/power_supply/battery/charge_full"
+                    "/sys/class/power_supply/bms/charge_full_design"
             };
-            for (String path : paths) {
+            for (String path : chargePaths) {
                 try (java.io.BufferedReader reader =
                              new java.io.BufferedReader(new java.io.FileReader(path))) {
                     String raw = reader.readLine();
@@ -546,6 +545,42 @@ public class MainActivity extends Activity {
                     long value = Long.parseLong(raw.trim());
                     long mah = value > 100000 ? Math.round(value / 1000.0) : value;
                     if (mah >= 500 && mah <= 30000) return (int) mah;
+                } catch (Exception ignored) { }
+            }
+
+            // Some kernels expose design energy (uWh) rather than charge (uAh).
+            // Convert using the design voltage (uV); never substitute current
+            // full-charge capacity because it is not the battery's design rating.
+            String[] energyPaths = {
+                    "/sys/class/power_supply/battery/energy_full_design",
+                    "/sys/class/power_supply/Battery/energy_full_design",
+                    "/sys/class/power_supply/bms/energy_full_design"
+            };
+            String[] voltagePaths = {
+                    "/sys/class/power_supply/battery/voltage_max_design",
+                    "/sys/class/power_supply/Battery/voltage_max_design",
+                    "/sys/class/power_supply/bms/voltage_max_design"
+            };
+            for (String energyPath : energyPaths) {
+                try {
+                    long energyUwh;
+                    try (java.io.BufferedReader reader =
+                                 new java.io.BufferedReader(new java.io.FileReader(energyPath))) {
+                        String raw = reader.readLine();
+                        if (raw == null) continue;
+                        energyUwh = Long.parseLong(raw.trim());
+                    }
+                    for (String voltagePath : voltagePaths) {
+                        try (java.io.BufferedReader reader =
+                                     new java.io.BufferedReader(new java.io.FileReader(voltagePath))) {
+                            String raw = reader.readLine();
+                            if (raw == null) continue;
+                            double voltageV = Long.parseLong(raw.trim()) / 1000000.0;
+                            if (voltageV < 2.0 || voltageV > 6.0) continue;
+                            long mah = Math.round((energyUwh / 1000.0) / voltageV);
+                            if (mah >= 500 && mah <= 30000) return (int) mah;
+                        }
+                    }
                 } catch (Exception ignored) { }
             }
             return -1;
