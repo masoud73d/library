@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راهنمای هوشمند آزمایشگاه | Android 17 Expressive UI</title>
+    <!-- Google Fonts: Vazirmatn -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        m3: {
+                            bg: '#f3f4f9',
+                            surface: '#ffffff',
+                            surfaceVariant: '#e7ecf5',
+                            container: '#e1e8f5',
+                            primary: '#0061a4',
+                            primaryContainer: '#d1e4ff',
+                            onPrimaryContainer: '#001d36',
+                            secondary: '#535f70',
+                            accent: '#006a60',
+                            accentContainer: '#74f8e5',
+                            onAccentContainer: '#00201c',
+                            danger: '#ba1a1a',
+                            dangerContainer: '#ffdad6',
+                            warning: '#b25900',
+                            warningContainer: '#ffddb8'
+                        }
+                    },
+                    borderRadius: {
+                        '4xl': '2.25rem',
+                        '5xl': '2.75rem'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f0f4f9;
+            color: #191c20;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Material You Expressive Spring Animations & Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c3c7ce;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #90949a;
+        }
+
+        .m3-chip {
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .m3-chip.active {
+            background-color: #0061a4;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(0, 97, 164, 0.25);
+        }
+
+        .m3-card {
+            transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.25s ease, background-color 0.2s ease;
+        }
+        .m3-card:active {
+            transform: scale(0.97);
+        }
+
+        /* Android 17 Sheet Animation */
+        .bottom-sheet-enter {
+            animation: sheetUp 0.35s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        }
+        @keyframes sheetUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-m3-primaryContainer selection:text-m3-onPrimaryContainer p-2 sm:p-4 lg:p-6 max-w-7xl mx-auto">
+
+    <!-- Top Android 17 App Container Bar -->
+    <header class="w-full bg-white/80 backdrop-blur-xl rounded-[2.25rem] p-3 sm:p-4 shadow-sm border border-white/60 mb-4 transition-all">
+        <div class="flex flex-col gap-3">
+            
+            <!-- Row 1: App Title & Quick Action Pill -->
+            <div class="flex items-center justify-between px-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-m3-primaryContainer text-m3-primary flex items-center justify-center text-xl shadow-inner font-black">
+                        <i class="fa-solid fa-notes-medical"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-black text-slate-900 leading-snug">راهنمای هوشمند آزمایشگاه</h1>
+                        <p class="text-[11px] text-slate-500 font-medium">Android 17 Material You Edition</p>
+                    </div>
+                </div>
+
+                <!-- Favorite Filter Toggle Chip -->
+                <button onclick="toggleFavoritesFilter()" id="favToggleBtn" 
+                    class="px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200/80 text-slate-700 text-xs font-bold transition flex items-center gap-2 border border-slate-200/60 active:scale-95">
+                    <i class="fa-solid fa-bookmark text-amber-500"></i>
+                    <span>نشان‌شده‌ها</span>
+                    <span id="favCountBadge" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+            </div>
+
+            <!-- Row 2: Android 17 Search Capsule & Alphabet Dropdown Pill -->
+            <div class="flex items-center gap-2">
+                <!-- Large Pill Search Bar -->
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-base"></i>
+                    </div>
+                    <input type="text" id="searchInput" 
+                        placeholder="جستجوی آزمایش (مثلاً CBC، قند خون، TSH، چربی)..." 
+                        class="w-full pr-11 pl-10 py-3.5 bg-m3-bg border border-transparent rounded-full text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none focus:bg-white focus:border-m3-primary/30 focus:ring-4 focus:ring-m3-primaryContainer/40 transition-all placeholder-slate-400 shadow-inner">
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 hover:text-slate-700">
+                        <i class="fa-solid fa-circle-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Alphabet Dropdown Pill -->
+                <div class="shrink-0">
+                    <select id="alphaSelect" onchange="onAlphaSelectChange(this.value)" 
+                        class="bg-m3-primaryContainer text-m3-onPrimaryContainer font-mono text-xs font-black rounded-full px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-m3-primary cursor-pointer border border-m3-primary/10 shadow-sm dir-ltr">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 3: Horizontal Scrollable Category Chips -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 pb-0.5 text-xs">
+                <button onclick="setCategory('all')" class="m3-chip active px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">همه دسته‌ها</button>
+                <button onclick="setCategory('cbc')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">خون‌شناسی (CBC)</button>
+                <button onclick="setCategory('biochem')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">بیوشیمی و قند</button>
+                <button onclick="setCategory('lipid')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">چربی خون</button>
+                <button onclick="setCategory('liver')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">کبدی</button>
+                <button onclick="setCategory('kidney')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">کلیوی و ادرار</button>
+                <button onclick="setCategory('thyroid')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">تیروئید و هورمون</button>
+                <button onclick="setCategory('vitamins')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">ویتامین و املاح</button>
+                <button onclick="setCategory('coagulation')" class="m3-chip px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold whitespace-nowrap border border-slate-200/60">انعقاد، ایمنی و مارکرها</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Status Bar -->
+    <div class="flex items-center justify-between px-3 mb-3 text-xs font-bold text-slate-600">
+        <span id="resultCountText" class="bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200/60 shadow-2xs">
+            نمایش ۵۸ مورد آزمایش به ترتیب A-Z
+        </span>
+        <div class="flex items-center gap-1.5 bg-white/70 backdrop-blur-md p-1 rounded-full border border-slate-200/60">
+            <button id="viewGridBtn" onclick="setViewMode('grid')" class="px-3 py-1 rounded-full bg-m3-primary text-white shadow-xs transition text-xs" title="نمایش کارتی">
+                <i class="fa-solid fa-table-cells-large ml-1"></i>کارت
+            </button>
+            <button id="viewTableBtn" onclick="setViewMode('table')" class="px-3 py-1 rounded-full text-slate-600 hover:text-slate-900 transition text-xs" title="نمایش جدولی">
+                <i class="fa-solid fa-list ml-1"></i>جدول
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container: Mobile/Desktop Cards Grid -->
+    <main class="w-full flex-grow">
+        <!-- Cards View -->
+        <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            <!-- Dynamically Populated Cards -->
+        </div>
+
+        <!-- Table View (Desktop option) -->
+        <div id="tableContainer" class="hidden overflow-hidden bg-white/90 backdrop-blur-xl rounded-[2rem] border border-slate-200/80 shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
+                        <tr>
+                            <th class="p-4 text-center">نشان</th>
+                            <th class="p-4">کد & نام انگلیسی</th>
+                            <th class="p-4">معادل فارسی</th>
+                            <th class="p-4">دسته اصلی</th>
+                            <th class="p-4">محدوده مرجع سلامت</th>
+                            <th class="p-4">واحد</th>
+                            <th class="p-4 text-center">جزئیات & بررسی</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100">
+                        <!-- Dynamically Populated Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyResult" class="hidden text-center py-16 bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-slate-200/60 shadow-sm my-4">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-m3-primaryContainer text-m3-primary flex items-center justify-center text-2xl">
+                <i class="fa-solid fa-magnifying-glass font-bold"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 mb-1">هیچ آزمایشی پیدا نشد</h3>
+            <p class="text-xs text-slate-500 mb-4">لطفا عبارات دیگری یا تغییر فیلتر حروف الفبا را امتحان کنید.</p>
+            <button onclick="resetFilters()" class="px-5 py-2.5 bg-m3-primary text-white text-xs font-bold rounded-full shadow-md hover:opacity-90 transition">
+                بازنشانی همه فیلترها
+            </button>
+        </div>
+    </main>
+
+    <!-- Android 17 Bottom Sheet / Interactive Calculator Modal -->
+    <div id="detailModal" onclick="if(event.target === this) closeModal()" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <!-- Modal Card Sheet -->
+        <div class="bottom-sheet-enter w-full sm:max-w-2xl bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl border border-white/60 overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <!-- Handle bar for mobile gesture feel -->
+            <div class="w-full pt-3 pb-1 flex justify-center sm:hidden cursor-pointer" onclick="closeModal()">
+                <div class="w-12 h-1.5 bg-slate-300 rounded-full"></div>
+            </div>
+
+            <!-- Modal Header -->
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-m3-primaryContainer to-m3-primary text-white relative">
+                <button onclick="closeModal()" class="absolute left-4 top-4 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition backdrop-blur-md">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <span id="modalCodeBadge" class="px-3.5 py-1.5 rounded-2xl bg-white text-m3-primary font-mono font-black text-lg shadow-sm">
+                        CBC
+                    </span>
+                    <div>
+                        <h3 id="modalFullName" class="text-base sm:text-lg font-bold leading-tight">Complete Blood Count</h3>
+                        <p id="modalFaName" class="text-xs text-slate-200 font-medium">شمارش کامل سلول‌های خون</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Body Scrollable -->
+            <div class="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+                
+                <!-- Interactive Numerical Health Gauge Box -->
+                <div class="bg-m3-bg border border-slate-200/80 rounded-3xl p-4 shadow-xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-m3-primary text-sm"></i>
+                            بررسی عدد برگه آزمایش شما:
+                        </label>
+                        <span id="modalUnitBadge" class="text-[11px] font-mono font-bold text-slate-600 bg-slate-200/80 px-2.5 py-0.5 rounded-full">mg/dL</span>
+                    </div>
+
+                    <div class="flex gap-2 mb-3">
+                        <input type="number" step="any" id="userCalcInput" placeholder="مثلاً: 95" 
+                            class="flex-1 px-4 py-3 bg-white border border-slate-300 rounded-2xl text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-m3-primary">
+                        <button onclick="evaluateUserValue()" class="px-5 py-3 bg-m3-primary hover:bg-m3-primary/90 text-white font-bold text-xs rounded-2xl shadow-md transition active:scale-95 shrink-0">
+                            تحلیل وضعیت
+                        </button>
+                    </div>
+
+                    <!-- Visual Health Gauge Result Bar -->
+                    <div id="calcResultContainer" class="hidden space-y-2.5 pt-3 border-t border-slate-200/80">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500 font-medium">نتیجه تحلیل:</span>
+                            <span id="calcStatusBadge" class="px-3 py-1 rounded-full font-bold text-xs">نرمال</span>
+                        </div>
+                        
+                        <!-- Dynamic Gauge Bar -->
+                        <div class="relative w-full h-3.5 bg-slate-200 rounded-full overflow-hidden flex">
+                            <div class="w-1/3 bg-amber-400 h-full" title="کمتر از حد مجاز"></div>
+                            <div class="w-1/3 bg-emerald-500 h-full" title="محدوده طبیعی و نرمال"></div>
+                            <div class="w-1/3 bg-rose-500 h-full" title="بالاتر از حد مجاز"></div>
+                            <!-- Marker Pin -->
+                            <div id="calcMarkerPin" class="absolute top-0 bottom-0 w-2.5 bg-slate-900 border-2 border-white rounded-full shadow-md transition-all duration-500 transform -translate-x-1/2" style="right: 50%;"></div>
+                        </div>
+                        <p id="calcExplanation" class="text-xs text-slate-700 leading-relaxed pt-1 bg-white p-3 rounded-2xl border border-slate-200/60"></p>
+                    </div>
+                </div>
+
+                <!-- Info Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl">
+                        <span class="text-slate-400 block mb-1 font-medium">دسته بندی:</span>
+                        <span id="modalCategory" class="font-bold text-slate-800">خون‌شناسی</span>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 border border-slate-200/70 rounded-2xl">
+                        <span class="text-slate-400 block mb-1 font-medium">محدوده مجاز نرمال:</span>
+                        <span id="modalNormalRange" class="font-bold text-emerald-700 font-mono text-sm block dir-ltr text-right">--</span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <h4 class="text-xs font-bold text-slate-800 mb-1.5 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-m3-primary"></i> معرفی و شرح آزمایش:
+                    </h4>
+                    <p id="modalDescription" class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3.5 rounded-2xl border border-slate-200/60">
+                        توضیحات...
+                    </p>
+                </div>
+
+                <!-- Causes High / Low -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-rose-50/80 border border-rose-200/60 rounded-2xl p-3.5 space-y-1">
+                        <div class="font-bold text-rose-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrow-up-right-dots text-rose-600"></i> علل احتمالی افزایش (High):
+                        </div>
+                        <p id="modalHighCauses" class="text-rose-950/80 leading-relaxed text-[11px]">...</p>
+                    </div>
+                    <div class="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-3.5 space-y-1">
+                        <div class="font-bold text-amber-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrow-down-left-dots text-amber-600"></i> علل احتمالی کاهش (Low):
+                        </div>
+                        <p id="modalLowCauses" class="text-amber-950/80 leading-relaxed text-[11px]">...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-100/80 px-6 py-3 border-t border-slate-200/80 flex justify-end">
+                <button onclick="closeModal()" class="px-6 py-2.5 bg-slate-900 text-white font-bold text-xs rounded-full hover:bg-slate-800 transition active:scale-95">
+                    بستن
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Data (~58 Lab Tests A-Z) & Core Logic -->
+    <script>
+        const labDatabase = [
+            {
+                code: "ALB",
+                fullName: "Albumin",
+                faName: "آلبومین خون",
+                category: "liver",
+                categoryFa: "کبدی و پروتئین",
+                rangeText: "3.5 - 5.0 g/dL",
+                min: 3.5,
+                max: 5.0,
+                unit: "g/dL",
+                desc: "اصلی‌ترین پروتئین ساخت کبد که فشار اسمزی خون را حفظ کرده و مواد مختلف را در بدن حمل می‌کند.",
+                highCauses: "کم‌آبی شدید بدن (دیهیدراسیون)، رژیم‌های بسیار پرپروتئین.",
+                lowCauses: "بیماری‌های مزمن کبدی (سیروز)، سوءتغذیه، سندرم نفروتیک کلیوی، سوختگی شدید."
+            },
+            {
+                code: "ALP",
+                fullName: "Alkaline Phosphatase",
+                faName: "آلکالین فسفاتاز",
+                category: "liver",
+                categoryFa: "کبدی و استخوان",
+                rangeText: "44 - 147 IU/L",
+                min: 44,
+                max: 147,
+                unit: "IU/L",
+                desc: "آنزیم موجود در کبد، مجاری صفراوی و استخوان‌ها.",
+                highCauses: "انسداد مجاری صفراوی، کبد چرب، رشد استخوان، پرکاری پاراتیروئید، بارداری.",
+                lowCauses: "کمبود شدید روی، کمبود منیزیم، هیپوفسفاتازی، سوءتغذیه شدید."
+            },
+            {
+                code: "ALT / SGPT",
+                fullName: "Alanine Aminotransferase",
+                faName: "آلانین آمینوترانسفراز",
+                category: "liver",
+                categoryFa: "کبدی",
+                rangeText: "7 - 56 U/L",
+                min: 7,
+                max: 56,
+                unit: "U/L",
+                desc: "آنزیم اختصاصی کبدی که هنگام آسیب به سلول‌های کبدی وارد خون می‌شود.",
+                highCauses: "هپاتیت ویروسی، کبد چرب، مصرف داروهای سمی برای کبد، مصرف الکل، سیروز.",
+                lowCauses: "معمولاً فاقد اهمیت بالینی است؛ کمبود ویتامین B6."
+            },
+            {
+                code: "Amylase",
+                fullName: "Serum Amylase",
+                faName: "آمیلاز سرم",
+                category: "biochem",
+                categoryFa: "گوارش و پانکراس",
+                rangeText: "30 - 110 U/L",
+                min: 30,
+                max: 110,
+                unit: "U/L",
+                desc: "آنزیم هضم‌کننده نشاسته که توسط پانکراس و غدد بزاقی ترشح می‌شود.",
+                highCauses: "پانکراتیت حاد (التهاب لوزالمعده)، انسداد مجرای پانکراس، اورمی، انسداد روده.",
+                lowCauses: "آسیب مزمن پانکراس، فیبروز کیستیک، سیروز کبدی پیشرفته."
+            },
+            {
+                code: "AST / SGOT",
+                fullName: "Aspartate Aminotransferase",
+                faName: "آسپارتات آمینوترانسفراز",
+                category: "liver",
+                categoryFa: "کبدی و قلبی",
+                rangeText: "10 - 40 U/L",
+                min: 10,
+                max: 40,
+                unit: "U/L",
+                desc: "آنزیم موجود در کبد، قلب و عضلات که آسیب بافتی را نشان می‌دهد.",
+                highCauses: "آسیب کبدی، آسیب قلبی، ورزش بسیار سنگین، تخریب عضلانی، کبد چرب.",
+                lowCauses: "کمبود ویتامین B6، دیالیز مزمن، بارداری."
+            },
+            {
+                code: "Beta-hCG",
+                fullName: "Human Chorionic Gonadotropin",
+                faName: "هورمون بارداری (بتا)",
+                category: "thyroid",
+                categoryFa: "هورمونی",
+                rangeText: "< 5.0 (غیرباردار) mIU/mL",
+                min: 0,
+                max: 5.0,
+                unit: "mIU/mL",
+                desc: "هورمون اختصاصی تشخیص بارداری و سلامت جفت.",
+                highCauses: "بارداری، بارداری چندقلو، بارداری مولار، برخی تومورهای نادر.",
+                lowCauses: "عدم بارداری، احتمال سقط یا بارداری پوچ."
+            },
+            {
+                code: "Bilirubin Direct",
+                fullName: "Direct Bilirubin",
+                faName: "بیلی‌روبین مستقیم",
+                category: "liver",
+                categoryFa: "کبدی و صفراوی",
+                rangeText: "0.0 - 0.3 mg/dL",
+                min: 0,
+                max: 0.3,
+                unit: "mg/dL",
+                desc: "فرم کنژوگه بیلی‌روبین در کبد که آماده دفع از صفرا است.",
+                highCauses: "انسداد مجاری صفراوی (سنگ صفرا)، هپاتیت، سیروز.",
+                lowCauses: "معمولاً فاقد ارزش بالینی خاص است."
+            },
+            {
+                code: "Bilirubin Total",
+                fullName: "Total Bilirubin",
+                faName: "بیلی‌روبین کل",
+                category: "liver",
+                categoryFa: "کبدی و صفراوی",
+                rangeText: "0.2 - 1.2 mg/dL",
+                min: 0.2,
+                max: 1.2,
+                unit: "mg/dL",
+                desc: "رنگدانه حاصل از تجزیه هموگلوبین گلبول‌های قرمز خون.",
+                highCauses: "یرقان (زردی)، تخریب گلبول‌های قرمز (همولیز)، بیماری‌های کبدی، سنگ صفرا.",
+                lowCauses: "مصرف برخی داروها یا کافئین بالا."
+            },
+            {
+                code: "BUN",
+                fullName: "Blood Urea Nitrogen",
+                faName: "نیتروژن اوره خون",
+                category: "kidney",
+                categoryFa: "کلیوی",
+                rangeText: "7 - 20 mg/dL",
+                min: 7,
+                max: 20,
+                unit: "mg/dL",
+                desc: "محصول پسماند تجزیه پروتئین‌ها که توسط کلیه دفع می‌شود.",
+                highCauses: "نارسایی کلیه، کم‌آبی بدن، خونریزی گوارشی، رژیم پرپروتئین.",
+                lowCauses: "سوءتغذیه، کمبود پروتئین، نارسایی شديد کبد، پرآبی بدن."
+            },
+            {
+                code: "Ca",
+                fullName: "Calcium",
+                faName: "کلسیم خون",
+                category: "vitamins",
+                categoryFa: "املاح و استخوان",
+                rangeText: "8.5 - 10.5 mg/dL",
+                min: 8.5,
+                max: 10.5,
+                unit: "mg/dL",
+                desc: "ماده معدنی حیاتی برای استخوان‌ها، انقباض عضلات و عملکرد اعصاب.",
+                highCauses: "پرکاری پاراتیروئید، سمیت ویتامین D، تومورهای استخوانی.",
+                lowCauses: "کمبود ویتامین D، کم‌کاری پاراتیروئید، نارسایی کلیه."
+            },
+            {
+                code: "CBC",
+                fullName: "Complete Blood Count",
+                faName: "شمارش کامل گلبول‌های خون",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "شامل اجزای استاندارد خون",
+                min: 0,
+                max: 100,
+                unit: "Index",
+                desc: "پانل جامع شامل شمارش گلبول قرمز، سفید، پلاکت و شاخص‌های مربوطه.",
+                highCauses: "عفونت، التهاب، غلظت خون.",
+                lowCauses: "کم‌خونی، نقص ایمنی، خونریزی."
+            },
+            {
+                code: "Chol",
+                fullName: "Total Cholesterol",
+                faName: "کلسترول کل خون",
+                category: "lipid",
+                categoryFa: "چربی خون",
+                rangeText: "< 200 mg/dL",
+                min: 100,
+                max: 200,
+                unit: "mg/dL",
+                desc: "مجموع کلسترول موجود در خون شامل چربی‌های مفید و مضر.",
+                highCauses: "رژیم چرب، کم‌تحرکی، ژنتیک، کم‌کاری تیروئید.",
+                lowCauses: "سوءتغذیه، پرکاری تیروئید، بیماری کبد."
+            },
+            {
+                code: "Cr",
+                fullName: "Creatinine",
+                faName: "کراتینین خون",
+                category: "kidney",
+                categoryFa: "کلیوی",
+                rangeText: "0.6 - 1.2 mg/dL",
+                min: 0.6,
+                max: 1.2,
+                unit: "mg/dL",
+                desc: "مهم‌ترین شاخص عملکرد کلیه که از سوخت‌وساز عضلات حاصل می‌شود.",
+                highCauses: "نارسایی کلیوی، کم‌آبی شدید، انسداد مجاری ادراری.",
+                lowCauses: "کاهش توده عضلانی، سوءتغذیه، بارداری."
+            },
+            {
+                code: "CRP",
+                fullName: "C-Reactive Protein",
+                faName: "پروتئین واکنش‌گر C",
+                category: "coagulation",
+                categoryFa: "التهاب و عفونت",
+                rangeText: "< 3.0 mg/L",
+                min: 0,
+                max: 3.0,
+                unit: "mg/L",
+                desc: "پروتئین کبدی که در پاسخ به التهاب حاد در بدن افزایش می‌یابد.",
+                highCauses: "عفونت‌های باکتریایی یا ویروسی، بیماری خودایمنی، حمله قلبی.",
+                lowCauses: "وضعیت سلامت و عدم وجود التهاب فعال."
+            },
+            {
+                code: "ESR",
+                fullName: "Erythrocyte Sedimentation Rate",
+                faName: "سرعت رسوب گلبول قرمز",
+                category: "coagulation",
+                categoryFa: "التهاب و خون",
+                rangeText: "0 - 20 mm/hr",
+                min: 0,
+                max: 20,
+                unit: "mm/hr",
+                desc: "تست عمومی برای بررسی وجود التهاب یا عفونت مزمن در بدن.",
+                highCauses: "عفونت، بیماری خودایمنی، بارداری، کم‌خونی شديد.",
+                lowCauses: "پلی‌سیتمی (غلظت خون شدید)، گلبول‌های قرمز داسی‌شکل."
+            },
+            {
+                code: "FBS",
+                fullName: "Fasting Blood Sugar",
+                faName: "قند خون ناشتا",
+                category: "biochem",
+                categoryFa: "بیوشیمی و قند",
+                rangeText: "70 - 99 mg/dL",
+                min: 70,
+                max: 99,
+                unit: "mg/dL",
+                desc: "سنجش میزان گلوکز خون پس از حداقل ۸ ساعت روزه‌داری جهت بررسی دیابت.",
+                highCauses: "دیابت، پیش‌دیابت (100-125)، استرس شدید، مصرف کورتون.",
+                lowCauses: "مصرف زیاد انسولین/دارو، روزه‌داری طولانی، ورزش شديد."
+            },
+            {
+                code: "Fe",
+                fullName: "Serum Iron",
+                faName: "آهن سرم خون",
+                category: "vitamins",
+                categoryFa: "املاح و خون",
+                rangeText: "60 - 170 mcg/dL",
+                min: 60,
+                max: 170,
+                unit: "mcg/dL",
+                desc: "میزان آهن آزاد موجود در مایع خون.",
+                highCauses: "مسمومیت با آهن، هموکروماتوز، تزریق مکرر خون.",
+                lowCauses: "کم‌خونی فقر آهن، خونریزی مزمن، سوءجذب گوارشی."
+            },
+            {
+                code: "Ferritin",
+                fullName: "Serum Ferritin",
+                faName: "فریتین (ذخیره آهن)",
+                category: "vitamins",
+                categoryFa: "املاح و خون",
+                rangeText: "20 - 250 ng/mL",
+                min: 20,
+                max: 250,
+                unit: "ng/mL",
+                desc: "پروتئین ذخیره‌کننده آهن در سلول‌ها؛ دقیق‌ترین شاخص ذخیره آهن بدن.",
+                highCauses: "مازاد آهن، التهاب مزمن، کبد چرب، بیماری‌های عفونی.",
+                lowCauses: "کم‌خونی فقر آهن، خونریزی مزمن، عدم جذب کافی."
+            },
+            {
+                code: "Folate",
+                fullName: "Folic Acid (Vit B9)",
+                faName: "اسید فولیک (ویتامین B9)",
+                category: "vitamins",
+                categoryFa: "ویتامین‌ها",
+                rangeText: "2.7 - 17.0 ng/mL",
+                min: 2.7,
+                max: 17.0,
+                unit: "ng/mL",
+                desc: "ویتامین B9 ضروری برای ساخت گلبول‌های قرمز و تقسیم سلولی.",
+                highCauses: "مصرف مکمل اسید فولیک.",
+                lowCauses: "سوءتغذیه، مصرف الکل، بارداری، سوءجذب سلیاک."
+            },
+            {
+                code: "Free T3",
+                fullName: "Free Triiodothyronine",
+                faName: "تیروکسین T3 آزاد",
+                category: "thyroid",
+                categoryFa: "تیروئید",
+                rangeText: "2.0 - 4.4 pg/mL",
+                min: 2.0,
+                max: 4.4,
+                unit: "pg/mL",
+                desc: "شکل آزاد و فعال هورمون T3 تیروئید.",
+                highCauses: "پرکاری تیروئید، بیماری گریوز.",
+                lowCauses: "کم‌کاری تیروئید، بیماری‌های شديد غیرتیروئیدی."
+            },
+            {
+                code: "Free T4",
+                fullName: "Free Thyroxine",
+                faName: "تیروکسین T4 آزاد",
+                category: "thyroid",
+                categoryFa: "تیروئید",
+                rangeText: "0.93 - 1.7 ng/dL",
+                min: 0.93,
+                max: 1.7,
+                unit: "ng/dL",
+                desc: "شکل آزاد هورمون T4 در خون.",
+                highCauses: "پرکاری تیروئید، التهاب تیروئید (تیروئیدیت).",
+                lowCauses: "کم‌کاری تیروئید، کمبود ید."
+            },
+            {
+                code: "FSH",
+                fullName: "Follicle Stimulating Hormone",
+                faName: "هورمون محرک فولیکول",
+                category: "thyroid",
+                categoryFa: "هورمونی",
+                rangeText: "1.5 - 12.4 mIU/mL",
+                min: 1.5,
+                max: 12.4,
+                unit: "mIU/mL",
+                desc: "هورمون ترشح‌شده از هیپوفیز جهت تحریک تخمک‌گذاری و ساخت اسپرم.",
+                highCauses: "یائسگی، نارسایی اولیه تخمدان یا بیضه.",
+                lowCauses: "اختلال غده هیپوفیز یا هیپوتالاموس، استرس."
+            },
+            {
+                code: "HbA1c",
+                fullName: "Glycated Hemoglobin",
+                faName: "هموگلوبین A1c (قند ۳ ماهه)",
+                category: "biochem",
+                categoryFa: "بیوشیمی و قند",
+                rangeText: "4.0 - 5.6 %",
+                min: 4.0,
+                max: 5.6,
+                unit: "%",
+                desc: "میانگین قند خون بدن در ۲ تا ۳ ماه گذشته.",
+                highCauses: "دیابت کنترل نشده (≥6.5%)، پیش‌دیابت (5.7-6.4%).",
+                lowCauses: "افت قند خون مزمن، کم‌خونی همولیتیک."
+            },
+            {
+                code: "Hct",
+                fullName: "Hematocrit",
+                faName: "هماتوکریت",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "38.3 - 48.6 %",
+                min: 38.3,
+                max: 48.6,
+                unit: "%",
+                desc: "درصد حجم گلبول‌های قرمز نسبت به کل حجم خون.",
+                highCauses: "کم‌آبی بدن، غلظت خون (پلی‌سیتمی)، سیگار کشیدن.",
+                lowCauses: "کم‌خونی، خونریزی، پرآبی بدن."
+            },
+            {
+                code: "HDL",
+                fullName: "High-Density Lipoprotein",
+                faName: "کلسترول خوب (HDL)",
+                category: "lipid",
+                categoryFa: "چربی خون",
+                rangeText: "> 40 (مرد) | > 50 (زن) mg/dL",
+                min: 40,
+                max: 100,
+                unit: "mg/dL",
+                desc: "چربی مفید که کلسترول اضافه را از عروق به کبد منتقل می‌کند.",
+                highCauses: "ورزش منظم، رژیم غذایی سالم، ژنتیک خوب.",
+                lowCauses: "کم‌تحرکی، چاقی، سیگار کشیدن، دیابت."
+            },
+            {
+                code: "Hgb / Hb",
+                fullName: "Hemoglobin",
+                faName: "هموگلوبین",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "12.1 - 17.2 g/dL",
+                min: 12.1,
+                max: 17.2,
+                unit: "g/dL",
+                desc: "پروتئین حاوی آهن در گلبول‌های قرمز برای حمل اکسیژن.",
+                highCauses: "غلظت خون، بیماری ریوی، کم‌آبی شدید.",
+                lowCauses: "کم‌خونی (فقر آهن و...)، خونریزی."
+            },
+            {
+                code: "INR",
+                fullName: "International Normalized Ratio",
+                faName: "نسبت بین‌المللی انعقاد",
+                category: "coagulation",
+                categoryFa: "انعقادی",
+                rangeText: "0.8 - 1.1 (عادی)",
+                min: 0.8,
+                max: 1.1,
+                unit: "Ratio",
+                desc: "استاندارد جهانی برای پایش دوز داروی ضد انعقاد وارفارین.",
+                highCauses: "مصرف وارفارین، خطر خونریزی، بیماری کبدی.",
+                lowCauses: "خطر تشکیل لخته خون."
+            },
+            {
+                code: "K",
+                fullName: "Potassium",
+                faName: "پتاسیم خون",
+                category: "vitamins",
+                categoryFa: "الکترولیت‌ها",
+                rangeText: "3.5 - 5.2 mEq/L",
+                min: 3.5,
+                max: 5.2,
+                unit: "mEq/L",
+                desc: "الکترولیت کلیدی برای ریتم قلب و انقباض عضلات.",
+                highCauses: "نارسایی کلیه، داروی مهارکننده ACE، آسیب بافتی.",
+                lowCauses: "استفراغ/اسهال شدید، مصرف داروهای ادرارآور."
+            },
+            {
+                code: "LDH",
+                fullName: "Lactate Dehydrogenase",
+                faName: "لاکتات دهیدروژناز",
+                category: "biochem",
+                categoryFa: "بیوشیمی و بافت",
+                rangeText: "140 - 280 U/L",
+                min: 140,
+                max: 280,
+                unit: "U/L",
+                desc: "آنزیم موجود در اکثر بافت‌ها که نشان‌دهنده آسیب سلولی عمومی است.",
+                highCauses: "سکته قلبی، عفونت شديد، تخریب بافتی، کم‌خونی همولیتیک.",
+                lowCauses: "معمولاً فاقد اهمیت بالینی است."
+            },
+            {
+                code: "LDL",
+                fullName: "Low-Density Lipoprotein",
+                faName: "کلسترول بد (LDL)",
+                category: "lipid",
+                categoryFa: "چربی خون",
+                rangeText: "< 100 mg/dL",
+                min: 50,
+                max: 100,
+                unit: "mg/dL",
+                desc: "چربی مضر که باعث رسوب کلسترول در دیواره عروق می‌شود.",
+                highCauses: "مصرف چربی اشباع، کم‌تحرکی، ژنتیک، کم‌کاری تیروئید.",
+                lowCauses: "سوءتغذیه، پرکاری تیروئید، مصرف استاتین."
+            },
+            {
+                code: "LH",
+                fullName: "Luteinizing Hormone",
+                faName: "هورمون لوتئینه‌کننده",
+                category: "thyroid",
+                categoryFa: "هورمونی",
+                rangeText: "1.2 - 12.5 mIU/mL",
+                min: 1.2,
+                max: 12.5,
+                unit: "mIU/mL",
+                desc: "هورمون محرک غدد جنسی جهت تخمک‌گذاری و ترشح تستوسترون.",
+                highCauses: "سندرم تخمدان پلی‌کیستیک (PCOS)، یائسگی.",
+                lowCauses: "اختلال هیپوفیز، بی اشتهایی عصبی."
+            },
+            {
+                code: "Lipase",
+                fullName: "Serum Lipase",
+                faName: "لیپاز سرم",
+                category: "biochem",
+                categoryFa: "گوارش و پانکراس",
+                rangeText: "0 - 160 U/L",
+                min: 0,
+                max: 160,
+                unit: "U/L",
+                desc: "آنزیم اختصاصی پانکراس برای هضم چربی‌ها.",
+                highCauses: "پانکراتیت حاد (التهاب لوزالمعده)، سنگ کیسه صفرا.",
+                lowCauses: "آسیب دائمی و مزمن سلول‌های پانکراس."
+            },
+            {
+                code: "MCH",
+                fullName: "Mean Corpuscular Hb",
+                faName: "متوسط هموگلوبین گلبولی",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "27 - 33 pg",
+                min: 27,
+                max: 33,
+                unit: "pg",
+                desc: "میانگین وزن هموگلوبین موجود در یک گلبول قرمز.",
+                highCauses: "کم‌خونی کمبود B12 یا فولات.",
+                lowCauses: "کم‌خونی فقر آهن، تالاسمی."
+            },
+            {
+                code: "MCHC",
+                fullName: "Mean Corpuscular Hb Conc.",
+                faName: "غلظت متوسط هموگلوبین گلبولی",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "32 - 36 g/dL",
+                min: 32,
+                max: 36,
+                unit: "g/dL",
+                desc: "غلظت هموگلوبین نسبت به حجم گلبول قرمز.",
+                highCauses: "اسفروسیتوز ارثی، سوختگی‌های شديد.",
+                lowCauses: "کم‌خونی فقر آهن شدید، تالاسمی."
+            },
+            {
+                code: "MCV",
+                fullName: "Mean Corpuscular Volume",
+                faName: "حجم متوسط گلبول قرمز",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "80 - 100 fL",
+                min: 80,
+                max: 100,
+                unit: "fL",
+                desc: "شاخص اندازه‌گیری میانگین حجم گلبول‌های قرمز.",
+                highCauses: "کمبود ویتامین B12/فولات، الکل، کم‌کاری تیروئید.",
+                lowCauses: "کم‌خونی فقر آهن، مینور تالاسمی."
+            },
+            {
+                code: "Mg",
+                fullName: "Magnesium",
+                faName: "منیزیم خون",
+                category: "vitamins",
+                categoryFa: "الکترولیت‌ها",
+                rangeText: "1.7 - 2.2 mg/dL",
+                min: 1.7,
+                max: 2.2,
+                unit: "mg/dL",
+                desc: "ماده معدنی ضروری برای عملکرد عضلانی و عصبی.",
+                highCauses: "نارسایی کلیه، مصرف زیاد آنتی‌اسیدها.",
+                lowCauses: "سوءتغذیه، مصرف الکل، دیابت، اسهال مزمن."
+            },
+            {
+                code: "Na",
+                fullName: "Sodium",
+                faName: "سدیم خون",
+                category: "vitamins",
+                categoryFa: "الکترولیت‌ها",
+                rangeText: "135 - 145 mEq/L",
+                min: 135,
+                max: 145,
+                unit: "mEq/L",
+                desc: "الکترولیت اصلی مایع خارج سلولی و تنظیم‌کننده تعادل آب بدن.",
+                highCauses: "کم‌آبی بدن، دیابت بی‌مزه، رژیم پرنمک.",
+                lowCauses: "تعریق با دریافت فقط آب، دیورتیک‌ها، اسهال."
+            },
+            {
+                code: "OGTT",
+                fullName: "Oral Glucose Tolerance Test",
+                faName: "تست تحمل گلوکز خوراکی",
+                category: "biochem",
+                categoryFa: "بیوشیمی و قند",
+                rangeText: "< 140 (۲ ساعته) mg/dL",
+                min: 70,
+                max: 140,
+                unit: "mg/dL",
+                desc: "سنجش توانایی بدن در پردازش گلوکز ۲ ساعت پس از نوشیدن محلول قند.",
+                highCauses: "دیابت، دیابت بارداری، پیش‌دیابت (140-199).",
+                lowCauses: "ترشح بیش از حد انسولین، هیپوگلیسمی."
+            },
+            {
+                code: "P / Phos",
+                fullName: "Phosphorus",
+                faName: "فسفر خون",
+                category: "vitamins",
+                categoryFa: "املاح و استخوان",
+                rangeText: "2.5 - 4.5 mg/dL",
+                min: 2.5,
+                max: 4.5,
+                unit: "mg/dL",
+                desc: "ماده معدنی همراه کلسیم در ساخت استخوان.",
+                highCauses: "نارسایی کلیه، کم‌کاری پاراتیروئید.",
+                lowCauses: "پرکاری پاراتیروئید، کمبود شدید ویتامین D."
+            },
+            {
+                code: "PLT",
+                fullName: "Platelets",
+                faName: "پلاکت‌ها",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "150,000 - 450,000 /µL",
+                min: 150000,
+                max: 450000,
+                unit: "/µL",
+                desc: "سلول‌های مسئول انعقاد و جلوگیری از خونریزی.",
+                highCauses: "التهاب مزمن، برداشتن طحال، عفونت.",
+                lowCauses: "بیماری خودایمنی (ITP)، شیمی‌درمانی، عفونت ویروسی."
+            },
+            {
+                code: "Prolactin",
+                fullName: "Prolactin (PRL)",
+                faName: "پرولاکتین",
+                category: "thyroid",
+                categoryFa: "هورمونی",
+                rangeText: "2 - 29 ng/mL",
+                min: 2,
+                max: 29,
+                unit: "ng/mL",
+                desc: "هورمون هیپوفیز مسئول ترشح شیر و تنظیم سیستم تناسلی.",
+                highCauses: "تومور هیپوفیز (پرولاکتینوما)، بارداری، استرس، کم‌کاری تیروئید.",
+                lowCauses: "کم‌کاری غده هیپوفیز."
+            },
+            {
+                code: "PSA",
+                fullName: "Prostate Specific Antigen",
+                faName: "آنتی‌ژن اختصاصی پروستات",
+                category: "coagulation",
+                categoryFa: "مارکرها و پروستات",
+                rangeText: "< 4.0 ng/mL",
+                min: 0,
+                max: 4.0,
+                unit: "ng/mL",
+                desc: "پروتئین تولید شده توسط غده پروستات جهت غربالگری.",
+                highCauses: "بزرگی خوش‌خیم پروستات (BPH)، التهاب پروستات، سرطان پروستات.",
+                lowCauses: "وضعیت طبیعی پروستات."
+            },
+            {
+                code: "PT",
+                fullName: "Prothrombin Time",
+                faName: "زمان پروترومبین",
+                category: "coagulation",
+                categoryFa: "انعقادی",
+                rangeText: "11.0 - 13.5 Sec",
+                min: 11.0,
+                max: 13.5,
+                unit: "Sec",
+                desc: "سنجش سرعت لخته شدن خون (مسیر خارجی انعقاد).",
+                highCauses: "مصرف وارفارین، بیماری کبدی، کمبود ویتامین K.",
+                lowCauses: "مصرف مکمل ویتامین K، غلظت بالای فاکتورهای انعقاد."
+            },
+            {
+                code: "PTT",
+                fullName: "Partial Thromboplastin Time",
+                faName: "زمان ترومبوپلاستین نسبی",
+                category: "coagulation",
+                categoryFa: "انعقادی",
+                rangeText: "25 - 35 Sec",
+                min: 25,
+                max: 35,
+                unit: "Sec",
+                desc: "سنجش سرعت لخته شدن خون (مسیر داخلی انعقاد)؛ پایش هپارین.",
+                highCauses: "مصرف هپارین، هموفیلی، بیماری کبدی.",
+                lowCauses: "التهاب حاد، سرطان‌ها."
+            },
+            {
+                code: "RBC",
+                fullName: "Red Blood Cell Count",
+                faName: "تعداد گلبول‌های قرمز",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "4.2 - 6.1 M/µL",
+                min: 4.2,
+                max: 6.1,
+                unit: "M/µL",
+                desc: "تعداد کل گلبول‌های قرمز مسئول انتقال اکسیژن.",
+                highCauses: "پلی‌سیتمی (غلظت خون)، بیماری قلبی-ریوی، کم‌آبی.",
+                lowCauses: "کم‌خونی‌ها، خونریزی، سوءتغذیه."
+            },
+            {
+                code: "RDW",
+                fullName: "Red Cell Distribution Width",
+                faName: "پراکندگی حجم گلبول قرمز",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "11.5 - 14.5 %",
+                min: 11.5,
+                max: 14.5,
+                unit: "%",
+                desc: "سنجش میزان تفاوت اندازه گلبول‌های قرمز خون از یکدیگر.",
+                highCauses: "کم‌خونی فقر آهن، کمبود B12.",
+                lowCauses: "یکنواخت بودن اندازه گلبول‌ها (طبیعی)."
+            },
+            {
+                code: "T3",
+                fullName: "Total Triiodothyronine",
+                faName: "تیروئید T3 کل",
+                category: "thyroid",
+                categoryFa: "تیروئید",
+                rangeText: "80 - 200 ng/dL",
+                min: 80,
+                max: 200,
+                unit: "ng/dL",
+                desc: "مجموع هورمون T3 در خون.",
+                highCauses: "پرکاری تیروئید، بارداری.",
+                lowCauses: "کم‌کاری تیروئید، بیماری مزمن."
+            },
+            {
+                code: "T4",
+                fullName: "Total Thyroxine",
+                faName: "تیروئید T4 کل",
+                category: "thyroid",
+                categoryFa: "تیروئید",
+                rangeText: "5.4 - 11.5 mcg/dL",
+                min: 5.4,
+                max: 11.5,
+                unit: "mcg/dL",
+                desc: "مجموع هورمون T4 در خون.",
+                highCauses: "پرکاری تیروئید، بارداری.",
+                lowCauses: "کم‌کاری تیروئید، بیماری کلیه یا کبد."
+            },
+            {
+                code: "Testosterone",
+                fullName: "Total Testosterone",
+                faName: "هورمون تستوسترون",
+                category: "thyroid",
+                categoryFa: "هورمونی",
+                rangeText: "300 - 1000 (مرد) | 15 - 70 (زن) ng/dL",
+                min: 15,
+                max: 1000,
+                unit: "ng/dL",
+                desc: "اصلی‌ترین هورمون آندروژن (جنسی) در بدن.",
+                highCauses: "تومورهای آدرنال یا بیضه/تخمدان، مصرف استروئید.",
+                lowCauses: "کم‌کاری غدد جنسی (هیپوگونادیسم)، استرس، سن بالا."
+            },
+            {
+                code: "TG",
+                fullName: "Triglycerides",
+                faName: "تری‌گلیسرید (چربی خون)",
+                category: "lipid",
+                categoryFa: "چربی خون",
+                rangeText: "< 150 mg/dL",
+                min: 50,
+                max: 150,
+                unit: "mg/dL",
+                desc: "چربی ذخیره‌کننده کالری‌های اضافه در بدن.",
+                highCauses: "مصرف شیرینی زیاد، چاقی، دیابت، الکل.",
+                lowCauses: "رژیم کم‌چرب، سوءتغذیه، پرکاری تیروئید."
+            },
+            {
+                code: "TIBC",
+                fullName: "Total Iron Binding Capacity",
+                faName: "ظرفیت کل اتصال آهن",
+                category: "vitamins",
+                categoryFa: "املاح و خون",
+                rangeText: "240 - 450 mcg/dL",
+                min: 240,
+                max: 450,
+                unit: "mcg/dL",
+                desc: "سنجش توانایی ترانسفرین در حمل آهن در خون.",
+                highCauses: "کم‌خونی فقر آهن (بدن سعی می‌کند ترانسفرین بیشتری برای جذب بفرستد).",
+                lowCauses: "هموکروماتوز (مازاد آهن)، سیروز، سوءتغذیه."
+            },
+            {
+                code: "Total Protein",
+                fullName: "Total Serum Protein",
+                faName: "پروتئین کل سرم",
+                category: "liver",
+                categoryFa: "کبدی و پروتئین",
+                rangeText: "6.0 - 8.3 g/dL",
+                min: 6.0,
+                max: 8.3,
+                unit: "g/dL",
+                desc: "مجموع آلبومین و گلوبولین موجود در خون.",
+                highCauses: "کم‌آبی شدید، بیماری‌های مغز استخوان (مالتیپل میلوما)، التهاب مزمن.",
+                lowCauses: "بیماری کبدی، سندرم نفروتیک، سوءتغذیه شديد."
+            },
+            {
+                code: "TSH",
+                fullName: "Thyroid Stimulating Hormone",
+                faName: "هورمون محرک تیروئید",
+                category: "thyroid",
+                categoryFa: "تیروئید",
+                rangeText: "0.4 - 4.0 mIU/L",
+                min: 0.4,
+                max: 4.0,
+                unit: "mIU/L",
+                desc: "هورمون هیپوفیز جهت تنظیم کارکرد غده تیروئید.",
+                highCauses: "کم‌کاری تیروئید (تیروئید کم‌کار است و هیپوفیز فشار می‌آورد).",
+                lowCauses: "پرکاری تیروئید."
+            },
+            {
+                code: "Uric Acid",
+                fullName: "Uric Acid",
+                faName: "اسید اوریک",
+                category: "kidney",
+                categoryFa: "کلیوی و متابولیک",
+                rangeText: "2.6 - 7.2 mg/dL",
+                min: 2.6,
+                max: 7.2,
+                unit: "mg/dL",
+                desc: "ماده حاصل از تجزیه پورین‌ها که توسط کلیه دفع می‌شود.",
+                highCauses: "نقرس، سنگ کلیه، مصرف گوشت قرمز بالا، نارسایی کلیه.",
+                lowCauses: "بیماری ویلسون، کمبود پورین در رژیم."
+            },
+            {
+                code: "Vit B12",
+                fullName: "Vitamin B12",
+                faName: "ویتامین B12",
+                category: "vitamins",
+                categoryFa: "ویتامین‌ها",
+                rangeText: "200 - 900 pg/mL",
+                min: 200,
+                max: 900,
+                unit: "pg/mL",
+                desc: "ویتامین حیاتی برای عملکرد اعصاب و گلبول‌های قرمز.",
+                highCauses: "مصرف بیش از حد مکمل B12.",
+                lowCauses: "گیاه‌خواری مطلق بدون مکمل، کم‌خونی پرنیشیوز، جراحی معده."
+            },
+            {
+                code: "Vit D3",
+                fullName: "25-Hydroxy Vitamin D",
+                faName: "ویتامین D3",
+                category: "vitamins",
+                categoryFa: "ویتامین‌ها",
+                rangeText: "30 - 100 ng/mL",
+                min: 30,
+                max: 100,
+                unit: "ng/mL",
+                desc: "ویتامین لازم برای جذب کلسیم و سلامت ایمنی و استخوان.",
+                highCauses: "سمیت به علت دوزهای مفرط مکمل.",
+                lowCauses: "عدم مواجهه با نور خورشید، عدم مصرف مکمل."
+            },
+            {
+                code: "VLDL",
+                fullName: "Very Low-Density Lipoprotein",
+                faName: "چربی VLDL",
+                category: "lipid",
+                categoryFa: "چربی خون",
+                rangeText: "2 - 30 mg/dL",
+                min: 2,
+                max: 30,
+                unit: "mg/dL",
+                desc: "نوعی چربی مضر حاصل از تری‌گلیسرید بالا.",
+                highCauses: "چاقی، تری‌گلیسرید بالا، دیابت.",
+                lowCauses: "رژیم غذایی بسیار کم‌چرب."
+            },
+            {
+                code: "WBC",
+                fullName: "White Blood Cell Count",
+                faName: "تعداد گلبول‌های سفید",
+                category: "cbc",
+                categoryFa: "خون‌شناسی (CBC)",
+                rangeText: "4,500 - 11,000 /µL",
+                min: 4500,
+                max: 11000,
+                unit: "/µL",
+                desc: "تعداد کل گلبول‌های سفید مسئول دفاع ایمنی بدن.",
+                highCauses: "عفونت باکتریایی یا ویروسی، التهاب، لوسمی.",
+                lowCauses: "عفونت ویروسی شديد، شیمی‌درمانی، نقص ایمنی."
+            }
+        ];
+
+        // Global States
+        let currentCategory = 'all';
+        let currentAlpha = 'ALL';
+        let searchQuery = '';
+        let viewMode = 'grid'; // 'grid' or 'table'
+        let selectedTest = null;
+        let favorites = JSON.parse(localStorage.getItem('lab_favs_m3') || '[]');
+        let showingFavsOnly = false;
+
+        // Ensure Strict A-Z Sorting
+        labDatabase.sort((a, b) => a.code.localeCompare(b.code));
+
+        // On Load
+        window.onload = function() {
+            populateAlphabetDropdown();
+            setupSearchListener();
+            renderContent();
+            updateFavBadge();
+        };
+
+        // Populate Alphabet Dropdown A-Z
+        function populateAlphabetDropdown() {
+            const select = document.getElementById('alphaSelect');
+            if (!select) return;
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+            let html = `<option value="ALL">الفبا A-Z (همه)</option>`;
+            alphabet.forEach(letter => {
+                html += `<option value="${letter}">حرف ${letter}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        function onAlphaSelectChange(val) {
+            currentAlpha = val;
+            renderContent();
+        }
+
+        // Live Search Handler
+        function setupSearchListener() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            input.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim().toLowerCase();
+                if (searchQuery.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+                renderContent();
+            });
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderContent();
+        }
+
+        // Category Filter
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.m3-chip').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            renderContent();
+        }
+
+        // Reset Filters
+        function resetFilters() {
+            currentCategory = 'all';
+            currentAlpha = 'ALL';
+            searchQuery = '';
+            showingFavsOnly = false;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            
+            const select = document.getElementById('alphaSelect');
+            if (select) select.value = 'ALL';
+
+            const favBtn = document.getElementById('favToggleBtn');
+            favBtn.classList.remove('bg-amber-500', 'text-white');
+            favBtn.classList.add('bg-slate-100', 'text-slate-700');
+
+            document.querySelectorAll('.m3-chip').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.m3-chip')[0].classList.add('active');
+
+            renderContent();
+        }
+
+        // Toggle Favorites
+        function toggleFavorite(code, event) {
+            if (event) event.stopPropagation();
+            if (favorites.includes(code)) {
+                favorites = favorites.filter(c => c !== code);
+            } else {
+                favorites.push(code);
+            }
+            localStorage.setItem('lab_favs_m3', JSON.stringify(favorites));
+            updateFavBadge();
+            renderContent();
+        }
+
+        function updateFavBadge() {
+            document.getElementById('favCountBadge').innerText = favorites.length;
+        }
+
+        function toggleFavoritesFilter() {
+            showingFavsOnly = !showingFavsOnly;
+            const btn = document.getElementById('favToggleBtn');
+            if (showingFavsOnly) {
+                btn.classList.add('bg-amber-500', 'text-white');
+                btn.classList.remove('bg-slate-100', 'text-slate-700');
+            } else {
+                btn.classList.remove('bg-amber-500', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            }
+            renderContent();
+        }
+
+        // View Mode Switcher
+        function setViewMode(mode) {
+            viewMode = mode;
+            const gridBtn = document.getElementById('viewGridBtn');
+            const tableBtn = document.getElementById('viewTableBtn');
+            const cardsCont = document.getElementById('cardsContainer');
+            const tableCont = document.getElementById('tableContainer');
+
+            if (mode === 'grid') {
+                gridBtn.classList.add('bg-m3-primary', 'text-white');
+                gridBtn.classList.remove('text-slate-600');
+                tableBtn.classList.remove('bg-m3-primary', 'text-white');
+                tableBtn.classList.add('text-slate-600');
+
+                cardsCont.classList.remove('hidden');
+                tableCont.classList.add('hidden');
+            } else {
+                tableBtn.classList.add('bg-m3-primary', 'text-white');
+                tableBtn.classList.remove('text-slate-600');
+                gridBtn.classList.remove('bg-m3-primary', 'text-white');
+                gridBtn.classList.add('text-slate-600');
+
+                tableCont.classList.remove('hidden');
+                cardsCont.classList.add('hidden');
+            }
+        }
+
+        // Filter Logic
+        function getFilteredData() {
+            return labDatabase.filter(item => {
+                if (currentCategory !== 'all' && item.category !== currentCategory) return false;
+                if (currentAlpha !== 'ALL' && !item.code.toUpperCase().startsWith(currentAlpha)) return false;
+                if (showingFavsOnly && !favorites.includes(item.code)) return false;
+                if (searchQuery) {
+                    const matchCode = item.code.toLowerCase().includes(searchQuery);
+                    const matchFull = item.fullName.toLowerCase().includes(searchQuery);
+                    const matchFa = item.faName.toLowerCase().includes(searchQuery);
+                    if (!matchCode && !matchFull && !matchFa) return false;
+                }
+                return true;
+            });
+        }
+
+        // Render UI
+        function renderContent() {
+            const data = getFilteredData();
+            document.getElementById('resultCountText').innerText = `نمایش ${data.length} مورد آزمایش به ترتیب A-Z`;
+
+            const cardsCont = document.getElementById('cardsContainer');
+            const tableBody = document.getElementById('tableBody');
+            const emptyRes = document.getElementById('emptyResult');
+
+            if (data.length === 0) {
+                cardsCont.classList.add('hidden');
+                document.getElementById('tableContainer').classList.add('hidden');
+                emptyRes.classList.remove('hidden');
+                return;
+            } else {
+                emptyRes.classList.add('hidden');
+                if (viewMode === 'grid') cardsCont.classList.remove('hidden');
+                else document.getElementById('tableContainer').classList.remove('hidden');
+            }
+
+            // Render Cards View & Table View
+            let cardsHtml = '';
+            let tableHtml = '';
+
+            data.forEach(item => {
+                const isFav = favorites.includes(item.code);
+                const favClass = isFav ? 'text-amber-500 fill-amber-500' : 'text-slate-300 hover:text-amber-400';
+
+                // Mobile / Responsive Card Layout
+                cardsHtml += `
+                <div onclick="openModal('${item.code}')" class="m3-card bg-white rounded-[1.75rem] p-4 border border-slate-200/80 shadow-xs hover:shadow-md cursor-pointer flex flex-col justify-between relative group">
+                    <div>
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="px-3 py-1 rounded-xl bg-m3-primaryContainer text-m3-onPrimaryContainer font-mono font-black text-sm tracking-wide">
+                                ${item.code}
+                            </span>
+                            <button onclick="toggleFavorite('${item.code}', event)" class="p-2 -mr-2 text-base transition ${favClass}" title="نشان کردن">
+                                <i class="fa-${isFav ? 'solid' : 'regular'} fa-bookmark"></i>
+                            </button>
+                        </div>
+
+                        <h3 class="text-sm font-bold text-slate-900 mb-0.5 leading-snug">${item.faName}</h3>
+                        <p class="text-[11px] font-medium text-slate-400 font-mono mb-3 dir-ltr text-right">${item.fullName}</p>
+
+                        <div class="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 mb-3">
+                            <div class="flex justify-between items-center text-[11px]">
+                                <span class="text-slate-400 font-medium">محدوده مرجع سلامت:</span>
+                                <span class="font-bold text-emerald-700 font-mono dir-ltr">${item.rangeText}</span>
+                            </div>
+                        </div>
+
+                        <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">${item.desc}</p>
+                    </div>
+
+                    <div class="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-bold">${item.categoryFa}</span>
+                        <span class="text-m3-primary font-bold flex items-center gap-1 group-hover:translate-x-[-2px] transition">
+                            تفسیر و عدد شما <i class="fa-solid fa-chevron-left text-[9px]"></i>
+                        </span>
+                    </div>
+                </div>
+                `;
+
+                // Desktop Table Layout
+                tableHtml += `
+                <tr onclick="openModal('${item.code}')" class="hover:bg-slate-50/80 transition cursor-pointer">
+                    <td class="p-4 text-center" onclick="event.stopPropagation()">
+                        <button onclick="toggleFavorite('${item.code}', event)" class="${favClass} text-sm">
+                            <i class="fa-${isFav ? 'solid' : 'regular'} fa-bookmark"></i>
+                        </button>
+                    </td>
+                    <td class="p-4 font-mono font-bold text-m3-primary">${item.code} <div class="text-[10px] text-slate-400 font-sans font-normal">${item.fullName}</div></td>
+                    <td class="p-4 font-bold text-slate-900">${item.faName}</td>
+                    <td class="p-4 text-slate-600">${item.categoryFa}</td>
+                    <td class="p-4 font-mono font-bold text-emerald-700 dir-ltr text-right">${item.rangeText}</td>
+                    <td class="p-4 font-mono text-slate-500">${item.unit}</td>
+                    <td class="p-4 text-center">
+                        <button class="px-3 py-1.5 rounded-full bg-m3-primaryContainer text-m3-onPrimaryContainer font-bold text-[11px] hover:bg-m3-primary hover:text-white transition">
+                            بررسی
+                        </button>
+                    </td>
+                </tr>
+                `;
+            });
+
+            cardsCont.innerHTML = cardsHtml;
+            tableBody.innerHTML = tableHtml;
+        }
+
+        // Modal Bottom Sheet Handlers & Safe Mobile Back Button Navigation Logic
+        let isModalOpen = false;
+
+        function openModal(code) {
+            selectedTest = labDatabase.find(i => i.code === code);
+            if (!selectedTest) return;
+
+            document.getElementById('modalCodeBadge').innerText = selectedTest.code;
+            document.getElementById('modalFullName').innerText = selectedTest.fullName;
+            document.getElementById('modalFaName').innerText = selectedTest.faName;
+            document.getElementById('modalCategory').innerText = selectedTest.categoryFa;
+            document.getElementById('modalNormalRange').innerText = selectedTest.rangeText;
+            document.getElementById('modalUnitBadge').innerText = selectedTest.unit;
+            document.getElementById('modalDescription').innerText = selectedTest.desc;
+            document.getElementById('modalHighCauses').innerText = selectedTest.highCauses;
+            document.getElementById('modalLowCauses').innerText = selectedTest.lowCauses;
+
+            document.getElementById('userCalcInput').value = '';
+            document.getElementById('calcResultContainer').classList.add('hidden');
+
+            document.getElementById('detailModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Push state into browser history safely
+            if (!isModalOpen) {
+                isModalOpen = true;
+                try {
+                    history.pushState({ modalOpen: true }, '', '#detail');
+                } catch (e) {
+                    // Safe fallback if history API is restricted in sandbox
+                }
+            }
+        }
+
+        function closeModal(fromPopState = false) {
+            const modalEl = document.getElementById('detailModal');
+            if (!isModalOpen && modalEl && modalEl.classList.contains('hidden')) return;
+
+            if (modalEl) modalEl.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+
+            if (isModalOpen) {
+                isModalOpen = false;
+                if (!fromPopState) {
+                    try {
+                        if (history.state && history.state.modalOpen) {
+                            history.back();
+                        }
+                    } catch (e) {
+                        // Safe fallback
+                    }
+                }
+            }
+        }
+
+        // Listen for browser/mobile hardware back button action
+        window.addEventListener('popstate', (event) => {
+            if (isModalOpen) {
+                closeModal(true);
+            }
+        });
+
+        // Interactive Health Value Calculator
+        function evaluateUserValue() {
+            if (!selectedTest) return;
+            const inputVal = parseFloat(document.getElementById('userCalcInput').value);
+            if (isNaN(inputVal)) return;
+
+            const resContainer = document.getElementById('calcResultContainer');
+            const statusBadge = document.getElementById('calcStatusBadge');
+            const markerPin = document.getElementById('calcMarkerPin');
+            const explanation = document.getElementById('calcExplanation');
+
+            resContainer.classList.remove('hidden');
+
+            const min = selectedTest.min;
+            const max = selectedTest.max;
+
+            let pinPercent = 50;
+
+            if (inputVal < min) {
+                pinPercent = 15;
+                statusBadge.innerText = 'پایین‌تر از محدوده نرمال (Low)';
+                statusBadge.className = 'px-3 py-1 rounded-full font-bold text-xs bg-amber-100 text-amber-900 border border-amber-200';
+                explanation.innerHTML = `عدد واردشده (<strong>${inputVal}</strong>) پایین‌تر از حد نرمال است. دلایل احتمالی: <span class="text-amber-800 font-medium">${selectedTest.lowCauses}</span>`;
+            } else if (inputVal > max) {
+                pinPercent = 85;
+                statusBadge.innerText = 'بالاتر از محدوده نرمال (High)';
+                statusBadge.className = 'px-3 py-1 rounded-full font-bold text-xs bg-rose-100 text-rose-900 border border-rose-200';
+                explanation.innerHTML = `عدد واردشده (<strong>${inputVal}</strong>) بالاتر از حد نرمال است. دلایل احتمالی: <span class="text-rose-800 font-medium">${selectedTest.highCauses}</span>`;
+            } else {
+                pinPercent = 50;
+                statusBadge.innerText = 'طبیعی و نرمال (Normal)';
+                statusBadge.className = 'px-3 py-1 rounded-full font-bold text-xs bg-emerald-100 text-emerald-900 border border-emerald-200';
+                explanation.innerHTML = `عدد واردشده (<strong>${inputVal} ${selectedTest.unit}</strong>) کاملاً در محدوده طبیعی و سلامت مرجع قرار دارد.`;
+            }
+
+            markerPin.style.right = `${100 - pinPercent}%`;
+        }
+    </script>
+</body>
+</html>
