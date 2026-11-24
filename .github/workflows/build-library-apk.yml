@@ -190,6 +190,7 @@ jobs:
           for p in Path("android/app/src/main/assets/offline/tools").glob("*/index.html"):
               s = p.read_text(encoding="utf-8")
               s = re.sub(r"""https?://cdnjs\.cloudflare\.com/ajax/libs/font-awesome/[^"' ]+/css/all\.min\.css""", "../../vendor/all.min.css", s)
+              s = s.replace("https://cdn.tailwindcss.com", "../../vendor/tailwind.js")
               p.write_text(s, encoding="utf-8")
           PY
           echo "Downloaded tool entry points:"
