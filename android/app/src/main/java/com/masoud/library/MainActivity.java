@@ -28,6 +28,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.webkit.GeolocationPermissions;
+import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
     // Version-aware update banner release.
@@ -35,6 +36,7 @@ public class MainActivity extends Activity {
     private WebView webView;
     private WebView popupWebView;
     private boolean offlineFallbackLoaded = false;
+    private WebViewAssetLoader assetLoader;
     private ValueCallback<Uri[]> filePathCallback;
     private GeolocationPermissions.Callback pendingGeoCallback;
     private String pendingGeoOrigin;
@@ -67,6 +69,10 @@ public class MainActivity extends Activity {
         webView.setBackgroundColor(0xFF160A06);
         setContentView(webView);
 
+        assetLoader = new WebViewAssetLoader.Builder()
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
+
         WebSettings settings = webView.getSettings();
 
         settings.setJavaScriptEnabled(true);
@@ -98,6 +104,11 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidApp");
 
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request,
@@ -158,7 +169,8 @@ public class MainActivity extends Activity {
             // Allow the weather page to request Android location permission through WebView.
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                if (origin == null || !origin.startsWith("https://masoud73d.github.io")) {
+                if (origin == null || !(origin.startsWith("https://masoud73d.github.io")
+                        || origin.startsWith("https://appassets.androidplatform.net"))) {
                     callback.invoke(origin, false, false);
                     return;
                 }
@@ -254,12 +266,8 @@ public class MainActivity extends Activity {
             }
         });
 
-        if (isNetworkAvailable()) {
-            webView.loadUrl(WEBSITE_URL + "?refresh=" + System.currentTimeMillis());
-        } else {
-            offlineFallbackLoaded = true;
-            webView.loadUrl("file:///android_asset/offline/index.html");
-        }
+        offlineFallbackLoaded = true;
+        webView.loadUrl("https://appassets.androidplatform.net/assets/offline/index.html");
     }
 
     private boolean isNetworkAvailable() {
