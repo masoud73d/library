@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111a35">
+<title>آب‌وهوای من | پیش‌بینی هوا</title>
+<style>
+:root{--bg:#10172e;--glass:rgba(255,255,255,.085);--glass2:rgba(255,255,255,.12);--border:rgba(255,255,255,.14);--text:#f5f7ff;--muted:#b9c4df;--blue:#74c7ff;--purple:#a69bff;--radius:23px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--text);font-family:Tahoma,Arial,sans-serif;background:radial-gradient(ellipse at 10% 0%,rgba(87,103,220,.30),transparent 38%),radial-gradient(ellipse at 90% 30%,rgba(23,177,213,.17),transparent 35%),linear-gradient(145deg,#0b1228,#172345 55%,#10172e);background-attachment:fixed}
+button,select{font:inherit}button{cursor:pointer}
+.app{width:min(1100px,100%);margin:auto;padding:18px 15px 40px}
+.topbar{display:flex;justify-content:flex-start;align-items:center;margin-bottom:8px}
+.about-small{border:1px solid var(--border);color:#e7e9ff;background:rgba(255,255,255,.075);border-radius:12px;padding:8px 12px;font-size:12px}
+header{text-align:center;margin:0 0 24px}
+.logo{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:20px;background:linear-gradient(135deg,#77d4ff,#a49aff);font-size:31px;box-shadow:0 8px 30px #5c8ff34d}
+h1{font-size:clamp(23px,5vw,32px);margin:12px 0 7px}
+.subtitle{color:var(--muted);font-size:13px}
+.glass{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 12px 35px rgba(0,0,0,.13)}
+.panel{padding:19px;margin-bottom:17px}
+.section-title{font-size:16px;margin:0 0 15px}
+.select-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+.custom-select{position:relative;width:100%}
+.custom-select select{appearance:none;-webkit-appearance:none;width:100%;min-height:49px;padding:12px 14px 12px 38px;border:1px solid rgba(160,178,255,.28);border-radius:15px;outline:none;color:#f7f8ff;background:linear-gradient(135deg,rgba(115,145,255,.17),rgba(255,255,255,.065));transition:.2s}
+.custom-select select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(116,199,255,.12)}
+.custom-select select option{background:#172342;color:#fff}
+.custom-select:after{content:"⌄";position:absolute;left:14px;top:50%;transform:translateY(-55%);color:var(--blue);pointer-events:none}
+.primary{width:100%;border:0;border-radius:15px;padding:14px;font-weight:bold;transition:.2s;margin-top:15px;color:#10172e;background:linear-gradient(100deg,#8bdcff,#b7a5ff);box-shadow:0 7px 22px rgba(108,158,255,.2)}
+.primary:hover{transform:translateY(-1px)}.primary:disabled{opacity:.6;cursor:wait}.location-button{width:100%;border:1px solid #65b9d2;border-radius:15px;padding:13px;font-weight:bold;color:#176d91;background:linear-gradient(100deg,#e8faff,#dff8f1);margin-top:12px}.location-button:disabled{opacity:.6;cursor:wait}
+.status{color:var(--muted);text-align:center;font-size:12px;min-height:18px;margin-top:11px}.error{color:#ffb5bd}.hidden{display:none!important}
+.weather-hero{position:relative;overflow:hidden;padding:23px;background:linear-gradient(125deg,rgba(95,151,255,.22),rgba(161,133,255,.12),rgba(255,255,255,.055))}
+.location{color:var(--muted);font-size:13px}.hero-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.temperature{font-size:clamp(53px,13vw,78px);font-weight:700;letter-spacing:-3px;line-height:1.2}
+.condition{font-size:15px;margin-top:5px}.feels{color:var(--muted);font-size:12px;margin-top:9px}
+.weather-icon{font-size:clamp(65px,17vw,100px)}
+.minmax{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:17px 0}
+.metric{padding:15px 12px;min-height:112px}.metric-icon{font-size:22px}.metric-label{color:var(--muted);font-size:11px;margin:9px 0 6px}.metric-value{font-size:18px;font-weight:bold}.metric-sub{color:var(--muted);font-size:10px;margin-top:5px}
+.forecast-row{display:flex;gap:10px;overflow-x:auto;padding:3px 1px 10px;scrollbar-width:thin;scrollbar-color:#6475a8 transparent}
+.hour-card,.day-card{flex:0 0 90px;text-align:center;padding:13px 8px;background:rgba(255,255,255,.055);border:1px solid var(--border);border-radius:17px}
+.hour-time,.day-name{color:var(--muted);font-size:11px}.hour-icon,.day-icon{font-size:25px;margin:10px 0}.hour-temp,.day-temp{font-weight:bold;font-size:15px}.hour-rain{font-size:10px;color:#9bdcff;margin-top:8px}
+.day-card{flex-basis:115px}.day-date{color:var(--muted);font-size:10px;margin-top:7px}.day-low{color:#b6c6e9;font-size:12px;margin-top:7px}
+.advice{display:grid;grid-template-columns:1fr 1fr;gap:12px}.advice-card{padding:17px}.advice-card h3{font-size:14px;margin:0 0 10px}.advice-card p{font-size:12px;line-height:2;color:#d5def3;margin:0}
+footer{text-align:center;font-size:11px;color:#8795b8;margin-top:24px}
+.modal{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,7,20,.72);backdrop-filter:blur(9px)}
+.modal-box{width:min(380px,100%);padding:25px;text-align:center}.modal-box h2{margin-top:0;font-size:20px}.modal-box p{line-height:2.1;font-size:13px;color:#d8e0f7}
+.close-btn{border:1px solid var(--border);background:var(--glass2);color:white;border-radius:12px;padding:10px 24px}
+@media(max-width:600px){.app{padding:14px 12px 30px}.panel{padding:15px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{min-height:106px}.advice{grid-template-columns:1fr}.weather-hero{padding:19px}}
+
+/* MASOUD_VISUAL_REDESIGN_V1 */
+:root{--bg:#e9f6fb;--glass:rgba(255,255,255,.78);--glass2:rgba(255,255,255,.92);--border:rgba(70,145,177,.22);--text:#18394b;--muted:#58798b;--blue:#238fc1;--purple:#58b7c9;--radius:23px}body{background:radial-gradient(ellipse at 10% 0%,#b9eaff,transparent 38%),radial-gradient(ellipse at 90% 30%,#c8f4e7,transparent 34%),linear-gradient(145deg,#f4fbff,#dceff5)!important;color:#18394b!important}.glass,.panel{background:linear-gradient(145deg,#ffffffed,#eaf7fbdd)!important;border-color:#b8dce8!important;box-shadow:0 14px 38px #39758a20!important}h1,h2,.section-title{color:#176d91!important}.logo,.primary{background:linear-gradient(135deg,#39a9d2,#66cbb5)!important;color:white!important}.custom-select select,select{background:#f8fdff!important;color:#21495d!important;border-color:#b7d8e4!important}.custom-select select option{background:#fff;color:#21495d}
+
+/* MASOUD_READABILITY_FIX_2026_11 */
+:root{--muted:#3f6072;--text:#17394b}
+body{color:#17394b}
+.subtitle,.location,.feels,.minmax,.metric-label,.metric-sub,.hour-time,.day-name,.day-date,.day-low,.status,.field label{color:#3d5d70}
+.advice-card p{color:#294d60}
+.hour-rain{color:#176f8d}
+footer{color:#456879}
+.day-low{color:#365b70}
+.metric-value,.hour-temp,.day-temp{color:#17394b}
+
+
+/* MASOUD_ABOUT_BUTTON_READABILITY_FIX_2026_11_21 */
+.about-small{
+  color:#174f68!important;
+  background:#e7f6fb!important;
+  border:1px solid #79b9cf!important;
+  font-weight:700!important;
+}
+.about-small:focus-visible,.close-btn:focus-visible{
+  outline:3px solid #238fc1!important;
+  outline-offset:3px;
+}
+.modal-box h2{color:#176d91!important}
+.modal-box p{color:#294d60!important}
+.close-btn{
+  color:#174f68!important;
+  background:#e7f6fb!important;
+  border:1px solid #79b9cf!important;
+  font-weight:700!important;
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <button class="about-small" id="aboutButton">ⓘ درباره من</button>
+  </div>
+  <header>
+    <div class="logo">🌤️</div>
+    <h1>آب‌وهوای من</h1>
+    <div class="subtitle">پیش‌بینی وضعیت هوا، برای امروز و روزهای آینده</div>
+  </header>
+
+  <section class="glass panel">
+    <h2 class="section-title">📍 انتخاب موقعیت</h2>
+    <div class="select-grid">
+      <div class="field"><label for="province">استان</label><div class="custom-select"><select id="province"></select></div></div>
+      <div class="field"><label for="city">شهر</label><div class="custom-select"><select id="city"></select></div></div>
+    </div>
+    <button class="location-button" id="useMyLocation" type="button">📍 مکان من</button>
+    <button class="primary" id="getWeather">☁️ دریافت آخرین وضعیت هوا</button>
+    <div class="status" id="status" aria-live="polite">استان و شهر را انتخاب کنید.</div>
+  </section>
+
+  <div id="weatherContent" class="hidden">
+    <section class="glass weather-hero">
+      <div class="location" id="location">—</div>
+      <div class="hero-main"><div>
+        <div class="temperature"><span id="temperature">--</span>°</div>
+        <div class="condition" id="condition">—</div>
+        <div class="feels">احساس واقعی: <b id="feels">--</b>°</div>
+      </div><div class="weather-icon" id="mainIcon">🌤️</div></div>
+      <div class="minmax" id="minmax">کمینه: --° | بیشینه: --°</div>
+    </section>
+
+    <div class="grid">
+      <div class="glass metric"><div class="metric-icon">💧</div><div class="metric-label">رطوبت</div><div class="metric-value" id="humidity">--%</div><div class="metric-sub">رطوبت نسبی هوا</div></div>
+      <div class="glass metric"><div class="metric-icon">💨</div><div class="metric-label">سرعت باد</div><div class="metric-value" id="wind">--</div><div class="metric-sub" id="windDirection">کیلومتر بر ساعت</div></div>
+      <div class="glass metric"><div class="metric-icon">🌧️</div><div class="metric-label">احتمال بارش</div><div class="metric-value" id="rain">--%</div><div class="metric-sub">احتمال بارندگی امروز</div></div>
+      <div class="glass metric"><div class="metric-icon">☀️</div><div class="metric-label">شاخص UV</div><div class="metric-value" id="uv">--</div><div class="metric-sub" id="uvText">شاخص فرابنفش</div></div>
+    </div>
+    <section class="glass panel"><h2 class="section-title">🕒 پیش‌بینی ساعتی</h2><div class="forecast-row" id="hourly"></div></section>
+    <section class="glass panel"><h2 class="section-title">📅 پیش‌بینی ۷ روز آینده</h2><div class="forecast-row" id="daily"></div></section>
+    <section class="advice">
+      <div class="glass advice-card"><h3>👕 پیشنهاد پوشش</h3><p id="clothing">—</p></div>
+      <div class="glass advice-card"><h3>🎒 وسایل پیشنهادی</h3><p id="items">—</p></div>
+    </section>
+  </div>
+  <footer>اطلاعات هواشناسی با استفاده از Open-Meteo</footer>
+</div>
+
+<div class="modal hidden" id="aboutModal" role="dialog" aria-modal="true">
+  <div class="glass modal-box">
+    <div style="font-size:42px;margin-bottom:12px">👨‍💻</div>
+    <h2>درباره توسعه‌دهنده</h2>
+    <p><b>developer:</b> masoud delavar<br><b>email:</b> masoud0098d@gmail.com</p>
+    <button class="close-btn" id="closeAbout">بستن</button>
+  </div>
+</div>
+
+<script>
+/* مختصات شهرها: [عرض جغرافیایی، طول جغرافیایی] */
+const provinces = {
+"آذربایجان شرقی":{
+"تبریز":[38.08,46.29],"مراغه":[37.39,46.24],"مرند":[38.43,45.77],"میانه":[37.42,47.72],"اهر":[38.48,47.07],"بناب":[37.34,46.06],"اسکو":[37.92,46.12],"عجب‌شیر":[37.48,45.89],"شبستر":[38.18,45.70],"سراب":[37.94,47.54],"ملکان":[37.15,46.10],"هشترود":[37.47,47.05],"جلفا":[38.94,45.63],"کلیبر":[38.86,47.04],"آذرشهر":[37.76,45.98],"ورزقان":[38.51,46.65],"بستان‌آباد":[37.84,46.83],"هوراند":[38.86,47.37]},
+"آذربایجان غربی":{
+"ارومیه":[37.55,45.07],"خوی":[38.55,44.95],"مهاباد":[36.76,45.72],"بوکان":[36.52,46.21],"میاندوآب":[36.97,46.10],"سلماس":[38.20,44.77],"پیرانشهر":[36.70,45.14],"نقده":[36.95,45.39],"ماکو":[39.29,44.51],"سردشت":[36.15,45.48],"شاهین‌دژ":[36.68,46.57],"تکاب":[36.40,47.11],"چالدران":[39.06,44.38],"اشنویه":[37.04,45.10],"شوط":[39.22,44.77],"پلدشت":[39.35,45.07],"چایپاره":[38.90,45.00]},
+"اردبیل":{
+"اردبیل":[38.25,48.30],"پارس‌آباد":[39.65,47.92],"مشگین‌شهر":[38.40,47.68],"خلخال":[37.62,48.53],"گرمی":[39.03,48.08],"بیله‌سوار":[39.36,48.35],"نمین":[38.42,48.48],"نیر":[38.03,48.00],"کوثر":[37.77,48.34],"اصلاندوز":[39.44,47.41],"سرعین":[38.15,48.07],"هیر":[38.08,48.50]},
+"اصفهان":{
+"اصفهان":[32.65,51.67],"کاشان":[33.98,51.43],"نجف‌آباد":[32.63,51.37],"خمینی‌شهر":[32.68,51.53],"شاهین‌شهر":[32.87,51.57],"فلاورجان":[32.56,51.51],"زرین‌شهر":[32.39,51.38],"شهرضا":[31.99,51.87],"نائین":[32.86,53.09],"گلپایگان":[33.45,50.29],"خوانسار":[33.22,50.31],"آران و بیدگل":[34.06,51.48],"مبارکه":[32.35,51.50],"دهاقان":[31.94,51.65],"اردستان":[33.38,52.37],"سمیرم":[31.41,51.57],"تیران":[32.70,51.15],"فریدون‌شهر":[32.94,50.12],"داران":[32.99,50.41],"باغ‌بهادران":[32.38,51.19],"خور و بیابانک":[33.77,55.08],"نطنز":[33.51,51.92]},
+"البرز":{
+"کرج":[35.84,50.94],"فردیس":[35.72,50.98],"نظرآباد":[35.95,50.61],"هشتگرد":[35.96,50.68],"محمدشهر":[35.75,50.90],"ماهدشت":[35.72,50.80],"اشتهارد":[35.72,50.37],"طالقان":[36.17,50.77],"کمال‌شهر":[35.87,50.88],"گرمدره":[35.76,51.07],"چهارباغ":[35.84,50.85]},
+"ایلام":{
+"ایلام":[33.64,46.42],"دهلران":[32.69,47.27],"آبدانان":[32.99,47.42],"مهران":[33.12,46.16],"دره‌شهر":[33.14,47.38],"ایوان":[33.83,46.30],"چرداول":[33.77,46.57],"بدره":[33.31,47.04],"سرابله":[33.77,46.57],"ملکشاهی":[33.39,46.60],"موسیان":[32.52,47.37]},
+"بوشهر":{
+"بوشهر":[28.92,50.84],"برازجان":[29.27,51.22],"گناوه":[29.58,50.52],"کنگان":[27.84,52.06],"عسلویه":[27.48,52.61],"دیر":[27.84,51.94],"جم":[27.83,52.33],"خورموج":[28.65,51.38],"اهرم":[28.88,51.27],"دیلم":[30.05,50.16],"دلوار":[28.75,51.07],"بردخون":[28.06,51.47]},
+"تهران":{
+"تهران":[35.69,51.39],"شهریار":[35.66,51.06],"دماوند":[35.72,52.07],"ری":[35.59,51.44],"پردیس":[35.74,51.82],"اسلامشهر":[35.55,51.23],"ورامین":[35.32,51.65],"پاکدشت":[35.47,51.68],"قدس":[35.72,51.11],"ملارد":[35.67,50.98],"رباط‌کریم":[35.48,51.08],"قرچک":[35.44,51.57],"شمیرانات":[35.95,51.57],"فیروزکوه":[35.76,52.77],"پیشوا":[35.31,51.73],"لواسان":[35.82,51.63],"بومهن":[35.73,51.87],"رودهن":[35.73,51.91],"اندیشه":[35.72,51.02],"پاکدشت":[35.47,51.68]},
+"چهارمحال و بختیاری":{
+"شهرکرد":[32.33,50.86],"بروجن":[31.97,51.29],"فارسان":[32.26,50.56],"لردگان":[31.51,50.83],"فرخ‌شهر":[32.27,50.98],"اردل":[32.00,50.66],"کوهرنگ":[32.45,50.12],"سامان":[32.45,50.91],"بن":[32.54,50.75],"کیان":[32.28,50.89],"هفشجان":[32.23,50.79],"جونقان":[32.14,50.68]},
+"خراسان جنوبی":{
+"بیرجند":[32.87,59.22],"طبس":[33.60,56.92],"قائن":[33.73,59.18],"فردوس":[34.02,58.17],"نهبندان":[31.54,60.04],"سربیشه":[32.57,59.80],"سرایان":[33.86,58.52],"بشرویه":[33.85,57.42],"درمیان":[32.92,60.15],"خوسف":[32.78,58.89],"زیرکوه":[33.52,60.37]},
+"خراسان رضوی":{
+"مشهد":[36.30,59.60],"نیشابور":[36.21,58.80],"سبزوار":[36.21,57.68],"تربت حیدریه":[35.27,59.22],"قوچان":[37.11,58.51],"کاشمر":[35.24,58.46],"تربت جام":[35.24,60.62],"تایباد":[34.74,60.78],"خواف":[34.57,60.14],"چناران":[36.65,59.12],"درگز":[37.44,59.11],"سرخس":[36.54,61.16],"فریمان":[35.71,59.85],"گناباد":[34.35,58.68],"بردسکن":[35.26,57.97],"طرقبه":[36.31,59.37],"فیروزه":[36.28,58.58],"رشتخوار":[34.97,59.62],"کلات":[36.99,59.77],"بجستان":[34.52,58.18]},
+"خراسان شمالی":{
+"بجنورد":[37.47,57.33],"شیروان":[37.40,57.93],"اسفراین":[37.08,57.51],"جاجرم":[36.95,56.38],"فاروج":[37.23,58.22],"آشخانه":[37.56,56.93],"گرمه":[36.99,56.29],"راز":[37.93,57.11],"صفی‌آباد":[36.70,57.93]},
+"خوزستان":{
+"اهواز":[31.32,48.67],"آبادان":[30.34,48.30],"خرمشهر":[30.44,48.18],"دزفول":[32.38,48.40],"ماهشهر":[30.56,49.19],"بهبهان":[30.59,50.24],"اندیمشک":[32.46,48.35],"شوشتر":[32.05,48.86],"شوش":[32.19,48.24],"ایذه":[31.83,49.87],"مسجدسلیمان":[31.94,49.30],"رامهرمز":[31.28,49.60],"شادگان":[30.65,48.66],"سوسنگرد":[31.56,48.18],"هندیجان":[30.24,49.71],"امیدیه":[30.75,49.71],"لالی":[32.33,49.09],"باغ‌ملک":[31.52,49.88],"هفتکل":[31.45,49.53],"حمیدیه":[31.48,48.43],"گتوند":[32.25,48.82]},
+"زنجان":{
+"زنجان":[36.67,48.48],"ابهر":[36.15,49.22],"خرمدره":[36.21,49.19],"قیدار":[36.12,48.59],"ماهنشان":[36.74,47.67],"طارم":[36.95,48.96],"سلطانیه":[36.43,48.79],"زرین‌آباد":[36.42,48.28],"دندی":[36.55,47.62]},
+"سمنان":{
+"سمنان":[35.58,53.39],"شاهرود":[36.42,54.98],"دامغان":[36.17,54.34],"گرمسار":[35.22,52.34],"مهدی‌شهر":[35.70,53.35],"بسطام":[36.48,55.00],"میامی":[36.41,55.65],"آرادان":[35.25,52.50],"سرخه":[35.46,53.21],"ایوانکی":[35.35,52.07]},
+"سیستان و بلوچستان":{
+"زاهدان":[29.50,60.86],"چابهار":[25.29,60.64],"زابل":[31.03,61.49],"ایرانشهر":[27.20,60.68],"خاش":[28.22,61.21],"سراوان":[27.37,62.33],"نیک‌شهر":[26.23,60.22],"کنارک":[25.36,60.40],"راسک":[26.23,61.40],"میرجاوه":[29.02,61.45],"زهک":[30.89,61.68],"هیرمند":[31.11,61.41],"بمپور":[27.12,60.46],"فنوج":[26.57,59.64],"قصرقند":[26.22,60.75],"سیب و سوران":[27.11,61.56]},
+"فارس":{
+"شیراز":[29.59,52.58],"مرودشت":[29.87,52.80],"کازرون":[29.62,51.65],"جهرم":[28.50,53.56],"فسا":[28.94,53.65],"لار":[27.67,54.34],"داراب":[28.75,54.54],"فیروزآباد":[28.84,52.57],"آباده":[31.16,52.65],"اقلید":[30.90,52.69],"استهبان":[29.13,54.04],"نی‌ریز":[29.20,54.33],"سپیدان":[30.24,51.99],"اقلید":[30.90,52.69],"لامرد":[27.34,53.18],"مهر":[27.55,52.88],"گراش":[27.67,54.14],"زرین‌دشت":[28.35,54.42],"ارسنجان":[29.91,53.31],"خرامه":[29.50,53.32],"سروستان":[29.27,53.22],"خنج":[27.89,53.43],"بوانات":[30.47,53.64],"قیر":[28.48,52.68]},
+"قزوین":{
+"قزوین":[36.27,50.00],"تاکستان":[36.07,49.70],"آبیک":[36.04,50.53],"الوند":[36.19,50.06],"بوئین‌زهرا":[35.77,50.06],"آوج":[35.58,49.22],"محمدیه":[36.22,50.18],"اقبالیه":[36.23,49.92],"محمودآباد نمونه":[36.29,49.90]},
+"قم":{
+"قم":[34.64,50.88],"جعفریه":[34.77,50.52],"دستجرد":[34.55,50.25],"سلفچگان":[34.47,50.46],"کهک":[34.39,50.87],"قنوات":[34.61,51.03],"قاهان":[34.90,50.13]},
+"کردستان":{
+"سنندج":[35.31,46.99],"سقز":[36.25,46.27],"مریوان":[35.52,46.18],"بانه":[35.99,45.89],"قروه":[35.17,47.80],"بیجار":[35.87,47.61],"کامیاران":[34.80,46.94],"دیواندره":[35.91,47.02],"دهگلان":[35.44,47.42],"سروآباد":[35.31,46.37],"موچش":[34.81,47.15]},
+"کرمان":{
+"کرمان":[30.28,57.08],"رفسنجان":[30.41,55.99],"جیرفت":[28.68,57.74],"سیرجان":[29.45,55.68],"بم":[29.11,58.36],"زرند":[30.81,56.56],"کهنوج":[27.95,57.70],"بافت":[29.23,56.60],"بردسیر":[29.93,56.57],"راور":[31.27,56.81],"شهربابک":[30.12,55.12],"عنبرآباد":[28.48,57.85],"منوجان":[27.41,57.50],"قلعه‌گنج":[27.52,57.88],"فهرج":[28.95,58.89],"نرماشیر":[28.95,58.70],"ماهان":[30.06,57.29]},
+"کرمانشاه":{
+"کرمانشاه":[34.31,47.07],"اسلام‌آباد غرب":[34.11,46.53],"کنگاور":[34.50,47.96],"پاوه":[35.04,46.36],"جوانرود":[34.80,46.49],"سنقر":[34.78,47.60],"هرسین":[34.27,47.59],"صحنه":[34.48,47.69],"سرپل ذهاب":[34.46,45.86],"قصرشیرین":[34.51,45.58],"گیلانغرب":[34.14,45.92],"روانسر":[34.71,46.65],"ثلاث باباجانی":[34.74,45.99],"کوزران":[34.50,46.60]},
+"کهگیلویه و بویراحمد":{
+"یاسوج":[30.67,51.59],"دهدشت":[30.79,50.56],"گچساران":[30.36,50.80],"لیکک":[30.90,50.10],"سی‌سخت":[30.86,51.46],"چرام":[30.75,50.74],"باشت":[30.36,51.16],"لنده":[30.98,50.42],"دیشموک":[31.30,50.40],"قلعه‌رئیسی":[31.19,50.44]},
+"گلستان":{
+"گرگان":[36.84,54.44],"گنبد کاووس":[37.25,55.17],"علی‌آباد کتول":[36.91,54.87],"بندر ترکمن":[36.90,54.07],"آق‌قلا":[37.01,54.46],"کلاله":[37.38,55.49],"مینودشت":[37.23,55.37],"کردکوی":[36.79,54.11],"بندر گز":[36.77,53.95],"آزادشهر":[37.09,55.17],"رامیان":[37.02,55.14],"گالیکش":[37.27,55.43],"مراوه‌تپه":[37.90,55.96],"اینچه‌برون":[37.45,54.72]},
+"گیلان":{
+"رشت":[37.28,49.59],"بندر انزلی":[37.47,49.46],"لاهیجان":[37.21,50.00],"لنگرود":[37.20,50.15],"آستارا":[38.43,48.87],"تالش":[37.80,48.90],"فومن":[37.23,49.31],"صومعه‌سرا":[37.30,49.32],"رودسر":[37.14,50.29],"رودبار":[36.82,49.42],"آستانه اشرفیه":[37.26,49.94],"ماسال":[37.36,49.00],"شفت":[37.16,49.40],"املش":[37.09,50.19],"رضوانشهر":[37.55,49.14],"خمام":[37.39,49.65],"سیاهکل":[37.15,49.87],"کلاچای":[37.08,50.40],"چابکسر":[36.97,50.57]},
+"لرستان":{
+"خرم‌آباد":[33.49,48.36],"بروجرد":[33.90,48.75],"دورود":[33.50,49.06],"الیگودرز":[33.40,49.70],"ازنا":[33.45,49.45],"کوهدشت":[33.53,47.60],"نورآباد":[34.07,47.97],"الشتر":[33.86,48.26],"پلدختر":[33.15,47.71],"چگنی":[33.48,48.02],"دلفان":[34.05,47.96],"سپیددشت":[33.22,48.88]},
+"مازندران":{
+"ساری":[36.56,53.06],"بابل":[36.54,52.68],"آمل":[36.47,52.35],"قائم‌شهر":[36.46,52.86],"چالوس":[36.65,51.42],"نوشهر":[36.65,51.50],"بهشهر":[36.69,53.55],"تنکابن":[36.82,50.87],"رامسر":[36.91,50.66],"بابلسر":[36.70,52.65],"فریدونکنار":[36.69,52.52],"نکا":[36.65,53.30],"جویبار":[36.64,52.91],"محمودآباد":[36.63,52.26],"نور":[36.57,52.02],"کلاردشت":[36.49,51.15],"زیرآب":[36.18,52.97],"پل سفید":[36.11,53.06],"گلوگاه":[36.73,53.81],"عباس‌آباد":[36.72,51.11],"سوادکوه":[36.08,52.89],"کجور":[36.39,51.73]},
+"مرکزی":{
+"اراک":[34.09,49.70],"ساوه":[35.02,50.36],"خمین":[33.64,50.08],"محلات":[33.91,50.45],"دلیجان":[33.99,50.68],"تفرش":[34.69,50.01],"آشتیان":[34.52,50.00],"شازند":[33.93,49.41],"زرندیه":[35.30,50.35],"کمیجان":[34.72,49.32],"مهاجران":[34.05,49.43],"خنداب":[34.39,49.19],"فرمهین":[34.50,49.68]},
+"هرمزگان":{
+"بندرعباس":[27.19,56.27],"قشم":[26.96,56.27],"کیش":[26.53,53.98],"میناب":[27.15,57.08],"بندر لنگه":[26.56,54.88],"جاسک":[25.65,57.77],"حاجی‌آباد":[28.31,55.90],"رودان":[27.44,57.19],"پارسیان":[27.20,53.04],"بستک":[27.20,54.37],"خمیر":[26.95,55.58],"سیریک":[26.52,57.10],"ابوموسی":[25.88,55.03],"تیرور":[27.34,56.94],"درگهان":[26.96,56.07]},
+"همدان":{
+"همدان":[34.80,48.51],"ملایر":[34.30,48.82],"نهاوند":[34.19,48.38],"تویسرکان":[34.55,48.45],"اسدآباد":[34.78,48.12],"کبودرآهنگ":[35.21,48.72],"بهار":[34.90,48.44],"رزن":[35.39,49.03],"فامنین":[35.11,48.97],"لالجین":[34.97,48.47],"قروه درجزین":[35.31,49.10]},
+"یزد":{
+"یزد":[31.90,54.37],"میبد":[32.25,54.02],"اردکان":[32.31,54.02],"بافق":[31.60,55.40],"مهریز":[31.59,54.43],"تفت":[31.75,54.21],"ابرکوه":[31.13,53.28],"اشکذر":[32.00,54.20],"هرات":[30.05,54.37],"مروست":[30.48,54.21],"زارچ":[31.99,54.24],"بهاباد":[31.87,56.02]}
+};
+
+const $=id=>document.getElementById(id);
+const provinceSelect=$("province"),citySelect=$("city"),getButton=$("getWeather"),statusEl=$("status"),locationButton=$("useMyLocation");
+let currentCoordinates=null;
+provinceSelect.addEventListener("change",()=>{currentCoordinates=null;});
+citySelect.addEventListener("change",()=>{currentCoordinates=null;});
+function fillProvinces(){
+ provinceSelect.innerHTML="";
+ Object.keys(provinces).sort((a,b)=>a.localeCompare(b,"fa")).forEach(n=>provinceSelect.add(new Option(n,n)));
+ provinceSelect.value="تهران";fillCities();
+}
+function fillCities(){
+ const cities=provinces[provinceSelect.value];citySelect.innerHTML="";
+ Object.keys(cities).sort((a,b)=>a.localeCompare(b,"fa")).forEach(n=>citySelect.add(new Option(n,n)));
+ const preferred={"تهران":"تهران","اصفهان":"اصفهان","فارس":"شیراز","خراسان رضوی":"مشهد","البرز":"کرج","گیلان":"رشت","مازندران":"ساری"};
+ if(cities[preferred[provinceSelect.value]])citySelect.value=preferred[provinceSelect.value];
+}
+provinceSelect.addEventListener("change",fillCities);
+function weatherInfo(code,day=true){
+ if(code===0)return{text:"آسمان صاف",icon:day?"☀️":"🌙"};
+ if(code===1)return{text:"عمدتاً صاف",icon:day?"🌤️":"🌙"};
+ if(code===2)return{text:"کمی ابری",icon:"⛅"};
+ if(code===3)return{text:"ابری",icon:"☁️"};
+ if([45,48].includes(code))return{text:"مه‌آلود",icon:"🌫️"};
+ if([51,53,55,56,57].includes(code))return{text:"نم‌نم باران",icon:"🌦️"};
+ if([61,63,65,66,67,80,81,82].includes(code))return{text:"بارانی",icon:"🌧️"};
+ if([71,73,75,77,85,86].includes(code))return{text:"برفی",icon:"🌨️"};
+ if([95,96,99].includes(code))return{text:"رعدوبرق",icon:"⛈️"};
+ return{text:"وضعیت متغیر",icon:"🌤️"};
+}
+function windDirection(d){return["شمال","شمال‌شرق","شرق","جنوب‌شرق","جنوب","جنوب‌غرب","غرب","شمال‌غرب"][Math.round(d/45)%8]}
+function faDay(d){return new Date(d+"T12:00:00").toLocaleDateString("fa-IR",{weekday:"long"})}
+function faDate(d){return new Date(d+"T12:00:00").toLocaleDateString("fa-IR",{month:"short",day:"numeric"})}
+function uvDescription(v){if(v<3)return"کم";if(v<6)return"متوسط";if(v<8)return"زیاد";if(v<11)return"خیلی زیاد";return"شدید"}
+function makeAdvice(temp,rain,wind,uv){
+ let clothes=temp<=2?"لباس گرم چندلایه، کاپشن ضخیم، شال و دستکش بپوشید.":temp<=10?"کاپشن یا پالتو و لباس گرم همراه داشته باشید.":temp<=18?"لباس آستین‌بلند و ژاکت سبک مناسب است.":temp<=27?"لباس راحت و نسبتاً خنک انتخاب کنید.":"لباس نخی، روشن و خنک بپوشید و آب کافی بنوشید.";
+ let items=[];if(rain>=35)items.push("چتر یا بارانی");if(uv>=6)items.push("ضدآفتاب و عینک آفتابی");if(temp>=28)items.push("بطری آب");if(wind>=30)items.push("لباس مناسب باد");if(temp<=5)items.push("شال و دستکش گرم");if(!items.length)items.push("وسایل ضروری روزانه و یک لایه لباس اضافه");
+ $("clothing").textContent=clothes;$("items").textContent=items.join("، ")+" همراه داشته باشید.";
+}
+function setStatus(m,err=false){statusEl.textContent=m;statusEl.classList.toggle("error",err)}
+async function loadWeather(coordinates=null, locationLabel=null){
+ const province=provinceSelect.value,city=citySelect.value;
+ const [lat,lon]=coordinates||provinces[province][city];
+ getButton.disabled=true;getButton.textContent="در حال دریافت اطلاعات…";setStatus("در حال دریافت اطلاعات هواشناسی…");
+ try{
+  const params=new URLSearchParams({latitude:lat,longitude:lon,timezone:"auto",forecast_days:7,current:"temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m",hourly:"temperature_2m,precipitation_probability,weather_code",daily:"weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max"});
+  const response=await fetch("https://api.open-meteo.com/v1/forecast?"+params);
+  if(!response.ok)throw Error("weather");
+  const data=await response.json(),c=data.current,d=data.daily,cond=weatherInfo(c.weather_code,!!c.is_day);
+  $("location").textContent="📍 "+(locationLabel||(province+"، "+city));
+  $("temperature").textContent=Math.round(c.temperature_2m);$("feels").textContent=Math.round(c.apparent_temperature);
+  $("condition").textContent=cond.text;$("mainIcon").textContent=cond.icon;
+  $("minmax").textContent="کمینه: "+Math.round(d.temperature_2m_min[0])+"° | بیشینه: "+Math.round(d.temperature_2m_max[0])+"°";
+  $("humidity").textContent=c.relative_humidity_2m+"٪";$("wind").textContent=Math.round(c.wind_speed_10m)+" km/h";
+  $("windDirection").textContent="جهت "+windDirection(c.wind_direction_10m);
+  $("rain").textContent=(d.precipitation_probability_max?.[0]??0)+"٪";
+  const uv=d.uv_index_max?.[0]??0;$("uv").textContent=Number(uv).toLocaleString("fa-IR",{maximumFractionDigits:1});$("uvText").textContent=uvDescription(uv);
+  const hc=$("hourly");hc.innerHTML="";
+  let start=data.hourly.time.findIndex(t=>t.slice(0,13)===c.time.slice(0,13));if(start<0)start=0;
+  for(let i=start;i<Math.min(start+24,data.hourly.time.length);i++){
+   const w=weatherInfo(data.hourly.weather_code[i]);const card=document.createElement("div");card.className="hour-card";
+   const time=new Date(data.hourly.time[i]);
+   card.innerHTML='<div class="hour-time">'+time.toLocaleTimeString("fa-IR",{hour:"2-digit",minute:"2-digit"})+'</div><div class="hour-icon">'+w.icon+'</div><div class="hour-temp">'+Math.round(data.hourly.temperature_2m[i])+'°</div><div class="hour-rain">🌧 '+(data.hourly.precipitation_probability[i]??0)+'٪</div>';hc.appendChild(card);
+  }
+  const dc=$("daily");dc.innerHTML="";
+  for(let i=0;i<d.time.length;i++){
+   const w=weatherInfo(d.weather_code[i]),card=document.createElement("div");card.className="day-card";
+   card.innerHTML='<div class="day-name">'+(i===0?"امروز":faDay(d.time[i]))+'</div><div class="day-date">'+faDate(d.time[i])+'</div><div class="day-icon">'+w.icon+'</div><div class="day-temp">'+Math.round(d.temperature_2m_max[i])+'°</div><div class="day-low">کمینه '+Math.round(d.temperature_2m_min[i])+'°</div><div class="hour-rain">🌧 '+(d.precipitation_probability_max?.[i]??0)+'٪</div>';dc.appendChild(card);
+  }
+  makeAdvice(c.temperature_2m,d.precipitation_probability_max?.[0]??0,c.wind_speed_10m,uv);
+  $("weatherContent").classList.remove("hidden");setStatus("آخرین اطلاعات با موفقیت دریافت شد.");
+ }catch(e){setStatus("دریافت اطلاعات ناموفق بود. اینترنت را بررسی کنید و دوباره تلاش کنید.",true)}
+ finally{getButton.disabled=false;getButton.textContent="☁️ دریافت آخرین وضعیت هوا"}
+}
+$("aboutButton").addEventListener("click",()=>$("aboutModal").classList.remove("hidden"));
+$("closeAbout").addEventListener("click",()=>$("aboutModal").classList.add("hidden"));
+$("aboutModal").addEventListener("click",e=>{if(e.target===$("aboutModal"))$("aboutModal").classList.add("hidden")});
+getButton.addEventListener("click",()=>loadWeather());
+locationButton.addEventListener("click",()=>{
+ if(!("geolocation" in navigator)){setStatus("دسترسی موقعیت مکانی در این مرورگر پشتیبانی نمی‌شود.",true);return;}
+ locationButton.disabled=true;locationButton.textContent="در حال دریافت موقعیت…";setStatus("لطفاً اجازه دسترسی به موقعیت مکانی را صادر کنید.");
+ navigator.geolocation.getCurrentPosition(async position=>{
+  const coords=[position.coords.latitude,position.coords.longitude];currentCoordinates=coords;
+  let nearest=null,nearestDistance=Infinity;
+  for(const [p,cities] of Object.entries(provinces))for(const [name,point] of Object.entries(cities)){
+   const rad=x=>x*Math.PI/180, dLat=rad(point[0]-coords[0]),dLon=rad(point[1]-coords[1]);
+   const a=Math.sin(dLat/2)**2+Math.cos(rad(coords[0]))*Math.cos(rad(point[0]))*Math.sin(dLon/2)**2;
+   const km=6371*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+   if(km<nearestDistance){nearestDistance=km;nearest={province:p,city:name,point};}
+  }
+  let label="مکان من";
+  if(nearest&&nearestDistance<=40){provinceSelect.value=nearest.province;fillCities();citySelect.value=nearest.city;label=nearest.province+"، "+nearest.city;}
+  await loadWeather(coords,label);
+  locationButton.disabled=false;locationButton.textContent="📍 مکان من";
+ },error=>{
+  const messages={1:"اجازه دسترسی به موقعیت مکانی داده نشد. از تنظیمات برنامه، مجوز مکان را فعال کنید.",2:"موقعیت مکانی در دسترس نیست. GPS یا سرویس مکان‌یابی را بررسی کنید.",3:"دریافت موقعیت مکانی بیش از حد طول کشید. دوباره تلاش کنید."};
+  setStatus(messages[error.code]||"دریافت موقعیت مکانی ناموفق بود.",true);
+  locationButton.disabled=false;locationButton.textContent="📍 مکان من";
+ },{enableHighAccuracy:true,timeout:20000,maximumAge:60000});
+});
+fillProvinces();loadWeather();
+</script>
+</body>
+</html>
