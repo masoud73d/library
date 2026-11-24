@@ -64,6 +64,15 @@ jobs:
             echo "::warning::Persistent signing key is not fully configured. This APK will use a temporary debug key and must NOT be installed as the update version."
           fi
 
+      - name: Prepare offline Android assets
+        run: |
+          mkdir -p android/app/src/main/assets/offline
+          cp index.html android/app/src/main/assets/offline/index.html
+          cp library-bg.png android/app/src/main/assets/offline/library-bg.png
+          test -s android/app/src/main/assets/offline/index.html
+          test -s android/app/src/main/assets/offline/library-bg.png
+          test -s android/app/src/main/assets/offline/taghvim/index.html
+
       - name: Build APK
         working-directory: android
         env:
