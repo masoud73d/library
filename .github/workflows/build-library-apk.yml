@@ -136,11 +136,13 @@ jobs:
           from pathlib import Path
           p = Path("android/app/src/main/assets/offline/tools/Text-reader/index.html")
           s = p.read_text(encoding="utf-8")
-          old = 'return Tesseract.createWorker("fas+eng", 1, {'
-          new = 'return Tesseract.createWorker("fas+eng", 1, {\n          workerPath: "../../vendor/tesseract/worker.min.js",\n          corePath: "../../vendor/tesseract",\n          langPath: "../../vendor/tessdata",\n          gzip: true,'
-          if old not in s:
-              raise SystemExit("Could not find OCR worker configuration")
-          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          import re
+          pattern = r'Tesseract\\.createWorker\\(\\s*["\\']fas\\+eng["\\']\\s*,\\s*1\\s*,\\s*\\{'
+          replacement = 'Tesseract.createWorker("fas+eng", 1, {\\n          workerPath: "../../vendor/tesseract/worker.min.js",\\n          corePath: "../../vendor/tesseract",\\n          langPath: "../../vendor/tessdata",\\n          gzip: true,'
+          s, count = re.subn(pattern, lambda _: replacement, s, count=1)
+          if count != 1:
+              raise SystemExit("Could not find OCR worker configuration in bundled Text-reader")
+          p.write_text(s, encoding="utf-8")
           PY
           sed -i "s#https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json#./devices.json#g" "$ROOT/tools/etela-ate-system-/index.html"
           # Remove optional remote font imports; Android system fonts are used as fallback.
