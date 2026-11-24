@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>جدول تناوبی ۱۱۸ عنصر - متریال ۱۷</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Vazirmatn -->
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --m3-radius: 10px;
+            --font-vazir: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+            --expressive-easing: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: var(--font-vazir);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background-color: #030712;
+            color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+            width: 100vw;
+        }
+
+        /* Ambient cosmic space background */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.95) 0%, rgba(3, 7, 18, 1) 100%);
+        }
+
+        /* Viewport container holding page grids */
+        .grid-stage {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Fixed Grid for 4 cols x 10 rows without vertical clipping */
+        .page-grid {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-rows: repeat(10, minmax(0, 1fr));
+            gap: 3px;
+            padding: 2px;
+            box-sizing: border-box;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transform-origin: center center;
+        }
+
+        .page-grid.hidden-page {
+            display: none !important;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .page-grid {
+                gap: 5px;
+                padding: 4px;
+                max-width: 520px;
+            }
+        }
+
+        /* Material 17 Slim Tonal Card */
+        .m3-card {
+            background: var(--bg-surface, rgba(30, 41, 59, 0.85));
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+            border-radius: var(--m3-radius);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2px 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            min-height: 0;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+            transition: transform 0.15s var(--expressive-easing), border-color 0.15s ease;
+        }
+
+        .m3-card:active {
+            transform: scale(0.93);
+        }
+
+        .m3-card.dimmed {
+            opacity: 0.15;
+            filter: grayscale(80%);
+            pointer-events: none;
+        }
+
+        .m3-card.highlighted {
+            animation: m3Pulse 0.8s infinite alternate var(--expressive-easing);
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 12px #fbbf24 !important;
+            z-index: 20;
+        }
+
+        @keyframes m3Pulse {
+            0% { transform: scale(1.0); }
+            100% { transform: scale(1.04); }
+        }
+
+        .m3-num-pill {
+            font-size: 8px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.95);
+            background: rgba(0, 0, 0, 0.45);
+            padding: 0.5px 3px;
+            border-radius: 4px;
+            width: max-content;
+            line-height: 1;
+            direction: ltr;
+        }
+
+        .m3-symbol {
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
+            text-align: center;
+            font-family: system-ui, -apple-system, sans-serif;
+            letter-spacing: -0.3px;
+        }
+
+        .m3-name {
+            font-size: 8px;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #f8fafc;
+            width: 100%;
+            min-width: 0;
+        }
+
+        @media (min-width: 640px) {
+            .m3-num-pill { font-size: 9px; }
+            .m3-symbol { font-size: 16px; }
+            .m3-name { font-size: 9px; }
+        }
+
+        /* 12 Specifications Row Item */
+        .m3-spec-card {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .m3-spec-key {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .m3-spec-val {
+            color: #f8fafc;
+            font-size: 11px;
+            font-weight: 800;
+            text-align: left;
+            word-break: break-word;
+        }
+
+        .m3-drawer-scroll::-webkit-scrollbar { width: 4px; }
+        .m3-drawer-scroll::-webkit-scrollbar-track { background: transparent; }
+        .m3-drawer-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-[#030712] text-slate-100 antialiased select-none">
+
+    <div id="bg-canvas"></div>
+
+    <!-- Main Container Layout strictly separating Header, Grid, and Navigation -->
+    <div class="relative z-10 w-full h-dvh flex flex-col justify-between overflow-hidden p-2 sm:p-3 max-w-lg mx-auto">
+        
+        <!-- Top Header Component (Two Symmetrical Compact Bars) -->
+        <header class="shrink-0 flex flex-col gap-1.5 w-full">
+            <!-- Title Bar -->
+            <div class="w-full h-8 px-3 bg-slate-900/95 rounded-xl border border-white/10 shadow-lg flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white text-[10px] shadow-sm">
+                        <i class="fa-solid fa-atom"></i>
+                    </div>
+                    <h1 class="text-[11px] font-black text-white tracking-tight">
+                        جدول تناوبی ۱۱۸ عنصر
+                    </h1>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span class="text-[9.5px] font-bold text-slate-400">متریال ۱۷</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative w-full h-8">
+                <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="جستجو بر اساس نام، نماد یا عدد اتمی..." 
+                       class="w-full h-full bg-slate-900/95 border border-white/10 rounded-xl pr-8 pl-7 text-[11px] text-white placeholder-slate-400 focus:outline-none focus:border-sky-500/80 transition shadow-lg">
+                <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-[10px]">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Middle Grid Container (Scales to exact available height with zero overlap) -->
+        <main class="flex-1 min-h-0 w-full flex justify-center items-center py-1 overflow-hidden" id="viewportContainer">
+            <div class="grid-stage">
+                <div class="page-grid" id="page-0"></div>
+                <div class="page-grid hidden-page" id="page-1"></div>
+                <div class="page-grid hidden-page" id="page-2"></div>
+            </div>
+        </main>
+
+        <!-- Bottom Pagination Controls (Always sitting cleanly in document flow below grid) -->
+        <nav class="shrink-0 flex flex-col items-center gap-1 w-full pt-0.5">
+            <div class="flex items-center gap-2.5 bg-slate-900/95 px-3 py-1 rounded-xl border border-white/10 shadow-lg">
+                <button onclick="prevPage()" id="prevBtn" class="w-7 h-7 rounded-lg bg-slate-800/80 border border-white/10 text-slate-300 hover:text-white flex items-center justify-center transition disabled:opacity-25 disabled:pointer-events-none active:scale-95">
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+
+                <div class="flex items-center gap-1.5" id="pageDots">
+                    <button onclick="goToPage(0)" class="page-dot w-6 h-6 rounded-lg font-black text-[10px] transition bg-sky-500 text-slate-950 shadow-md">۱</button>
+                    <button onclick="goToPage(1)" class="page-dot w-6 h-6 rounded-lg font-black text-[10px] transition bg-slate-800/80 text-slate-400 hover:bg-slate-700">۲</button>
+                    <button onclick="goToPage(2)" class="page-dot w-6 h-6 rounded-lg font-black text-[10px] transition bg-slate-800/80 text-slate-400 hover:bg-slate-700">۳</button>
+                </div>
+
+                <button onclick="nextPage()" id="nextBtn" class="w-7 h-7 rounded-lg bg-slate-800/80 border border-white/10 text-slate-300 hover:text-white flex items-center justify-center transition disabled:opacity-25 disabled:pointer-events-none active:scale-95">
+                    <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+            </div>
+
+            <p class="text-[9px] text-slate-400 bg-slate-950/90 px-2.5 py-0.5 rounded-full border border-white/5 flex items-center gap-1">
+                <i class="fa-solid fa-hand-pointer text-sky-400 ml-0.5"></i> کشیدن انگشت از چپ به راست برای صفحه بعد
+            </p>
+        </nav>
+    </div>
+
+    <!-- Element Detail Modal Component -->
+    <div id="detailBackdrop" onclick="closeModalUI()" class="fixed inset-0 z-50 bg-slate-950/80 opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-2.5 sm:p-4">
+        <div id="detailPanel" onclick="event.stopPropagation()" class="w-full max-w-md h-[88dvh] bg-slate-950 border border-white/15 rounded-3xl shadow-2xl flex flex-col overflow-hidden transform scale-95 opacity-0 transition-all duration-300">
+            
+            <div class="flex items-center justify-between p-3 border-b border-white/10 bg-slate-900">
+                <div class="flex items-center gap-2.5">
+                    <div id="modal-symbol-box" class="w-10 h-10 rounded-xl flex flex-col items-center justify-center border border-white/20 bg-slate-900 p-1 shadow-md">
+                        <span id="modal-number" class="text-[8.5px] text-slate-400 font-extrabold self-start leading-none">1</span>
+                        <span id="modal-symbol" class="text-lg font-black text-white leading-none">H</span>
+                    </div>
+                    <div>
+                        <h2 id="modal-name" class="text-sm font-black text-white leading-tight">هیدروژن</h2>
+                        <span id="modal-latin" class="text-[11px] text-slate-400 font-semibold block">Hydrogen</span>
+                        <div id="modal-category-badge" class="mt-0.5 inline-block text-[9px] font-black px-1.5 py-0.5 rounded-md border border-sky-500/30 bg-sky-500/20 text-sky-300">
+                            نافلزات
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="closeModalUI()" aria-label="بستن" class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-white/10 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-3 space-y-2.5 m3-drawer-scroll">
+                <!-- Rich Volumetric 3D Bohr Atom Viewport Component -->
+                <div class="relative rounded-2xl border border-white/15 bg-slate-950 shadow-2xl flex flex-col items-center justify-center overflow-hidden">
+                    <div class="w-full flex items-center justify-between px-3 pt-2.5 pb-1 z-10 bg-slate-900/60 backdrop-blur-md border-b border-white/5">
+                        <div class="text-[10px] font-black text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-atom text-sky-400 animate-pulse"></i> مدل اتمی ۳D حجمی و فوتونیک
+                        </div>
+                        <button onclick="resetBohrView()" title="بازنشانی زاویه دید" class="px-2 py-0.5 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-[9px] font-extrabold text-slate-200 border border-white/15 transition flex items-center gap-1 active:scale-95 shadow">
+                            <i class="fa-solid fa-rotate-right text-[8px]"></i> بازنشانی زاویه
+                        </button>
+                    </div>
+
+                    <div class="relative w-full h-44 cursor-grab active:cursor-grabbing touch-none my-0.5">
+                        <canvas id="bohrCanvas" class="w-full h-full rounded-lg"></canvas>
+                        <div class="absolute bottom-2 right-2 text-[8px] text-slate-300 font-bold pointer-events-none flex items-center gap-1 bg-slate-950/80 backdrop-blur px-2 py-0.5 rounded-md border border-white/10 shadow">
+                            <i class="fa-solid fa-arrows-spin text-sky-400"></i> لمس و کشیدن برای چرخش ۳D در تمام زوایا
+                        </div>
+                    </div>
+
+                    <div id="bohrShellBadges" class="w-full flex items-center justify-center gap-1 flex-wrap p-2 border-t border-white/10 bg-slate-900/40"></div>
+                </div>
+
+                <!-- 12 Specifications List Matching User Reference Image -->
+                <div class="space-y-1.5">
+                    <div class="m3-spec-card"><span class="m3-spec-key">عدد اتمی</span><span id="spec-number" class="m3-spec-val text-sky-400">۱</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">جرم اتمی</span><span id="spec-mass" class="m3-spec-val text-emerald-400" dir="ltr">1.008</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">گروه</span><span id="spec-group" class="m3-spec-val">۱</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">دوره</span><span id="spec-period" class="m3-spec-val">۱</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">دسته</span><span id="spec-category" class="m3-spec-val text-purple-400">نافلزات</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">بلوک</span><span id="spec-block" class="m3-spec-val text-amber-400 uppercase">s</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">ظاهر</span><span id="spec-appearance" class="m3-spec-val text-slate-200">گاز بی‌رنگ</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">نقطه جوش</span><span id="spec-boiling" class="m3-spec-val text-rose-400" dir="ltr">-252.87 °C</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">نقطه ذوب</span><span id="spec-melting" class="m3-spec-val text-cyan-400" dir="ltr">-259.16 °C</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">چگالی</span><span id="spec-density" class="m3-spec-val text-teal-400" dir="ltr">0.00008988 g/cm³</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">الکترونگاتیوی</span><span id="spec-electronegativity" class="m3-spec-val text-indigo-400" dir="ltr">2.20</span></div>
+                    <div class="m3-spec-card"><span class="m3-spec-key">آرایش الکترونی</span><span id="spec-config" class="m3-spec-val text-amber-300 font-mono text-[10.5px]" dir="ltr">1s¹</span></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Javascript Data & Application Logic -->
+    <script>
+        const categoryColors = {
+            'نافلزات': { theme: '#38bdf8', bg: 'rgba(56, 189, 248, 0.16)' },
+            'گازهای نجیب': { theme: '#c084fc', bg: 'rgba(192, 132, 252, 0.16)' },
+            'فلزات قلیایی': { theme: '#f87171', bg: 'rgba(248, 113, 113, 0.16)' },
+            'فلزات قلیایی خاکی': { theme: '#fb923c', bg: 'rgba(251, 146, 60, 0.16)' },
+            'شبه‌فلزات': { theme: '#34d399', bg: 'rgba(52, 211, 153, 0.16)' },
+            'هالوژن‌ها': { theme: '#22d3ee', bg: 'rgba(34, 211, 238, 0.16)' },
+            'فلزات واسطه': { theme: '#facc15', bg: 'rgba(250, 204, 21, 0.16)' },
+            'فلزات پس‌واسطه': { theme: '#a3e635', bg: 'rgba(163, 230, 53, 0.16)' },
+            'لانتانیدها': { theme: '#f472b6', bg: 'rgba(244, 114, 182, 0.16)' },
+            'اکتینیدها': { theme: '#fb7185', bg: 'rgba(251, 113, 133, 0.16)' }
+        };
+
+        const rawElements = [
+            [1, "H", "هیدروژن", "Hydrogen", "1.008", 1, 1, "نافلزات", "s", "گاز بی‌رنگ", "-252.87 °C", "-259.16 °C", "0.00008988 g/cm³", "2.20", "1s¹"],
+            [2, "He", "هلیوم", "Helium", "4.0026", 18, 1, "گازهای نجیب", "s", "گاز بی‌رنگ", "-268.93 °C", "-272.20 °C", "0.0001785 g/cm³", "-", "1s²"],
+            [3, "Li", "لیتیوم", "Lithium", "6.94", 1, 2, "فلزات قلیایی", "s", "جامد نقره‌ای", "1342 °C", "180.50 °C", "0.534 g/cm³", "0.98", "[He] 2s¹"],
+            [4, "Be", "بریلیوم", "Beryllium", "9.0122", 2, 2, "فلزات قلیایی خاکی", "s", "جامد خاکستری-سفید", "2469 °C", "1287 °C", "1.85 g/cm³", "1.57", "[He] 2s²"],
+            [5, "B", "بور", "Boron", "10.81", 13, 2, "شبه‌فلزات", "p", "جامد سیاه-خاکستری", "3927 °C", "2076 °C", "2.34 g/cm³", "2.04", "[He] 2s² 2p¹"],
+            [6, "C", "کربن", "Carbon", "12.011", 14, 2, "نافلزات", "p", "جامد سیاه (گرافیت)", "4827 °C", "3550 °C", "2.267 g/cm³", "2.55", "[He] 2s² 2p²"],
+            [7, "N", "نیتروژن", "Nitrogen", "14.007", 15, 2, "نافلزات", "p", "گاز بی‌رنگ", "-195.79 °C", "-210.00 °C", "0.0012506 g/cm³", "3.04", "[He] 2s² 2p³"],
+            [8, "O", "اکسیژن", "Oxygen", "15.999", 16, 2, "نافلزات", "p", "گاز بی‌رنگ", "-182.96 °C", "-218.79 °C", "0.001429 g/cm³", "3.44", "[He] 2s² 2p⁴"],
+            [9, "F", "فلوئور", "Fluorine", "18.998", 17, 2, "هالوژن‌ها", "p", "گاز زرد کمرنگ", "-188.11 °C", "-219.67 °C", "0.001696 g/cm³", "3.98", "[He] 2s² 2p⁵"],
+            [10, "Ne", "نئون", "Neon", "20.180", 18, 2, "گازهای نجیب", "p", "گاز بی‌رنگ", "-246.05 °C", "-248.59 °C", "0.0009002 g/cm³", "-", "[He] 2s² 2p⁶"],
+            [11, "Na", "سدیم", "Sodium", "22.990", 1, 3, "فلزات قلیایی", "s", "جامد نقره‌ای نرم", "882.94 °C", "97.79 °C", "0.968 g/cm³", "0.93", "[Ne] 3s¹"],
+            [12, "Mg", "منیزیم", "Magnesium", "24.305", 2, 3, "فلزات قلیایی خاکی", "s", "جامد سفید نقره‌ای", "1090 °C", "650 °C", "1.738 g/cm³", "1.31", "[Ne] 3s²"],
+            [13, "Al", "آلومینیوم", "Aluminium", "26.982", 13, 3, "فلزات پس‌واسطه", "p", "جامد نقره‌ای", "2470 °C", "660.32 °C", "2.70 g/cm³", "1.61", "[Ne] 3s² 3p¹"],
+            [14, "Si", "سیلیسیوم", "Silicon", "28.085", 14, 3, "شبه‌فلزات", "p", "جامد خاکستری تیره", "3265 °C", "1414 °C", "2.329 g/cm³", "1.90", "[Ne] 3s² 3p²"],
+            [15, "P", "فسفر", "Phosphorus", "30.974", 15, 3, "نافلزات", "p", "جامد سفید/قرمز", "280.5 °C", "44.15 °C", "1.823 g/cm³", "2.19", "[Ne] 3s² 3p³"],
+            [16, "S", "گوگرد", "Sulfur", "32.06", 16, 3, "نافلزات", "p", "جامد زرد لیمویی", "444.6 °C", "115.21 °C", "2.07 g/cm³", "2.58", "[Ne] 3s² 3p⁴"],
+            [17, "Cl", "کلر", "Chlorine", "35.45", 17, 3, "هالوژن‌ها", "p", "گاز زرد مایل به سبز", "-34.04 °C", "-101.5 °C", "0.0032 g/cm³", "3.16", "[Ne] 3s² 3p⁵"],
+            [18, "Ar", "آرگون", "Argon", "39.948", 18, 3, "گازهای نجیب", "p", "گاز بی‌رنگ", "-185.85 °C", "-189.34 °C", "0.001784 g/cm³", "-", "[Ne] 3s² 3p⁶"],
+            [19, "K", "پتاسیم", "Potassium", "39.098", 1, 4, "فلزات قلیایی", "s", "جامد نقره‌ای بسیار نرم", "759 °C", "63.5 °C", "0.89 g/cm³", "0.82", "[Ar] 4s¹"],
+            [20, "Ca", "کلسیم", "Calcium", "40.078", 2, 4, "فلزات قلیایی خاکی", "s", "جامد نقره‌ای درخشان", "1484 °C", "842 °C", "1.55 g/cm³", "1.00", "[Ar] 4s²"],
+            [21, "Sc", "اسکاندیم", "Scandium", "44.956", 3, 4, "فلزات واسطه", "d", "جامد نقره‌ای سفید", "2836 °C", "1541 °C", "2.985 g/cm³", "1.36", "[Ar] 3d¹ 4s²"],
+            [22, "Ti", "تیتانیوم", "Titanium", "47.867", 4, 4, "فلزات واسطه", "d", "جامد نقره‌ای درخشان", "3287 °C", "1668 °C", "4.506 g/cm³", "1.54", "[Ar] 3d² 4s²"],
+            [23, "V", "وانادیوم", "Vanadium", "50.942", 5, 4, "فلزات واسطه", "d", "جامد خاکستری فلزی", "3407 °C", "1910 °C", "6.11 g/cm³", "1.63", "[Ar] 3d³ 4s²"],
+            [24, "Cr", "کروم", "Chromium", "51.996", 6, 4, "فلزات واسطه", "d", "جامد فولادی خاکستری", "2671 °C", "1907 °C", "7.19 g/cm³", "1.66", "[Ar] 3d⁵ 4s¹"],
+            [25, "Mn", "منگنز", "Manganese", "54.938", 7, 4, "فلزات واسطه", "d", "جامد نقره‌ای فلزی", "2061 °C", "1246 °C", "7.21 g/cm³", "1.55", "[Ar] 3d⁵ 4s²"],
+            [26, "Fe", "آهن", "Iron", "55.845", 8, 4, "فلزات واسطه", "d", "جامد خاکستری درخشان", "2862 °C", "1538 °C", "7.874 g/cm³", "1.83", "[Ar] 3d⁶ 4s²"],
+            [27, "Co", "کبالت", "Cobalt", "58.933", 9, 4, "فلزات واسطه", "d", "جامد آبی-خاکستری", "2927 °C", "1495 °C", "8.90 g/cm³", "1.88", "[Ar] 3d⁷ 4s²"],
+            [28, "Ni", "نیکل", "Nickel", "58.693", 10, 4, "فلزات واسطه", "d", "جامد درخشان نقره‌ای", "2730 °C", "1455 °C", "8.908 g/cm³", "1.91", "[Ar] 3d⁸ 4s²"],
+            [29, "Cu", "مس", "Copper", "63.546", 11, 4, "فلزات واسطه", "d", "جامد سرخ رنگ فلزی", "2562 °C", "1084.62 °C", "8.96 g/cm³", "1.90", "[Ar] 3d¹⁰ 4s¹"],
+            [30, "Zn", "روی", "Zinc", "65.38", 12, 4, "فلزات واسطه", "d", "جامد آبی-سفید", "907 °C", "419.53 °C", "7.14 g/cm³", "1.65", "[Ar] 3d¹⁰ 4s²"],
+            [31, "Ga", "گالیوم", "Gallium", "69.723", 13, 4, "فلزات پس‌واسطه", "p", "جامد نقره‌ای", "2229 °C", "29.76 °C", "5.91 g/cm³", "1.81", "[Ar] 3d¹⁰ 4s² 4p¹"],
+            [32, "Ge", "ژرمانیوم", "Germanium", "72.630", 14, 4, "شبه‌فلزات", "p", "جامد سفید-خاکستری", "2833 °C", "938.25 °C", "5.323 g/cm³", "2.01", "[Ar] 3d¹⁰ 4s² 4p²"],
+            [33, "As", "آرسنیک", "Arsenic", "74.922", 15, 4, "شبه‌فلزات", "p", "جامد خاکستری فلزی", "614 °C", "817 °C", "5.727 g/cm³", "2.18", "[Ar] 3d¹⁰ 4s² 4p³"],
+            [34, "Se", "سلنیوم", "Selenium", "78.971", 16, 4, "نافلزات", "p", "جامد خاکستری/قرمز", "685 °C", "221 °C", "4.81 g/cm³", "2.55", "[Ar] 3d¹⁰ 4s² 4p⁴"],
+            [35, "Br", "برم", "Bromine", "79.904", 17, 4, "هالوژن‌ها", "p", "مایع قهوه‌ای قرمز", "58.8 °C", "-7.2 °C", "3.1028 g/cm³", "2.96", "[Ar] 3d¹⁰ 4s² 4p⁵"],
+            [36, "Kr", "کریپتون", "Krypton", "83.798", 18, 4, "گازهای نجیب", "p", "گاز بی‌رنگ", "-153.22 °C", "-157.36 °C", "0.003749 g/cm³", "3.00", "[Ar] 3d¹⁰ 4s² 4p⁶"],
+            [37, "Rb", "روبیدیوم", "Rubidium", "85.468", 1, 5, "فلزات قلیایی", "s", "جامد سفید نقره‌ای", "688 °C", "39.30 °C", "1.532 g/cm³", "0.82", "[Kr] 5s¹"],
+            [38, "Sr", "استرانسیوم", "Strontium", "87.62", 2, 5, "فلزات قلیایی خاکی", "s", "جامد زرد-نقره‌ای", "1382 °C", "777 °C", "2.64 g/cm³", "0.95", "[Kr] 5s²"],
+            [39, "Y", "ایتیریوم", "Yttrium", "88.906", 3, 5, "فلزات واسطه", "d", "جامد نقره‌ای درخشان", "3345 °C", "1526 °C", "4.472 g/cm³", "1.22", "[Kr] 4d¹ 5s²"],
+            [40, "Zr", "زیرکونیوم", "Zirconium", "91.224", 4, 5, "فلزات واسطه", "d", "جامد سفید-نقره‌ای", "4409 °C", "1855 °C", "6.52 g/cm³", "1.33", "[Kr] 4d² 5s²"],
+            [41, "Nb", "نیوبیوم", "Niobium", "92.906", 5, 5, "فلزات واسطه", "d", "جامد خاکستری فلزی", "4744 °C", "2477 °C", "8.57 g/cm³", "1.6", "[Kr] 4d⁴ 5s¹"],
+            [42, "Mo", "مولیبدن", "Molybdenum", "95.95", 6, 5, "فلزات واسطه", "d", "جامد خاکستری فلزی", "4639 °C", "2623 °C", "10.28 g/cm³", "2.16", "[Kr] 4d⁵ 5s¹"],
+            [43, "Tc", "تکنسیم", "Technetium", "98", 7, 5, "فلزات واسطه", "d", "جامد نقره‌ای رادیواکتیو", "4265 °C", "2157 °C", "11 g/cm³", "1.9", "[Kr] 4d⁵ 5s²"],
+            [44, "Ru", "روتنیوم", "Ruthenium", "101.07", 8, 5, "فلزات واسطه", "d", "جامد سفید-نقره‌ای", "4150 °C", "2334 °C", "12.45 g/cm³", "2.2", "[Kr] 4d⁷ 5s¹"],
+            [45, "Rh", "رودیوم", "Rhodium", "102.91", 9, 5, "فلزات واسطه", "d", "جامد نقره‌ای درخشان", "3695 °C", "1964 °C", "12.41 g/cm³", "2.28", "[Kr] 4d⁸ 5s¹"],
+            [46, "Pd", "پالادیوم", "Palladium", "106.42", 10, 5, "فلزات واسطه", "d", "جامد سفید-نقره‌ای", "2963 °C", "1554.9 °C", "12.02 g/cm³", "2.20", "[Kr] 4d¹⁰"],
+            [47, "Ag", "نقره", "Silver", "107.87", 11, 5, "فلزات واسطه", "d", "جامد نقره‌ای درخشان", "2162 °C", "961.78 °C", "10.49 g/cm³", "1.93", "[Kr] 4d¹⁰ 5s¹"],
+            [48, "Cd", "کادمیوم", "Cadmium", "112.41", 12, 5, "فلزات واسطه", "d", "جامد آبی-سفید", "767 °C", "321.07 °C", "8.65 g/cm³", "1.69", "[Kr] 4d¹⁰ 5s²"],
+            [49, "In", "ایندیوم", "Indium", "114.82", 13, 5, "فلزات پس‌واسطه", "p", "جامد درخشان بسیار نرم", "2072 °C", "156.60 °C", "7.31 g/cm³", "1.78", "[Kr] 4d¹⁰ 5s² 5p¹"],
+            [50, "Sn", "قلع", "Tin", "118.71", 14, 5, "فلزات پس‌واسطه", "p", "جامد نقره‌ای درخشان", "2602 °C", "231.93 °C", "7.265 g/cm³", "1.96", "[Kr] 4d¹⁰ 5s² 5p²"],
+            [51, "Sb", "آنتی‌موان", "Antimony", "121.76", 15, 5, "شبه‌فلزات", "p", "جامد خاکستری براق", "1587 °C", "630.63 °C", "6.697 g/cm³", "2.05", "[Kr] 4d¹⁰ 5s² 5p³"],
+            [52, "Te", "تلوریوم", "Tellurium", "127.60", 16, 5, "شبه‌فلزات", "p", "جامد نقره‌ای سفید", "988 °C", "449.51 °C", "6.24 g/cm³", "2.10", "[Kr] 4d¹⁰ 5s² 5p⁴"],
+            [53, "I", "ید", "Iodine", "126.90", 17, 5, "هالوژن‌ها", "p", "جامد بنفش-سیاه", "184.3 °C", "113.7 °C", "4.933 g/cm³", "2.66", "[Kr] 4d¹⁰ 5s² 5p⁵"],
+            [54, "Xe", "زنون", "Xenon", "131.29", 18, 5, "گازهای نجیب", "p", "گاز بی‌رنگ", "-108.12 °C", "-111.7 °C", "0.005894 g/cm³", "2.60", "[Kr] 4d¹⁰ 5s² 5p⁶"],
+            [55, "Cs", "سزیوم", "Caesium", "132.91", 1, 6, "فلزات قلیایی", "s", "جامد طلایی-نقره‌ای", "671 °C", "28.5 °C", "1.93 g/cm³", "0.79", "[Xe] 6s¹"],
+            [56, "Ba", "باریوم", "Barium", "137.33", 2, 6, "فلزات قلیایی خاکی", "s", "جامد درخشان نقره‌ای", "1897 °C", "727 °C", "3.51 g/cm³", "0.89", "[Xe] 6s²"],
+            [57, "La", "لانتان", "Lanthanum", "138.91", 3, 6, "لانتانیدها", "f", "جامد سفید-نقره‌ای", "3464 °C", "920 °C", "6.162 g/cm³", "1.10", "[Xe] 5d¹ 6s²"],
+            [58, "Ce", "سریوم", "Cerium", "140.12", 3, 6, "لانتانیدها", "f", "جامد نقره‌ای درخشان", "3443 °C", "798 °C", "6.77 g/cm³", "1.12", "[Xe] 4f¹ 5d¹ 6s²"],
+            [59, "Pr", "پرازئودیمیوم", "Praseodymium", "140.91", 3, 6, "لانتانیدها", "f", "جامد زرد-نقره‌ای", "3520 °C", "931 °C", "6.77 g/cm³", "1.13", "[Xe] 4f³ 6s²"],
+            [60, "Nd", "نئودیمیوم", "Neodymium", "144.24", 3, 6, "لانتانیدها", "f", "جامد نقره‌ای درخشان", "3074 °C", "1024 °C", "7.01 g/cm³", "1.14", "[Xe] 4f⁴ 6s²"],
+            [61, "Pm", "پرومتیم", "Promethium", "145", 3, 6, "لانتانیدها", "f", "جامد رادیواکتیو", "3000 °C", "1042 °C", "7.26 g/cm³", "1.13", "[Xe] 4f⁵ 6s²"],
+            [62, "Sm", "ساماریوم", "Samarium", "150.36", 3, 6, "لانتانیدها", "f", "جامد سفید-نقره‌ای", "1794 °C", "1072 °C", "7.52 g/cm³", "1.17", "[Xe] 4f⁶ 6s²"],
+            [63, "Eu", "ارپیم", "Europium", "151.96", 3, 6, "لانتانیدها", "f", "جامد نقره‌ای درخشان", "1529 °C", "822 °C", "5.264 g/cm³", "1.20", "[Xe] 4f⁷ 6s²"],
+            [64, "Gd", "گادولینیوم", "Gadolinium", "157.25", 3, 6, "لانتانیدها", "f", "جامد سفید-نقره‌ای", "3273 °C", "1313 °C", "7.90 g/cm³", "1.20", "[Xe] 4f⁷ 5d¹ 6s²"],
+            [65, "Tb", "تربیوم", "Terbium", "158.93", 3, 6, "لانتانیدها", "f", "جامد سفید-نقره‌ای", "3230 °C", "1356 °C", "8.23 g/cm³", "1.20", "[Xe] 4f⁹ 6s²"],
+            [66, "Dy", "دیسپروسیوم", "Dysprosium", "162.50", 3, 6, "لانتانیدها", "f", "جامد درخشان نقره‌ای", "2567 °C", "1407 °C", "8.54 g/cm³", "1.22", "[Xe] 4f¹⁰ 6s²"],
+            [67, "Ho", "هولمیوم", "Holmium", "164.93", 3, 6, "لانتانیدها", "f", "جامد درخشان نقره‌ای", "2700 °C", "1474 °C", "8.79 g/cm³", "1.23", "[Xe] 4f¹¹ 6s²"],
+            [68, "Er", "اربیوم", "Erbium", "167.26", 3, 6, "لانتانیدها", "f", "جامد نقره‌ای", "2868 °C", "1529 °C", "9.066 g/cm³", "1.24", "[Xe] 4f¹² 6s²"],
+            [69, "Tm", "تولیوم", "Thulium", "168.93", 3, 6, "لانتانیدها", "f", "جامد خاکستری درخشان", "1950 °C", "1545 °C", "9.32 g/cm³", "1.25", "[Xe] 4f¹³ 6s²"],
+            [70, "Yb", "ایتربیوم", "Ytterbium", "173.05", 3, 6, "لانتانیدها", "f", "جامد زرد-نقره‌ای", "1196 °C", "824 °C", "6.90 g/cm³", "1.10", "[Xe] 4f¹⁴ 6s²"],
+            [71, "Lu", "لوتسیوم", "Lutetium", "174.97", 3, 6, "لانتانیدها", "d", "جامد سفید-نقره‌ای", "3402 °C", "1663 °C", "9.841 g/cm³", "1.27", "[Xe] 4f¹⁴ 5d¹ 6s²"],
+            [72, "Hf", "هافنیوم", "Hafnium", "178.49", 4, 6, "فلزات واسطه", "d", "جامد خاکستری درخشان", "4603 °C", "2233 °C", "13.31 g/cm³", "1.3", "[Xe] 4f¹⁴ 5d² 6s²"],
+            [73, "Ta", "تانتیال", "Tantalum", "180.95", 5, 6, "فلزات واسطه", "d", "جامد خاکستری آبی", "5458 °C", "3017 °C", "16.69 g/cm³", "1.5", "[Xe] 4f¹⁴ 5d³ 6s²"],
+            [74, "W", "تنگستن", "Tungsten", "183.84", 6, 6, "فلزات واسطه", "d", "جامد خاکستری سفید", "5555 °C", "3422 °C", "19.25 g/cm³", "2.36", "[Xe] 4f¹⁴ 5d⁴ 6s²"],
+            [75, "Re", "رنیوم", "Rhenium", "186.21", 7, 6, "فلزات واسطه", "d", "جامد سفید-نقره‌ای", "5596 °C", "3186 °C", "21.02 g/cm³", "1.9", "[Xe] 4f¹⁴ 5d⁵ 6s²"],
+            [76, "Os", "اسمیوم", "Osmium", "190.23", 8, 6, "فلزات واسطه", "d", "جامد آبی-خاکستری", "5012 °C", "3033 °C", "22.59 g/cm³", "2.2", "[Xe] 4f¹⁴ 5d⁶ 6s²"],
+            [77, "Ir", "ایریدیوم", "Iridium", "192.22", 9, 6, "فلزات واسطه", "d", "جامد سفید-نقره‌ای", "4428 °C", "2446 °C", "22.56 g/cm³", "2.20", "[Xe] 4f¹⁴ 5d⁷ 6s²"],
+            [78, "Pt", "پلاتین", "Platinum", "195.08", 10, 6, "فلزات واسطه", "d", "جامد سفید-نقره‌ای درخشان", "3825 °C", "1768.3 °C", "21.45 g/cm³", "2.28", "[Xe] 4f¹⁴ 5d⁹ 6s¹"],
+            [79, "Au", "طلا", "Gold", "196.97", 11, 6, "فلزات واسطه", "d", "جامد زرد فلزی", "2856 °C", "1064.18 °C", "19.30 g/cm³", "2.54", "[Xe] 4f¹⁴ 5d¹⁰ 6s¹"],
+            [80, "Hg", "جیوه", "Mercury", "200.59", 12, 6, "فلزات واسطه", "d", "مایع نقره‌ای درخشان", "356.73 °C", "-38.83 °C", "13.534 g/cm³", "2.00", "[Xe] 4f¹⁴ 5d¹⁰ 6s²"],
+            [81, "Tl", "تالیوم", "Thallium", "204.38", 13, 6, "فلزات پس‌واسطه", "p", "جامد سفید-خاکستری", "1473 °C", "304 °C", "11.85 g/cm³", "1.62", "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹"],
+            [82, "Pb", "سرب", "Lead", "207.2", 14, 6, "فلزات پس‌واسطه", "p", "جامد خاکستری مات", "1749 °C", "327.46 °C", "11.34 g/cm³", "1.87", "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²"],
+            [83, "Bi", "بیسموت", "Bismuth", "208.98", 15, 6, "فلزات پس‌واسطه", "p", "جامد نقره‌ای با جلا", "1564 °C", "271.5 °C", "9.78 g/cm³", "2.02", "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³"],
+            [84, "Po", "پولونیوم", "Polonium", "209", 16, 6, "شبه‌فلزات", "p", "جامد نقره‌ای رادیواکتیو", "962 °C", "254 °C", "9.196 g/cm³", "2.0", "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴"],
+            [85, "At", "استاتین", "Astatine", "210", 17, 6, "هالوژن‌ها", "p", "جامد تاریک رادیواکتیو", "337 °C", "302 °C", "7 g/cm³", "2.2", "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵"],
+            [86, "Rn", "رادون", "Radon", "222", 18, 6, "گازهای نجیب", "p", "گاز بی‌رنگ رادیواکتیو", "-61.7 °C", "-71 °C", "0.00973 g/cm³", "2.2", "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶"],
+            [87, "Fr", "فرانسیم", "Francium", "223", 1, 7, "فلزات قلیایی", "s", "جامد رادیواکتیو", "677 °C", "27 °C", "1.87 g/cm³", "0.79", "[Rn] 7s¹"],
+            [88, "Ra", "رادیوم", "Radium", "226", 2, 7, "فلزات قلیایی خاکی", "s", "جامد سفید-نقره‌ای", "1737 °C", "960 °C", "5.5 g/cm³", "0.9", "[Rn] 7s²"],
+            [89, "Ac", "اکتینیوم", "Actinium", "227", 3, 7, "اکتینیدها", "f", "جامد درخشان نقره‌ای", "3198 °C", "1050 °C", "10.07 g/cm³", "1.1", "[Rn] 6d¹ 7s²"],
+            [90, "Th", "توریوم", "Thorium", "232.04", 3, 7, "اکتینیدها", "f", "جامد سفید-نقره‌ای", "4788 °C", "1750 °C", "11.72 g/cm³", "1.3", "[Rn] 6d² 7s²"],
+            [91, "Pa", "پروتاکتینیوم", "Protactinium", "231.04", 3, 7, "اکتینیدها", "f", "جامد درخشان نقره‌ای", "4000 °C", "1568 °C", "15.37 g/cm³", "1.5", "[Rn] 5f² 6d¹ 7s²"],
+            [92, "U", "اورانیوم", "Uranium", "238.03", 3, 7, "اکتینیدها", "f", "جامد نقره‌ای خاکستری", "4131 °C", "1135 °C", "19.1 g/cm³", "1.38", "[Rn] 5f³ 6d¹ 7s²"],
+            [93, "Np", "نپتونیوم", "Neptunium", "237", 3, 7, "اکتینیدها", "f", "جامد نقره‌ای فلزی", "3902 °C", "639 °C", "20.45 g/cm³", "1.36", "[Rn] 5f⁴ 6d¹ 7s²"],
+            [94, "Pu", "پلوتونیوم", "Plutonium", "244", 3, 7, "اکتینیدها", "f", "جامد نقره‌ای خاکستری", "3228 °C", "639.4 °C", "19.816 g/cm³", "1.28", "[Rn] 5f⁶ 7s²"],
+            [95, "Am", "آمریسیوم", "Americium", "243", 3, 7, "اکتینیدها", "f", "جامد سفید-نقره‌ای", "2607 °C", "1176 °C", "12 g/cm³", "1.13", "[Rn] 5f⁷ 7s²"],
+            [96, "Cm", "کوریوم", "Curium", "247", 3, 7, "اکتینیدها", "f", "جامد سفید-نقره‌ای", "3110 °C", "1345 °C", "13.51 g/cm³", "1.28", "[Rn] 5f⁷ 6d¹ 7s²"],
+            [97, "Bk", "برکلیوم", "Berkelium", "247", 3, 7, "اکتینیدها", "f", "جامد سفید-نقره‌ای", "2623 °C", "986 °C", "14.78 g/cm³", "1.3", "[Rn] 5f⁹ 7s²"],
+            [98, "Cf", "کالیفرنیوم", "Californium", "251", 3, 7, "اکتینیدها", "f", "جامد نقره‌ای رادیواکتیو", "1470 °C", "900 °C", "15.1 g/cm³", "1.3", "[Rn] 5f¹⁰ 7s²"],
+            [99, "Es", "اینشتینیوم", "Einsteinium", "252", 3, 7, "اکتینیدها", "f", "جامد نقره‌ای رادیواکتیو", "996 °C", "860 °C", "8.84 g/cm³", "1.3", "[Rn] 5f¹¹ 7s²"],
+            [100, "Fm", "فرمیوم", "Fermium", "257", 3, 7, "اکتینیدها", "f", "جامد رادیواکتیو", "-", "1527 °C", "-", "1.3", "[Rn] 5f¹² 7s²"],
+            [101, "Md", "مندلیوم", "Mendelevium", "258", 3, 7, "اکتینیدها", "f", "جامد رادیواکتیو", "-", "827 °C", "-", "1.3", "[Rn] 5f¹³ 7s²"],
+            [102, "No", "نوبلیوم", "Nobelium", "259", 3, 7, "اکتینیدها", "f", "جامد رادیواکتیو", "-", "827 °C", "-", "1.3", "[Rn] 5f¹⁴ 7s²"],
+            [103, "Lr", "لارنسیوم", "Lawrencium", "266", 3, 7, "اکتینیدها", "d", "جامد رادیواکتیو", "-", "1627 °C", "-", "1.3", "[Rn] 5f¹⁴ 7s² 7p¹"],
+            [104, "Rf", "رادرفوردیوم", "Rutherfordium", "267", 4, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "5500 °C", "2100 °C", "23.2 g/cm³", "-", "[Rn] 5f¹⁴ 6d² 7s²"],
+            [105, "Db", "دوبنیوم", "Dubnium", "268", 5, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "29.3 g/cm³", "-", "[Rn] 5f¹⁴ 6d³ 7s²"],
+            [106, "Sg", "سیبورگیوم", "Seaborgium", "269", 6, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "35.0 g/cm³", "-", "[Rn] 5f¹⁴ 6d⁴ 7s²"],
+            [107, "Bh", "بوریوم", "Bohrium", "270", 7, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "37.1 g/cm³", "-", "[Rn] 5f¹⁴ 6d⁵ 7s²"],
+            [108, "Hs", "هاسیوم", "Hassium", "277", 8, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "41 g/cm³", "-", "[Rn] 5f¹⁴ 6d⁶ 7s²"],
+            [109, "Mt", "مایتنریوم", "Meitnerium", "278", 9, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "37.4 g/cm³", "-", "[Rn] 5f¹⁴ 6d⁷ 7s²"],
+            [110, "Ds", "دارمشتاتیوم", "Darmstadtium", "281", 10, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "34.8 g/cm³", "-", "[Rn] 5f¹⁴ 6d⁸ 7s²"],
+            [111, "Rg", "رونتگنیوم", "Roentgenium", "282", 11, 7, "فلزات واسطه", "d", "جامد رادیواکتیو مصنوعی", "-", "-", "28.7 g/cm³", "-", "[Rn] 5f¹⁴ 6d⁹ 7s²"],
+            [112, "Cn", "کوپرنیسیوم", "Copernicium", "285", 12, 7, "فلزات واسطه", "d", "گاز/جامد رادیواکتیو", "84 °C", "10 °C", "14.0 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s²"],
+            [113, "Nh", "نیهونیوم", "Nihonium", "286", 13, 7, "فلزات پس‌واسطه", "p", "جامد رادیواکتیو مصنوعی", "1130 °C", "430 °C", "16 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹"],
+            [114, "Fl", "فلروویوم", "Flerovium", "289", 14, 7, "فلزات پس‌واسطه", "p", "جامد رادیواکتیو مصنوعی", "147 °C", "67 °C", "14 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²"],
+            [115, "Mc", "مسکوویوم", "Moscovium", "290", 15, 7, "فلزات پس‌واسطه", "p", "جامد رادیواکتیو مصنوعی", "1100 °C", "400 °C", "13.5 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³"],
+            [116, "Lv", "لیورموریوم", "Livermorium", "293", 16, 7, "فلزات پس‌واسطه", "p", "جامد رادیواکتیو مصنوعی", "835 °C", "435 °C", "12.9 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴"],
+            [117, "Ts", "تنسین", "Tennessine", "294", 17, 7, "هالوژن‌ها", "p", "جامد رادیواکتیو مصنوعی", "610 °C", "450 °C", "7.2 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵"],
+            [118, "Og", "اوگانسون", "Oganesson", "294", 18, 7, "گازهای نجیب", "p", "گاز/جامد رادیواکتیو", "80 °C", "50 °C", "5.0 g/cm³", "-", "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶"]
+        ];
+
+        const elementsData = rawElements.map(item => ({
+            number: item[0], symbol: item[1], name: item[2], latin: item[3],
+            mass: item[4], group: item[5], period: item[6], category: item[7],
+            block: item[8], appearance: item[9], boiling: item[10], melting: item[11],
+            density: item[12], electronegativity: item[13], config: item[14]
+        }));
+
+        let currentPage = 0;
+        const totalPages = 3;
+        let isTransitioning = false;
+        let touchStartX = 0, touchStartY = 0;
+        let isSwiping = false;
+        let isModalOpen = false;
+
+        // Upgraded Volumetric 3D Bohr Engine State
+        let bohrAnimId = null;
+        let bohrRotX = 0.45, bohrRotY = 0.65;
+        let targetRotX = 0.45, targetRotY = 0.65;
+        let isDraggingBohr = false;
+        let bohrLastMouseX = 0, bohrLastMouseY = 0;
+        let activeShellIndex = -1;
+        let bohrAngle = 0;
+        let bohrNucleons = [];
+        let currentBohrData = null;
+        let electronTrails = {};
+
+        window.addEventListener('load', () => {
+            renderPagesDOM();
+            setupSwipeGestures();
+            updateNavControls();
+        });
+
+        // Render cards into 3 separate page containers
+        function renderPagesDOM() {
+            for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+                const pageEl = document.getElementById(`page-${pageIdx}`);
+                if (!pageEl) continue;
+                pageEl.innerHTML = '';
+
+                if (pageIdx !== currentPage) {
+                    pageEl.classList.add('hidden-page');
+                } else {
+                    pageEl.classList.remove('hidden-page');
+                }
+
+                const start = pageIdx * 40;
+                const end = Math.min((pageIdx + 1) * 40, 118);
+                const pageElements = elementsData.slice(start, end);
+
+                pageElements.forEach(el => {
+                    const catTheme = categoryColors[el.category] || { theme: '#38bdf8', bg: 'rgba(56, 189, 248, 0.16)' };
+
+                    const card = document.createElement('div');
+                    card.className = 'm3-card';
+                    card.id = `card-el-${el.number}`;
+                    card.style.setProperty('--theme-color', catTheme.theme);
+                    card.style.setProperty('--bg-surface', catTheme.bg);
+                    card.style.setProperty('--border-color', catTheme.theme + '44');
+
+                    card.innerHTML = `
+                        <div class="m3-num-pill">${el.number}</div>
+                        <div class="m3-symbol" style="color: ${catTheme.theme};">${el.symbol}</div>
+                        <div class="m3-name">${el.name}</div>
+                    `;
+
+                    card.addEventListener('click', () => {
+                        if (!isSwiping && !isTransitioning) openDetailModal(el);
+                    });
+
+                    pageEl.appendChild(card);
+                });
+
+                // Add 2 clean empty cell placeholders for Page 3 to maintain 4x10 grid geometry
+                if (pageIdx === 2) {
+                    const remainingCells = 40 - pageElements.length;
+                    for (let i = 0; i < remainingCells; i++) {
+                        const dummy = document.createElement('div');
+                        dummy.setAttribute('aria-hidden', 'true');
+                        dummy.style.opacity = '0';
+                        dummy.style.pointerEvents = 'none';
+                        pageEl.appendChild(dummy);
+                    }
+                }
+            }
+        }
+
+        // Smooth Page Transition (0.85s velvet easing)
+        function goToPage(targetPage, direction = null) {
+            if (targetPage < 0 || targetPage >= totalPages || targetPage === currentPage || isTransitioning) return;
+
+            isTransitioning = true;
+            const oldPage = currentPage;
+            const newPage = targetPage;
+
+            if (!direction) {
+                direction = newPage > oldPage ? 'next' : 'prev';
+            }
+
+            const oldEl = document.getElementById(`page-${oldPage}`);
+            const newEl = document.getElementById(`page-${newPage}`);
+
+            newEl.style.transition = 'none';
+            newEl.classList.remove('hidden-page');
+
+            const enterOffset = direction === 'next' ? '36px' : '-36px';
+            const exitOffset = direction === 'next' ? '-36px' : '36px';
+
+            newEl.style.transform = `translate3d(${enterOffset}, 0, 0) scale(0.96)`;
+            newEl.style.opacity = '0';
+
+            void newEl.offsetWidth;
+
+            const transitionStyle = 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1)';
+            oldEl.style.transition = transitionStyle;
+            newEl.style.transition = transitionStyle;
+
+            oldEl.style.transform = `translate3d(${exitOffset}, 0, 0) scale(0.96)`;
+            oldEl.style.opacity = '0';
+
+            newEl.style.transform = 'translate3d(0, 0, 0) scale(1)';
+            newEl.style.opacity = '1';
+
+            currentPage = newPage;
+            updateNavControls();
+
+            setTimeout(() => {
+                oldEl.classList.add('hidden-page');
+                oldEl.style.transition = '';
+                oldEl.style.transform = '';
+                oldEl.style.opacity = '';
+
+                newEl.style.transition = '';
+                newEl.style.transform = '';
+                newEl.style.opacity = '';
+
+                isTransitioning = false;
+            }, 850);
+        }
+
+        function nextPage() { goToPage(currentPage + 1, 'next'); }
+        function prevPage() { goToPage(currentPage - 1, 'prev'); }
+
+        function updateNavControls() {
+            document.getElementById('prevBtn').disabled = (currentPage === 0);
+            document.getElementById('nextBtn').disabled = (currentPage === totalPages - 1);
+
+            const dots = document.querySelectorAll('.page-dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentPage) {
+                    dot.className = "page-dot w-6 h-6 rounded-lg font-black text-[10px] transition bg-sky-500 text-slate-950 shadow-md";
+                } else {
+                    dot.className = "page-dot w-6 h-6 rounded-lg font-black text-[10px] transition bg-slate-800/80 text-slate-400 hover:bg-slate-700";
+                }
+            });
+        }
+
+        // Swipe Gesture Detection (Left-to-Right => Next Page)
+        function setupSwipeGestures() {
+            const viewport = document.getElementById('viewportContainer');
+            if (!viewport) return;
+
+            viewport.addEventListener('touchstart', (e) => {
+                if (isTransitioning) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                isSwiping = false;
+            }, { passive: true });
+
+            viewport.addEventListener('touchmove', (e) => {
+                const diffX = Math.abs(e.touches[0].clientX - touchStartX);
+                const diffY = Math.abs(e.touches[0].clientY - touchStartY);
+                if (diffX > 10 || diffY > 10) isSwiping = true;
+            }, { passive: true });
+
+            viewport.addEventListener('touchend', (e) => {
+                if (isTransitioning) return;
+                const diffX = e.changedTouches[0].clientX - touchStartX;
+                const diffY = e.changedTouches[0].clientY - touchStartY;
+
+                if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX > 0) {
+                        nextPage(); // Left to Right => Next
+                    } else {
+                        prevPage(); // Right to Left => Prev
+                    }
+                }
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (isTransitioning || isModalOpen) return;
+                if (e.key === 'ArrowLeft') nextPage();
+                if (e.key === 'ArrowRight') prevPage();
+            });
+        }
+
+        // Open Modal Component
+        function openDetailModal(el) {
+            if (!el) return;
+            const catTheme = categoryColors[el.category] || { theme: '#38bdf8', bg: 'rgba(56, 189, 248, 0.16)' };
+
+            document.getElementById('modal-number').innerText = el.number;
+            document.getElementById('modal-symbol').innerText = el.symbol;
+            document.getElementById('modal-symbol').style.color = catTheme.theme;
+            document.getElementById('modal-symbol-box').style.borderColor = catTheme.theme + '66';
+            document.getElementById('modal-name').innerText = el.name;
+            document.getElementById('modal-latin').innerText = el.latin;
+
+            const badge = document.getElementById('modal-category-badge');
+            badge.innerText = el.category;
+            badge.style.backgroundColor = catTheme.bg;
+            badge.style.borderColor = catTheme.theme + '66';
+            badge.style.color = catTheme.theme;
+
+            // Fill 12 Persian Specification Rows
+            document.getElementById('spec-number').innerText = el.number;
+            document.getElementById('spec-mass').innerText = el.mass;
+            document.getElementById('spec-group').innerText = el.group;
+            document.getElementById('spec-period').innerText = el.period;
+            document.getElementById('spec-category').innerText = el.category;
+            document.getElementById('spec-category').style.color = catTheme.theme;
+            document.getElementById('spec-block').innerText = el.block;
+            document.getElementById('spec-appearance').innerText = el.appearance;
+            document.getElementById('spec-boiling').innerText = el.boiling;
+            document.getElementById('spec-melting').innerText = el.melting;
+            document.getElementById('spec-density').innerText = el.density;
+            document.getElementById('spec-electronegativity').innerText = el.electronegativity;
+            document.getElementById('spec-config').innerText = el.config;
+
+            const backdrop = document.getElementById('detailBackdrop');
+            const panel = document.getElementById('detailPanel');
+            
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            backdrop.classList.add('opacity-100', 'pointer-events-auto');
+            panel.classList.remove('scale-95', 'opacity-0');
+            panel.classList.add('scale-100', 'opacity-100');
+
+            if (!isModalOpen) {
+                isModalOpen = true;
+                try {
+                    history.pushState({ modalOpen: true }, '', '#element-' + el.number);
+                } catch(err) {}
+            }
+
+            activeShellIndex = -1;
+            electronTrails = {};
+            currentBohrData = { element: el, themeColor: catTheme.theme };
+            setupBohrInteraction();
+            startBohrAnimation();
+        }
+
+        // Close Modal Function
+        function closeModalUI() {
+            if (!isModalOpen) return;
+
+            const backdrop = document.getElementById('detailBackdrop');
+            const panel = document.getElementById('detailPanel');
+            if (backdrop && panel) {
+                backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+                panel.classList.remove('scale-100', 'opacity-100');
+                panel.classList.add('scale-95', 'opacity-0');
+            }
+
+            if (bohrAnimId) {
+                cancelAnimationFrame(bohrAnimId);
+                bohrAnimId = null;
+            }
+            isModalOpen = false;
+
+            try {
+                if (history.state && history.state.modalOpen) {
+                    history.back();
+                }
+            } catch(err) {}
+        }
+
+        // Handle Phone Hardware/Browser Back Button
+        window.addEventListener('popstate', () => {
+            if (isModalOpen) {
+                const backdrop = document.getElementById('detailBackdrop');
+                const panel = document.getElementById('detailPanel');
+                if (backdrop && panel) {
+                    backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+                    backdrop.classList.add('opacity-0', 'pointer-events-none');
+                    panel.classList.remove('scale-100', 'opacity-100');
+                    panel.classList.add('scale-95', 'opacity-0');
+                }
+                if (bohrAnimId) {
+                    cancelAnimationFrame(bohrAnimId);
+                    bohrAnimId = null;
+                }
+                isModalOpen = false;
+            }
+        });
+
+        function resetBohrView() {
+            targetRotX = 0.45;
+            targetRotY = 0.65;
+            activeShellIndex = -1;
+            renderShellBadges();
+        }
+
+        function getElectronShells(z) {
+            const maxCapacities = [2, 8, 18, 32, 32, 18, 8];
+            let remaining = z;
+            const shells = [];
+            for (let cap of maxCapacities) {
+                if (remaining <= 0) break;
+                const count = Math.min(remaining, cap);
+                shells.push(count);
+                remaining -= count;
+            }
+            return shells;
+        }
+
+        function setupBohrInteraction() {
+            const canvas = document.getElementById('bohrCanvas');
+            if (!canvas) return;
+
+            canvas.onpointerdown = (e) => {
+                isDraggingBohr = true;
+                bohrLastMouseX = e.clientX;
+                bohrLastMouseY = e.clientY;
+                canvas.setPointerCapture(e.pointerId);
+            };
+
+            canvas.onpointermove = (e) => {
+                if (!isDraggingBohr) return;
+                const dx = e.clientX - bohrLastMouseX;
+                const dy = e.clientY - bohrLastMouseY;
+                targetRotY += dx * 0.012;
+                targetRotX += dy * 0.012;
+                bohrLastMouseX = e.clientX;
+                bohrLastMouseY = e.clientY;
+            };
+
+            canvas.onpointerup = (e) => {
+                isDraggingBohr = false;
+                try { canvas.releasePointerCapture(e.pointerId); } catch(err){}
+            };
+
+            const z = currentBohrData.element.number;
+            const mass = parseFloat(currentBohrData.element.mass) || z * 2;
+            const neutrons = Math.max(0, Math.round(mass - z));
+            const totalNucleons = Math.min(z + neutrons, 34);
+
+            bohrNucleons = [];
+            for (let i = 0; i < totalNucleons; i++) {
+                const isProton = i < z;
+                const phi = Math.acos(-1 + (2 * i) / totalNucleons);
+                const theta = Math.sqrt(totalNucleons * Math.PI) * phi;
+                const r = 10 * Math.cbrt(Math.random());
+                bohrNucleons.push({
+                    x: r * Math.sin(phi) * Math.cos(theta),
+                    y: r * Math.sin(phi) * Math.sin(theta),
+                    z: r * Math.cos(phi),
+                    isProton: isProton,
+                    pulsePhase: Math.random() * Math.PI * 2
+                });
+            }
+
+            renderShellBadges();
+        }
+
+        function renderShellBadges() {
+            const container = document.getElementById('bohrShellBadges');
+            if (!container) return;
+            container.innerHTML = '';
+            const names = ['K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+            const shells = getElectronShells(currentBohrData.element.number);
+
+            shells.forEach((count, idx) => {
+                const badge = document.createElement('button');
+                const isActive = (activeShellIndex === idx || activeShellIndex === -1);
+                badge.className = `px-2 py-0.5 rounded-lg text-[9px] font-black border transition ${isActive ? 'bg-sky-500/30 border-sky-400 text-sky-200 shadow-sm' : 'bg-slate-900/60 border-white/5 text-slate-500'}`;
+                badge.innerText = `${names[idx]}: ${count}e⁻`;
+                badge.onclick = () => {
+                    activeShellIndex = (activeShellIndex === idx) ? -1 : idx;
+                    renderShellBadges();
+                };
+                container.appendChild(badge);
+            });
+        }
+
+        // Upgraded Volumetric 3D Bohr Render Engine
+        function startBohrAnimation() {
+            if (bohrAnimId) {
+                cancelAnimationFrame(bohrAnimId);
+                bohrAnimId = null;
+            }
+
+            const canvas = document.getElementById('bohrCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width || 320;
+            const height = rect.height || 180;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+
+            const cx = width / 2;
+            const cy = height / 2;
+            const shells = getElectronShells(currentBohrData.element.number);
+
+            function project(x, y, z) {
+                const cosY = Math.cos(bohrRotY), sinY = Math.sin(bohrRotY);
+                const x1 = x * cosY - z * sinY;
+                const z1 = x * sinY + z * cosY;
+
+                const cosX = Math.cos(bohrRotX), sinX = Math.sin(bohrRotX);
+                const y2 = y * cosX - z1 * sinX;
+                const z2 = y * sinX + z1 * cosX;
+
+                const focal = 320;
+                const scale = focal / (focal + z2);
+                return { x: cx + x1 * scale, y: cy + y2 * scale, z: z2, scale: scale };
+            }
+
+            // Draw Volumetric 3D Shaded Spheres for Nucleon particles
+            function drawVolumetricSphere(px, py, radius, colorPrimary, colorHighlight, colorShadow, opacity = 1.0) {
+                ctx.save();
+                ctx.globalAlpha = opacity;
+                const grad = ctx.createRadialGradient(
+                    px - radius * 0.3, py - radius * 0.35, radius * 0.05,
+                    px, py, radius
+                );
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.2, colorHighlight);
+                grad.addColorStop(0.6, colorPrimary);
+                grad.addColorStop(1, colorShadow);
+
+                ctx.beginPath();
+                ctx.arc(px, py, Math.max(0.5, radius), 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function loop() {
+                if (!isModalOpen) return;
+
+                // Smooth rotation damping
+                bohrRotX += (targetRotX - bohrRotX) * 0.08;
+                bohrRotY += (targetRotY - bohrRotY) * 0.08;
+                bohrAngle += 0.016;
+
+                ctx.save();
+                ctx.scale(dpr, dpr);
+                ctx.clearRect(0, 0, width, height);
+
+                // Deep space canvas backdrop grid aura
+                const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, width * 0.6);
+                bgGrad.addColorStop(0, 'rgba(15, 23, 42, 0.8)');
+                bgGrad.addColorStop(1, 'rgba(3, 7, 18, 0.98)');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, width, height);
+
+                // Collect renderable 3D elements for depth sorting
+                const drawList = [];
+
+                // 1. Nucleus particles
+                const breath = 1 + Math.sin(bohrAngle * 2) * 0.03;
+                bohrNucleons.forEach(n => {
+                    const nx = n.x * breath;
+                    const ny = n.y * breath;
+                    const nz = n.z * breath;
+                    const p = project(nx, ny, nz);
+                    drawList.push({
+                        type: 'nucleon',
+                        z: p.z,
+                        px: p.x,
+                        py: p.y,
+                        scale: p.scale,
+                        isProton: n.isProton
+                    });
+                });
+
+                // 2. Multi-axis 3D Tilted Orbits & Orbiting Electrons
+                const baseRadius = 26;
+                const radiusStep = 12;
+
+                shells.forEach((electronCount, shellIdx) => {
+                    const isShellActive = (activeShellIndex === -1 || activeShellIndex === shellIdx);
+                    const r = baseRadius + shellIdx * radiusStep;
+                    const tiltX = (shellIdx * 0.35);
+                    const tiltY = (shellIdx * 0.2);
+
+                    // Add Orbit ring points
+                    const ringSegments = 40;
+                    const ringPts = [];
+                    for (let i = 0; i <= ringSegments; i++) {
+                        const theta = (i / ringSegments) * Math.PI * 2;
+                        const rx = r * Math.cos(theta);
+                        const ry = r * Math.sin(theta) * Math.cos(tiltX);
+                        const rz = r * Math.sin(theta) * Math.sin(tiltY);
+                        const p = project(rx, ry, rz);
+                        ringPts.push(p);
+                    }
+
+                    drawList.push({
+                        type: 'orbit',
+                        z: 0,
+                        pts: ringPts,
+                        isShellActive: isShellActive,
+                        shellIdx: shellIdx
+                    });
+
+                    // Add Electrons
+                    for (let eIdx = 0; eIdx < electronCount; eIdx++) {
+                        const speedMult = 1 / (shellIdx + 1.2);
+                        const angle = bohrAngle * speedMult * (eIdx % 2 === 0 ? 1 : -1) + (eIdx * Math.PI * 2 / electronCount);
+                        const ex = r * Math.cos(angle);
+                        const ey = r * Math.sin(angle) * Math.cos(tiltX);
+                        const ez = r * Math.sin(angle) * Math.sin(tiltY);
+                        const ep = project(ex, ey, ez);
+
+                        // Key for trailing trail
+                        const key = `${shellIdx}-${eIdx}`;
+                        if (!electronTrails[key]) electronTrails[key] = [];
+                        electronTrails[key].push({ x: ep.x, y: ep.y, scale: ep.scale });
+                        if (electronTrails[key].length > 5) electronTrails[key].shift();
+
+                        drawList.push({
+                            type: 'electron',
+                            z: ep.z,
+                            px: ep.x,
+                            py: ep.y,
+                            scale: ep.scale,
+                            isShellActive: isShellActive,
+                            trail: [...electronTrails[key]]
+                        });
+                    }
+                });
+
+                // Sort by Z (Back to Front) for real 3D Depth Overlap
+                drawList.sort((a, b) => b.z - a.z);
+
+                // Render sorted elements
+                drawList.forEach(item => {
+                    if (item.type === 'orbit') {
+                        ctx.beginPath();
+                        item.pts.forEach((pt, idx) => {
+                            if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                            else ctx.lineTo(pt.x, pt.y);
+                        });
+                        ctx.strokeStyle = item.isShellActive ? currentBohrData.themeColor : 'rgba(255, 255, 255, 0.08)';
+                        ctx.lineWidth = item.isShellActive ? 1.5 : 0.6;
+                        ctx.shadowColor = item.isShellActive ? currentBohrData.themeColor : 'transparent';
+                        ctx.shadowBlur = item.isShellActive ? 6 : 0;
+                        ctx.stroke();
+                        ctx.shadowBlur = 0;
+
+                    } else if (item.type === 'nucleon') {
+                        const rad = 4.2 * item.scale;
+                        if (item.isProton) {
+                            // Proton: Crimson Coral 3D Sphere
+                            drawVolumetricSphere(item.px, item.py, rad, '#e11d48', '#fda4af', '#881337');
+                        } else {
+                            // Neutron: Cyan Sapphire 3D Sphere
+                            drawVolumetricSphere(item.px, item.py, rad, '#0284c7', '#7dd3fc', '#0c4a6e');
+                        }
+
+                    } else if (item.type === 'electron') {
+                        const alpha = item.isShellActive ? 1.0 : 0.25;
+
+                        // Draw Electron Motion Trail
+                        if (item.isShellActive && item.trail.length > 1) {
+                            ctx.beginPath();
+                            item.trail.forEach((t, i) => {
+                                if (i === 0) ctx.moveTo(t.x, t.y);
+                                else ctx.lineTo(t.x, t.y);
+                            });
+                            ctx.strokeStyle = currentBohrData.themeColor;
+                            ctx.lineWidth = 1.2;
+                            ctx.globalAlpha = 0.4;
+                            ctx.stroke();
+                            ctx.globalAlpha = 1.0;
+                        }
+
+                        // Luminous 3D Electron Sphere with Glow
+                        const rad = 3.2 * item.scale;
+                        ctx.shadowColor = '#38bdf8';
+                        ctx.shadowBlur = item.isShellActive ? 10 : 0;
+                        drawVolumetricSphere(item.px, item.py, rad, '#38bdf8', '#ffffff', '#0369a1', alpha);
+                        ctx.shadowBlur = 0;
+                    }
+                });
+
+                ctx.restore();
+                bohrAnimId = requestAnimationFrame(loop);
+            }
+
+            loop();
+        }
+
+        // Live Search Handler
+        function handleSearch() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearchBtn');
+            const query = input.value.trim().toLowerCase();
+
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            const cards = document.querySelectorAll('.m3-card');
+
+            if (!query) {
+                cards.forEach(c => c.classList.remove('dimmed', 'highlighted'));
+                return;
+            }
+
+            let foundIdx = -1;
+            elementsData.forEach((el) => {
+                const card = document.getElementById(`card-el-${el.number}`);
+                if (!card) return;
+
+                const match = el.name.toLowerCase().includes(query) ||
+                              el.symbol.toLowerCase().includes(query) ||
+                              el.number.toString() === query ||
+                              el.latin.toLowerCase().includes(query);
+
+                if (match) {
+                    card.classList.remove('dimmed');
+                    card.classList.add('highlighted');
+                    if (foundIdx === -1) foundIdx = el.number;
+                } else {
+                    card.classList.add('dimmed');
+                    card.classList.remove('highlighted');
+                }
+            });
+
+            if (foundIdx !== -1) {
+                const targetPage = Math.floor((foundIdx - 1) / 40);
+                if (targetPage !== currentPage && !isTransitioning) {
+                    goToPage(targetPage);
+                }
+            }
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            handleSearch();
+            input.focus();
+        }
+    </script>
+</body>
+</html>
