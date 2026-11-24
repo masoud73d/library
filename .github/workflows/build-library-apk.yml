@@ -112,6 +112,12 @@ jobs:
           curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js -o "$ROOT/vendor/tesseract/worker.min.js"
           curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core.wasm.js -o "$ROOT/vendor/tesseract/tesseract-core.wasm.js"
           curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core.wasm -o "$ROOT/vendor/tesseract/tesseract-core.wasm"
+          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd.wasm.js -o "$ROOT/vendor/tesseract/tesseract-core-simd.wasm.js"
+          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd.wasm -o "$ROOT/vendor/tesseract/tesseract-core-simd.wasm"
+          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-lstm.wasm.js -o "$ROOT/vendor/tesseract/tesseract-core-lstm.wasm.js"
+          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-lstm.wasm -o "$ROOT/vendor/tesseract/tesseract-core-lstm.wasm"
+          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd-lstm.wasm.js -o "$ROOT/vendor/tesseract/tesseract-core-simd-lstm.wasm.js"
+          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core-simd-lstm.wasm -o "$ROOT/vendor/tesseract/tesseract-core-simd-lstm.wasm"
           curl -fLsS https://tessdata.projectnaptha.com/4.0.0/fas.traineddata.gz -o "$ROOT/vendor/tessdata/fas.traineddata.gz"
           curl -fLsS https://tessdata.projectnaptha.com/4.0.0/eng.traineddata.gz -o "$ROOT/vendor/tessdata/eng.traineddata.gz"
           curl -fLsS https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css -o "$ROOT/vendor/all.min.css"
@@ -131,7 +137,7 @@ jobs:
           p = Path("android/app/src/main/assets/offline/tools/Text-reader/index.html")
           s = p.read_text(encoding="utf-8")
           old = 'return Tesseract.createWorker("fas+eng", 1, {'
-          new = 'return Tesseract.createWorker("fas+eng", 1, {\n          workerPath: "../../vendor/tesseract/worker.min.js",\n          corePath: "../../vendor/tesseract/tesseract-core.wasm.js",\n          langPath: "../../vendor/tessdata",\n          gzip: true,'
+          new = 'return Tesseract.createWorker("fas+eng", 1, {\n          workerPath: "../../vendor/tesseract/worker.min.js",\n          corePath: "../../vendor/tesseract",\n          langPath: "../../vendor/tessdata",\n          gzip: true,'
           if old not in s:
               raise SystemExit("Could not find OCR worker configuration")
           p.write_text(s.replace(old, new, 1), encoding="utf-8")
