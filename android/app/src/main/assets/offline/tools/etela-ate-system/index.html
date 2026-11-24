@@ -831,73 +831,65 @@
             const btn = document.getElementById('scan-cam-btn');
             const container = document.getElementById('camera-lenses-container');
             btn.disabled = true;
-            btn.innerHTML = `در حال دریافت مجوز و اسکن دقیق...`;
-
+            btn.textContent = 'در حال شناسایی مستقل دوربین‌ها...';
+            container.innerHTML = '';
             try {
-                // Request stream to trigger permission prompt & unlock device labels + capabilities
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 4096 }, height: { ideal: 2160 } } });
-                const tracks = stream.getVideoTracks();
-
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(d => d.kind === 'videoinput');
-
-                container.innerHTML = ''; // clear initial fallback text
-
-                if (videoDevices.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-amber-500 text-center py-2">هیچ دوربینی یافت نشد.</p>`;
+                if (window.AndroidApp && typeof AndroidApp.getCameraHardwareInfo === 'function') {
+                    const nativeCameras = JSON.parse(AndroidApp.getCameraHardwareInfo() || '[]');
+                    if (nativeCameras.length) {
+                        nativeCameras.forEach((cam, index) => {
+                            const facing = cam.facing === 1 ? 'جلو' : cam.facing === 0 ? 'پشت' : 'نامشخص';
+                            const focalValues = cam.focalLengthsMm || [];
+                            const name = cam.facing === 1 ? 'دوربین سلفی' :
+                                (focalValues.length ? (Math.min(...focalValues) < 2.2 ? 'اولتراواید' :
+                                 Math.max(...focalValues) > 4.5 ? 'تله‌فوتو' : 'دوربین اصلی') : 'دوربین ' + (index + 1));
+                            const focal = focalValues.length ? focalValues.join(' / ') + ' mm' : 'نامشخص';
+                            const mp = cam.megapixels ? cam.megapixels + ' مگاپیکسل' : 'نامشخص';
+                            const sensor = cam.sensorWidthMm ? cam.sensorWidthMm + ' × ' + cam.sensorHeightMm + ' mm' : 'نامشخص';
+                            container.insertAdjacentHTML('beforeend', `
+                              <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
+                                <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+                                  <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${name} — ${facing}</span>
+                                  <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">${cam.physical ? 'لنز فیزیکی مستقل' : 'دوربین منطقی'}</span>
+                                </div>
+                                <table class="sys-table text-xs"><tbody>
+                                  <tr class="table-row-custom"><td class="text-slate-500">شناسه دوربین:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">رزولوشن سنسور:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'} (${mp})</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">ابعاد سنسور:</td><td class="font-semibold text-left dir-ltr">${sensor}</td></tr>
+                                </tbody></table>
+                              </div>`);
+                        });
+                        document.getElementById('media-counts').textContent = nativeCameras.length + ' دوربین قابل‌شناسایی در Camera2';
+                        if (!nativeCameras.some(c => c.physical)) {
+                            container.insertAdjacentHTML('beforeend', '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">اندروید این گوشی لنزهای فیزیکی را جداگانه در اختیار برنامه نگذاشته؛ اطلاعات بالا مربوط به دوربین‌هایی است که سیستم گزارش کرده است.</p>');
+                        }
+                        btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
+                        return;
+                    }
                 }
-
-                for (let i = 0; i < videoDevices.length; i++) {
-                    const dev = videoDevices[i];
-                    let devTrack = tracks.find(t => t.getSettings().deviceId === dev.deviceId) || tracks[0];
-                    let caps = (devTrack && devTrack.getCapabilities) ? devTrack.getCapabilities() : {};
-                    let settings = (devTrack && devTrack.getSettings) ? devTrack.getSettings() : {};
-
-                    let label = dev.label || `دوربین شماره ${i + 1}`;
-                    let facing = caps.facingMode ? caps.facingMode.join(', ') : (settings.facingMode || 'نامشخص');
-                    if (facing === 'environment') facing = 'پشت (اصلی / عریض / اولتراواید)';
-                    else if (facing === 'user') facing = 'جلو (سلفی)';
-
-                    let maxW = caps.width ? caps.width.max : (settings.width || 'نامشخص');
-                    let maxH = caps.height ? caps.height.max : (settings.height || 'نامشخص');
-                    let mp = (typeof maxW === 'number' && typeof maxH === 'number') ? ((maxW * maxH) / 1000000).toFixed(1) + ' مگاپیکسل' : 'نامشخص';
-                    let maxFps = caps.frameRate ? caps.frameRate.max : (settings.frameRate || 'نامشخص');
-                    let zoom = caps.zoom ? `${caps.zoom.min}x تا ${caps.zoom.max}x` : 'دیجیتال / استاندارد';
-                    let torch = caps.torch ? 'دارد (چراغ‌قوه)' : 'ندارد';
-                    let focus = caps.focusMode ? caps.focusMode.join(', ') : 'اتوماتیک';
-
-                    const subCardHtml = `
-                        <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
-                            <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200/80 dark:border-slate-800">
-                                <span class="font-bold text-xs text-rose-600 dark:text-rose-400 dir-ltr">${label}</span>
-                                <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 font-semibold">${facing}</span>
-                            </div>
-                            <table class="sys-table text-xs">
-                                <colgroup><col class="col-title"><col class="col-value"></colgroup>
-                                <tbody>
-                                    <tr class="table-row-custom"><td class="text-slate-500">تفکیک‌پذیری و کیفیت:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${maxW} × ${maxH} (${mp})</td></tr>
-                                    <tr class="table-row-custom"><td class="text-slate-500">حداکثر نرخ فریم:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${maxFps} FPS</td></tr>
-                                    <tr class="table-row-custom"><td class="text-slate-500">محدوده زوم:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${zoom}</td></tr>
-                                    <tr class="table-row-custom"><td class="text-slate-500">حالت فوکوس:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${focus}</td></tr>
-                                    <tr class="table-row-custom"><td class="text-slate-500">پشتیبانی از فلش:</td><td class="font-semibold text-left">${torch}</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                    container.insertAdjacentHTML('beforeend', subCardHtml);
+                const permissionStream = await navigator.mediaDevices.getUserMedia({video:true});
+                permissionStream.getTracks().forEach(t => t.stop());
+                const devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+                document.getElementById('media-counts').textContent = devices.length + ' ورودی ویدیویی مرورگر';
+                for (let i = 0; i < devices.length; i++) {
+                    const dev = devices[i]; let stream = null;
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:dev.deviceId}}});
+                        const track = stream.getVideoTracks()[0], caps = track.getCapabilities ? track.getCapabilities() : {}, settings = track.getSettings ? track.getSettings() : {};
+                        const w = caps.width ? caps.width.max : settings.width || 'نامشخص', h = caps.height ? caps.height.max : settings.height || 'نامشخص';
+                        const mp = typeof w === 'number' && typeof h === 'number' ? ((w*h)/1e6).toFixed(1)+' MP' : 'نامشخص';
+                        container.insertAdjacentHTML('beforeend', `<div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-xs"><b>${dev.label || 'دوربین '+(i+1)}</b><p>رزولوشن: ${w} × ${h} (${mp})</p><p>شناسه: <span dir="ltr">${dev.deviceId}</span></p></div>`);
+                    } catch(e) {
+                        container.insertAdjacentHTML('beforeend', `<p class="text-xs text-amber-600">اطلاعات ${dev.label || 'دوربین '+(i+1)} در دسترس نیست.</p>`);
+                    } finally { if (stream) stream.getTracks().forEach(t => t.stop()); }
                 }
-
-                // Close active camera streams to free hardware
-                stream.getTracks().forEach(t => t.stop());
-                btn.innerHTML = `✓ اسکن لنزها کامل شد (بروزرسانی)`;
-                btn.disabled = false;
-                showToast('مشخصات تمام لنزهای دوربین بازخوانی شد');
+                if (!devices.length) container.textContent = 'هیچ ورودی دوربینی توسط مرورگر شناسایی نشد.';
+                btn.textContent = '✓ اسکن کامل شد (اسکن مجدد)';
             } catch (err) {
-                btn.disabled = false;
-                btn.innerHTML = `تلاش مجدد جهت اسکن دوربین‌ها`;
-                showToast('دسترسی به دوربین داده نشد یا مسدود است');
-                container.innerHTML = `<p class="text-xs text-rose-500 mt-2 text-center">دسترسی به دوربین امکان‌پذیر نشد: ${err.message || 'مسدود شده'}</p>`;
-            }
+                container.innerHTML = `<p class="text-xs text-rose-500 text-center">اسکن دوربین‌ها ناموفق بود: ${err.message || 'خطای دسترسی'}</p>`;
+                btn.textContent = 'تلاش مجدد برای اسکن';
+            } finally { btn.disabled = false; }
         }
 
         // 4. Sensors & Hardware Probing
