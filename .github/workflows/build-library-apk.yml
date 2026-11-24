@@ -49,6 +49,17 @@ jobs:
           echo "Manifest contents:"
           sed -n '1,120l' android/app/src/main/AndroidManifest.xml
 
+      - name: Validate WebView security boundaries
+        run: |
+          set -Eeuo pipefail
+          JAVA="android/app/src/main/java/com/masoud/library/MainActivity.java"
+          grep -q 'settings.setAllowFileAccess(false)' "$JAVA"
+          grep -q 'setAcceptThirdPartyCookies(webView, false)' "$JAVA"
+          grep -q 'private boolean isTrustedLocalOrigin(String rawUrl)' "$JAVA"
+          grep -q 'private boolean isTrustedLocalPermissionOrigin(String rawOrigin)' "$JAVA"
+          grep -q 'if (!trustedLocalPageLoaded) return "{}";' "$JAVA"
+          echo "WebView trust-boundary checks passed."
+
       - name: Prepare persistent APK signing key
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
