@@ -173,7 +173,9 @@ jobs:
           test -s "$ROOT/vendor/tesseract/worker.min.js"
           test -s "$ROOT/vendor/tessdata/fas.traineddata.gz"
           test -s "$ROOT/vendor/tessdata/eng.traineddata.gz"
-          for variant in wasm simd lstm simd-lstm; do
+          test -s "$ROOT/vendor/tesseract/tesseract-core.wasm.js"
+          test -s "$ROOT/vendor/tesseract/tesseract-core.wasm"
+          for variant in simd lstm simd-lstm; do
             test -s "$ROOT/vendor/tesseract/tesseract-core-$variant.wasm.js"
             test -s "$ROOT/vendor/tesseract/tesseract-core-$variant.wasm"
           done
@@ -182,12 +184,12 @@ jobs:
           import re
           root = Path("android/app/src/main/assets/offline/tools")
           patterns = [
-              re.compile(r"https?://cdnjs\\.cloudflare\\.com/ajax/libs/font-awesome/[^\\s\"'<>]+/css/all\\.min\\.css"),
-              re.compile(r"https?://cdnjs\\.cloudflare\\.com/ajax/libs/three\\.js/r128/three\\.min\\.js"),
-              re.compile(r"https?://cdn\\.tailwindcss\\.com"),
-              re.compile(r"https?://cdn\\.jsdelivr\\.net/npm/(?:qr-code-styling|jsbarcode|tesseract\\.js)"),
-              re.compile(r"https?://unpkg\\.com/@zxing"),
-              re.compile(r"https?://fonts\\.googleapis\\.com"),
+              re.compile(r"https?://cdnjs\.cloudflare\.com/ajax/libs/font-awesome/[^\s\"'<>]+/css/all\.min\.css"),
+              re.compile(r"https?://cdnjs\.cloudflare\.com/ajax/libs/three\.js/r128/three\.min\.js"),
+              re.compile(r"https?://cdn\.tailwindcss\.com"),
+              re.compile(r"https?://cdn\.jsdelivr\.net/npm/(?:qr-code-styling|jsbarcode|tesseract\.js)"),
+              re.compile(r"https?://unpkg\.com/@zxing"),
+              re.compile(r"https?://fonts\.googleapis\.com"),
           ]
           found = []
           for path in root.glob("*/index.html"):
@@ -197,7 +199,7 @@ jobs:
                       found.append(f"{path}:{number}: {line.strip()[:240]}")
           if found:
               print("Unbundled runtime references:")
-              print("\\n".join(found))
+              print("\n".join(found))
               raise SystemExit(1)
           print("Offline dependency validation: PASSED")
           PY
