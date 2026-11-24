@@ -532,7 +532,7 @@ public class MainActivity extends Activity {
         }
 
         private int readBatteryDesignCapacityMah() {
-            // First ask Android's framework power profile for the manufacturer-provided
+            // First ask Android's framework power profile for manufacturer-provided design capacity.
             // design capacity. This can work on devices that restrict direct sysfs access.
             try {
                 Class<?> profileClass = Class.forName("com.android.internal.os.PowerProfile");
