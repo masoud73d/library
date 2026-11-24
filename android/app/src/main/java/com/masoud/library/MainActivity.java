@@ -264,6 +264,7 @@ public class MainActivity extends Activity {
         }
     }
 
+    // Read-only Android device information bridge for the system information tool.
     private String readSystemProperty(String key) {
         try {
             Class<?> systemProperties = Class.forName("android.os.SystemProperties");
