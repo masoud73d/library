@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اطلاعات کامل سیستم و دستگاه</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        vazir: ['Vazirmatn', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Vazirmatn Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden !important;
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazirmatn', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Strict Responsive Fixed Tables */
+        .sys-table {
+            width: 100% !important;
+            max-width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: collapse;
+        }
+        .sys-table td {
+            padding: 9px 8px;
+            word-wrap: break-word !important;
+            overflow-wrap: anywhere !important;
+            white-space: normal !important;
+            vertical-align: middle;
+        }
+        .col-title {
+            width: 42% !important;
+        }
+        .col-value {
+            width: 58% !important;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(14, 165, 233, 0.4);
+            border-radius: 3px;
+        }
+        /* Glassmorphism styling */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .table-row-custom {
+            border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+        }
+        .dark .table-row-custom {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .battery-bar-anim {
+            transition: width 0.5s ease-in-out, background-color 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-12 w-full max-w-full overflow-x-hidden">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 z-50 opacity-0 pointer-events-none transition-all duration-300 translate-y-8 bg-slate-900/95 text-white dark:bg-slate-100 dark:text-slate-900 px-5 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 border border-slate-700 dark:border-slate-300 text-xs sm:text-sm font-medium w-11/12 max-w-md justify-center">
+        <svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span id="toast-message">پیام سیستم</span>
+    </div>
+
+    <div class="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-3 sm:pt-6">
+        
+        <!-- Header -->
+        <header class="glass-card rounded-2xl p-3.5 sm:p-5 mb-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3 w-full">
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20 flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-lg sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                            اطلاعات جامع سیستم
+                        </h1>
+                        <span id="device-badge" class="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border border-sky-300 dark:border-sky-800">
+                            در حال آنالیز...
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">شناسایی مدل گوشی، تراشه، سنسورها و لنزهای دوربین</p>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-200/60 dark:border-slate-800/60">
+                <button onclick="refreshData()" class="flex-1 md:flex-initial px-3 py-2 rounded-xl bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 active:scale-95">
+                    <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span>بروزرسانی</span>
+                </button>
+
+                <button onclick="copyReport()" class="flex-1 md:flex-initial px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 active:scale-95 shadow-md shadow-sky-600/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                    </svg>
+                    <span>کپی کل گزارش</span>
+                </button>
+
+                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all duration-200 active:scale-95 flex-shrink-0" title="تغییر تم">
+                    <svg class="w-4 h-4 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <svg class="w-4 h-4 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5 w-full">
+
+            <!-- 1. Phone Model & OS Card -->
+            <section class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-sm w-full">
+                <div class="flex items-center gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <div class="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100 text-sm">مدل گوشی و سیستم‌عامل</h2>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">شناسه سخت‌افزاری دستگاه</span>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 w-full">
+                    <table class="sys-table text-xs text-right">
+                        <colgroup>
+                            <col class="col-title">
+                            <col class="col-value">
+                        </colgroup>
+                        <tbody>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">مدل دقیق گوشی:</td>
+                                <td id="phone-model-val" class="font-bold text-sky-600 dark:text-sky-400 text-left dir-ltr">در حال شناسایی...</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سازنده / پلتفرم:</td>
+                                <td id="phone-brand-val" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سیستم‌عامل و نسخه:</td>
+                                <td id="os-info" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">مرورگر کاربر:</td>
+                                <td id="browser-info" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">معماری پردازنده:</td>
+                                <td id="arch-info" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">نقاط لمس همزمان:</td>
+                                <td id="touch-points" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">منطقه زمانی:</td>
+                                <td id="timezone-info" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 2. CPU, GPU & Chipset Inference Card -->
+            <section class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-sm w-full">
+                <div class="flex items-center gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <div class="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100 text-sm">چیپست، CPU و GPU</h2>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">پردازنده و چیپست احتمالی</span>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 w-full">
+                    <table class="sys-table text-xs text-right">
+                        <colgroup>
+                            <col class="col-title">
+                            <col class="col-value">
+                        </colgroup>
+                        <tbody>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">تراشه (Chipset):</td>
+                                <td id="inferred-chipset" class="font-bold text-purple-600 dark:text-purple-400 text-left dir-ltr">در حال تخمین...</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">مدل کارت گرافیک (GPU):</td>
+                                <td id="gpu-renderer" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr text-[11px]">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سازنده گرافیک:</td>
+                                <td id="gpu-vendor" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">هسته‌های منطقی CPU:</td>
+                                <td id="cpu-cores" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">حافظه رم (RAM):</td>
+                                <td id="device-ram" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">نسخه WebGL:</td>
+                                <td id="webgl-version" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">حداکثر سایز تکسچر:</td>
+                                <td id="max-texture-size" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. Cameras & Lens Details Card -->
+            <section class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-sm w-full">
+                <div class="flex items-center gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <div class="p-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">دوربین‌ها و لنزهای گوشی</h2>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">بررسی تفکیک‌پذیری و زوم</span>
+                    </div>
+                </div>
+
+                <div class="mb-2.5">
+                    <button id="scan-cam-btn" onclick="scanCamerasDetailed()" class="w-full py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-md shadow-rose-600/20 active:scale-95 flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <span>اسکن دقیق لنزها و مگاپیکسل (نیاز به مجوز)</span>
+                    </button>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 w-full mb-2">
+                    <table class="sys-table text-xs text-right">
+                        <colgroup>
+                            <col class="col-title">
+                            <col class="col-value">
+                        </colgroup>
+                        <tbody>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">تعداد کل ورودی‌ها:</td>
+                                <td id="media-counts" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Container for Scanned Lenses -->
+                <div id="camera-lenses-container" class="space-y-2">
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 text-center py-2 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                        برای مشاهده مگاپیکسل، نرخ فریم، زوم و وضعیت فلش هر لنز، روی دکمه اسکن بالا کلیک کنید.
+                    </p>
+                </div>
+            </section>
+
+            <!-- 4. Sensors & Hardware Probing Card -->
+            <section class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-sm w-full md:col-span-2 lg:col-span-1">
+                <div class="flex items-center gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <div class="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100 text-sm">سنسورها و سخت‌افزارها</h2>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">ژیروسکوپ، شتاب‌سنج، اثرانگشت</span>
+                    </div>
+                </div>
+
+                <div class="mb-2.5">
+                    <button onclick="requestSensorPermissions()" class="w-full py-1.5 px-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold transition-all active:scale-95 flex items-center justify-center gap-1">
+                        <span>فعالسازی سنسورهای زنده (iOS / Android)</span>
+                    </button>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 w-full">
+                    <table class="sys-table text-xs text-right">
+                        <colgroup>
+                            <col class="col-title">
+                            <col class="col-value">
+                        </colgroup>
+                        <tbody>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">بیومتریک / اثرانگشت:</td>
+                                <td id="biometric-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">بلوتوث (Web API):</td>
+                                <td id="bluetooth-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">موقعیت‌نما (GPS):</td>
+                                <td id="geo-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سنسور شتاب‌سنج:</td>
+                                <td id="accel-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr id="accel-live-row" class="table-row-custom hidden bg-amber-500/5 dark:bg-amber-500/10">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">شتاب زنده (X,Y,Z):</td>
+                                <td id="accel-live-vals" class="font-mono text-[11px] text-amber-600 dark:text-amber-400 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">ژیروسکوپ / زاویه:</td>
+                                <td id="gyro-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr id="gyro-live-row" class="table-row-custom hidden bg-sky-500/5 dark:bg-sky-500/10">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">زوایای زنده گوشی:</td>
+                                <td id="gyro-live-vals" class="font-mono text-[11px] text-sky-600 dark:text-sky-400 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">مغناطیس‌سنج / قطب‌نما:</td>
+                                <td id="mag-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سنسور نور محیط:</td>
+                                <td id="light-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سنسور مجاورت:</td>
+                                <td id="proximity-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">NFC / ویبراتور:</td>
+                                <td id="nfc-vibe-status" class="font-semibold text-left">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 5. Display & FPS Card -->
+            <section class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-sm w-full">
+                <div class="flex items-center gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <div class="p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100 text-sm">صفحه‌نمایش و FPS</h2>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">رزولوشن، نرخ نوسازی و HDR</span>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 w-full">
+                    <table class="sys-table text-xs text-right">
+                        <colgroup>
+                            <col class="col-title">
+                            <col class="col-value">
+                        </colgroup>
+                        <tbody>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">نرخ نوسازی (FPS):</td>
+                                <td id="screen-fps" class="font-bold text-teal-600 dark:text-teal-400 text-left dir-ltr">در حال محاسبه...</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">رزولوشن فیزیکی:</td>
+                                <td id="screen-physical" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">ابعاد منطقی (CSS):</td>
+                                <td id="screen-logical" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">پنجره (Viewport):</td>
+                                <td id="viewport-size" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">تراکم پیکسلی (DPR):</td>
+                                <td id="pixel-ratio" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">عمق رنگ / HDR:</td>
+                                <td id="hdr-support" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">جهت صفحه:</td>
+                                <td id="screen-orientation" class="font-semibold text-slate-800 dark:text-slate-200 text-left">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 6. Battery, Storage & Network Card -->
+            <section class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-sm w-full">
+                <div class="flex items-center gap-2.5 pb-2.5 mb-2.5 border-b border-slate-200 dark:border-slate-800">
+                    <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100 text-sm">باتری، حافظه و اینترنت</h2>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400">انرژی، ذخیره‌سازی و ارتباطات</span>
+                    </div>
+                </div>
+
+                <!-- Battery Visual Gauge -->
+                <div class="mb-3 bg-slate-50 dark:bg-slate-900/50 p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between gap-2">
+                    <div class="relative w-24 h-8 border-2 border-slate-400 dark:border-slate-600 rounded-lg p-0.5 flex items-center flex-shrink-0">
+                        <div class="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1.5 h-3 bg-slate-400 dark:bg-slate-600 rounded-l"></div>
+                        <div id="battery-bar" class="battery-bar-anim h-full rounded bg-emerald-500 w-0"></div>
+                    </div>
+                    <div class="text-left dir-ltr min-w-0">
+                        <span id="battery-percentage" class="text-sm font-black text-slate-900 dark:text-white block">-- %</span>
+                        <span id="battery-charging-badge" class="block text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">در حال بررسی...</span>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/80 dark:border-slate-800/80 w-full">
+                    <table class="sys-table text-xs text-right">
+                        <colgroup>
+                            <col class="col-title">
+                            <col class="col-value">
+                        </colgroup>
+                        <tbody>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">ظرفیت اسمی باتری:</td>
+                                <td id="battery-capacity" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">در حال شناسایی...</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">اتصال اینترنت:</td>
+                                <td id="online-status" class="font-semibold text-left">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">سرعت تخمینی:</td>
+                                <td id="net-downlink" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">ذخیره‌سازی مرورگر:</td>
+                                <td id="storage-quota-txt" class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-[11px] text-slate-500 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800/60 pt-4 w-full px-2">
+            طراحی شده با جداول فیکس ریسپانسیو • تمام اطلاعات به صورت محلی در دستگاه شما پردازش می‌شوند.
+        </footer>
+
+    </div>
+
+    <!-- JavaScript Core logic -->
+    <script>
+        const systemReportData = {};
+        let nativeDeviceInfoCache = null;
+
+        // Native Android information is supplied by the APK's read-only JavaScript bridge.
+        function readNativeDeviceInfo(refresh = false) {
+            if (!refresh && nativeDeviceInfoCache) return nativeDeviceInfoCache;
+            try {
+                if (!window.AndroidApp || typeof window.AndroidApp.getNativeDeviceInfo !== 'function') return null;
+                const raw = window.AndroidApp.getNativeDeviceInfo();
+                const info = JSON.parse(raw || '{}');
+                if (info && info.nativeSource === 'Android') {
+                    nativeDeviceInfoCache = info;
+                    return info;
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function updateBatteryVisual(level, status, plugged) {
+            const bar = document.getElementById('battery-bar');
+            const percentEl = document.getElementById('battery-percentage');
+            const badgeEl = document.getElementById('battery-charging-badge');
+            if (!bar || !percentEl || !badgeEl || !Number.isFinite(level) || level < 0) return;
+
+            const safeLevel = Math.max(0, Math.min(100, Math.round(level)));
+            percentEl.textContent = safeLevel + '%';
+            bar.style.width = safeLevel + '%';
+
+            if (safeLevel <= 20) bar.className = 'battery-bar-anim h-full rounded bg-rose-500';
+            else if (safeLevel <= 50) bar.className = 'battery-bar-anim h-full rounded bg-amber-500';
+            else bar.className = 'battery-bar-anim h-full rounded bg-emerald-500';
+
+            if (status === 'charging') badgeEl.textContent = '⚡ در حال شارژ';
+            else if (status === 'full') badgeEl.textContent = 'باتری کاملاً شارژ شده';
+            else if (status === 'not_charging') badgeEl.textContent = 'به شارژر متصل، بدون شارژ';
+            else if (plugged && plugged !== 'none') badgeEl.textContent = 'به برق متصل';
+            else badgeEl.textContent = 'در حال مصرف انرژی';
+        }
+
+        // Helper: Styled Flexible Badge
+        function makeBadge(text, type, title = '') {
+            let colors = '';
+            if (type === 'success') {
+                colors = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/90 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
+            } else if (type === 'warning') {
+                colors = 'bg-amber-100 text-amber-800 dark:bg-amber-950/90 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
+            } else if (type === 'danger') {
+                colors = 'bg-rose-100 text-rose-800 dark:bg-rose-950/90 dark:text-rose-300 border border-rose-300 dark:border-rose-800';
+            } else {
+                colors = 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700';
+            }
+            const titleAttr = title ? `title="${title}"` : '';
+            return `<span ${titleAttr} class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold whitespace-normal max-w-full leading-tight align-middle ${colors}">${text}</span>`;
+        }
+
+        // Device code -> commercial name database.
+        // The local aliases guarantee recognition of frequently reported Xiaomi identifiers
+        // even when the remote catalogue is unavailable or its CDN is blocked.
+        let deviceDatabasePromise = null;
+        let normalizedDeviceDatabase = null;
+
+        function normalizeDeviceCode(value) {
+            return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+        }
+
+        function getLocalDeviceMatch(value) {
+            const raw = String(value || '').trim();
+            const normalized = normalizeDeviceCode(raw);
+            const aliases = {
+                '2312DRA50G': { name: 'Redmi Note 13 Pro 5G', brand: 'Xiaomi (شیائومی)' },
+                '2312DRA50C': { name: 'Redmi Note 13 Pro 5G (نسخه چین)', brand: 'Xiaomi (شیائومی)' }
+            };
+
+            if (aliases[normalized]) return aliases[normalized];
+
+            // Some browsers prepend the manufacturer to the model identifier.
+            const codeMatch = raw.toUpperCase().match(/2312DRA50[GC]/);
+            return codeMatch ? aliases[codeMatch[0]] : null;
+        }
+
+        async function getDeviceDatabase() {
+            if (!deviceDatabasePromise) {
+                deviceDatabasePromise = fetch('https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json', { cache: 'force-cache' })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Device database unavailable');
+                        return response.json();
+                    })
+                    .catch(() => null);
+            }
+            return deviceDatabasePromise;
+        }
+
+        async function findCommercialDevice(modelCode) {
+            const code = String(modelCode || '').trim();
+            const normalized = normalizeDeviceCode(code);
+            if (!normalized) return null;
+
+            const localMatch = getLocalDeviceMatch(code);
+            if (localMatch) return localMatch;
+
+            const database = await getDeviceDatabase();
+            if (!database || typeof database !== 'object') return null;
+
+            if (database[code] && database[code].name) return database[code];
+
+            // Build the normalized index only once to support code formatting variations.
+            if (!normalizedDeviceDatabase) {
+                normalizedDeviceDatabase = Object.create(null);
+                Object.keys(database).forEach(key => {
+                    const item = database[key];
+                    const normalizedKey = normalizeDeviceCode(key);
+                    if (normalizedKey && item && item.name && !normalizedDeviceDatabase[normalizedKey]) {
+                        normalizedDeviceDatabase[normalizedKey] = item;
+                    }
+                });
+            }
+            return normalizedDeviceDatabase[normalized] || null;
+        }
+
+        // 1. Device Model & Brand Extraction Logic
+        async function loadPhoneModelAndOS() {
+            const ua = navigator.userAgent;
+            let model = 'نامشخص';
+            let brand = 'نامشخص';
+            let os = 'نامشخص';
+
+            const nativeInfo = readNativeDeviceInfo(true);
+
+            if (nativeInfo) {
+                model = nativeInfo.model || model;
+                const nativeBrand = String(nativeInfo.brand || nativeInfo.manufacturer || '').trim();
+                if (/xiaomi|redmi|poco/i.test(nativeBrand)) brand = 'Xiaomi (شیائومی)';
+                else if (/samsung/i.test(nativeBrand)) brand = 'Samsung (سامسونگ)';
+                else if (/google/i.test(nativeBrand)) brand = 'Google (گوگل)';
+                else if (nativeBrand) brand = nativeBrand;
+
+                if (nativeInfo.androidVersion) {
+                    os = 'اندروید ' + nativeInfo.androidVersion;
+                    if (nativeInfo.romVersion) {
+                        const rom = String(nativeInfo.romVersion).trim();
+                        if (/^OS/i.test(rom)) os += ' · HyperOS ' + rom;
+                        else if (/^V[0-9]/i.test(rom)) os += ' · MIUI ' + rom;
+                        else os += ' · نسخه رام ' + rom;
+                    }
+                }
+
+                if (nativeInfo.supportedAbis) {
+                    document.getElementById('arch-info').textContent = nativeInfo.supportedAbis + ' (معماری واقعی دستگاه)';
+                }
+            }
+
+            // High Entropy User Agent Data API (browser fallback only).
+            if (!nativeInfo && navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                try {
+                    const uad = await navigator.userAgentData.getHighEntropyValues(['model', 'platform', 'platformVersion', 'architecture', 'bitness']);
+                    if (uad.model) model = uad.model;
+                    if (uad.platform) {
+                        os = uad.platform === 'Android' ? 'اندروید' : uad.platform;
+                        if (uad.platformVersion) os += ' ' + uad.platformVersion;
+                    }
+                    if (uad.architecture) document.getElementById('arch-info').textContent = `${uad.architecture} (${uad.bitness || '64'} bit)`;
+                } catch (e) {}
+            }
+
+            // Read a model from User-Agent only when Client Hints did not provide one.
+            if (model === 'نامشخص' || model === '') {
+                if (/iPhone/i.test(ua)) {
+                    brand = 'Apple (اپل)';
+                    os = 'iOS';
+                    const match = ua.match(/iPhone OS ([0-9_]+)/);
+                    if (match) os += ' ' + match[1].replace(/_/g, '.');
+                    model = 'آیفون (iPhone)';
+                } else if (/Android/i.test(ua)) {
+                    const androidMatch = ua.match(/Android\s([0-9.]+)/);
+                    if (androidMatch) os = 'اندروید ' + androidMatch[1];
+
+                    // Prefer a recognizable hardware model code, even if the UA contains
+                    // extra manufacturer/build text around it.
+                    const knownCode = ua.match(/2312DRA50[GC]/i);
+                    const modelMatch = ua.match(/;\s?([^;]+?)\s?(?:Build(?:\/|\s)|\))/i);
+                    if (knownCode) model = knownCode[0].toUpperCase();
+                    else if (modelMatch && modelMatch[1]) model = modelMatch[1].trim();
+                }
+            }
+
+            // Normalize common prefixes such as "Xiaomi " before resolving the code.
+            const rawModelValue = String(model).trim();
+            const embeddedKnownCode = rawModelValue.match(/2312DRA50[GC]/i);
+            const originalModelCode = embeddedKnownCode ? embeddedKnownCode[0].toUpperCase() : rawModelValue;
+
+            // Update known battery capacity immediately from the raw browser/device hints.
+            // Do not wait for the optional online device database lookup to finish.
+            updateBatteryCapacity(ua + ' ' + rawModelValue, originalModelCode);
+
+            const matchedDevice = await findCommercialDevice(originalModelCode);
+
+            if (matchedDevice && matchedDevice.name) {
+                model = matchedDevice.name;
+                if (originalModelCode && normalizeDeviceCode(originalModelCode) !== normalizeDeviceCode(matchedDevice.name)) {
+                    model += ` (${originalModelCode})`;
+                }
+                if (matchedDevice.brand) brand = matchedDevice.brand;
+            } else if (rawModelValue !== originalModelCode && rawModelValue) {
+                model = rawModelValue;
+            }
+
+            // Brand inference fallback when the database has no match.
+            const brandModel = String(model).toLowerCase();
+            if (brand === 'نامشخص' || brand === 'Android (اندروید)' || brand === 'Android') {
+                if (/^sm[-_]/i.test(originalModelCode)) brand = 'Samsung (سامسونگ)';
+                else if (/redmi|poco|\bmi\b|2312dra|xiaomi/i.test(brandModel + ' ' + originalModelCode)) brand = 'Xiaomi (شیائومی)';
+                else if (/pixel/i.test(brandModel)) brand = 'Google (گوگل پکسل)';
+                else if (/cph|oppo/i.test(brandModel + ' ' + originalModelCode)) brand = 'OPPO (اوپو)';
+                else if (/v[0-9]{4}|vivo/i.test(brandModel + ' ' + originalModelCode)) brand = 'Vivo (ویوو)';
+                else if (/oneplus/i.test(brandModel)) brand = 'OnePlus (وان‌پلاس)';
+                else if (/huawei/i.test(brandModel)) brand = 'Huawei (هواوی)';
+                else if (/honor/i.test(brandModel)) brand = 'HONOR (آنر)';
+                else if (/motorola|moto/i.test(brandModel)) brand = 'Motorola (موتورولا)';
+                else if (/nokia/i.test(brandModel)) brand = 'Nokia (نوکیا)';
+            }
+
+            document.getElementById('phone-model-val').textContent = model;
+            document.getElementById('phone-brand-val').textContent = brand;
+            updateBatteryCapacity(model, originalModelCode);
+            if (os !== 'نامشخص') document.getElementById('os-info').textContent = os;
+
+            systemReportData['PhoneModel'] = model;
+            systemReportData['PhoneBrand'] = brand;
+
+            // Browser
+            let browser = 'مرورگر وب';
+            if (ua.includes('Firefox')) browser = 'فايرفاکس (Firefox)';
+            else if (ua.includes('SamsungBrowser')) browser = 'سامسونگ اینترنت';
+            else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'اپرا (Opera)';
+            else if (ua.includes('Edg')) browser = 'مایکروسافت اج (Edge)';
+            else if (ua.includes('Chrome')) browser = 'کروم (Google Chrome)';
+            else if (ua.includes('Safari')) browser = 'سافاری (Safari)';
+            document.getElementById('browser-info').textContent = browser;
+
+            if (document.getElementById('arch-info').textContent === '--') {
+                document.getElementById('arch-info').textContent = ua.includes('x86_64') ? 'x86_64 (64-bit)' : 'ARM64 / Mobile';
+            }
+
+            if (nativeInfo) {
+                if (nativeInfo.cpuCores > 0) {
+                    document.getElementById('cpu-cores').textContent = nativeInfo.cpuCores + ' هسته (اندروید)';
+                }
+                if (nativeInfo.totalRamBytes > 0) {
+                    const ramGb = nativeInfo.totalRamBytes / (1024 * 1024 * 1024);
+                    document.getElementById('device-ram').textContent = ramGb.toFixed(1) + ' GB (واقعی)';
+                }
+                systemReportData['AndroidVersion'] = os;
+                systemReportData['AndroidBuild'] = nativeInfo.buildNumber || nativeInfo.display || 'نامشخص';
+                systemReportData['CPUArchitecture'] = nativeInfo.supportedAbis || 'نامشخص';
+            }
+
+            document.getElementById('touch-points').textContent = `${navigator.maxTouchPoints || 0} نقطه`;
+            document.getElementById('timezone-info').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'نامشخص';
+
+            const isMobile = /Android|webOS|iPhone|iPad|iPod/i.test(ua);
+            document.getElementById('device-badge').textContent = isMobile ? 'گوشی / تبلت' : 'رایانه دسکتاپ';
+        }
+
+        // 2. GPU & Chipset Inference Logic
+        function inferChipset(gpuString) {
+            if (!gpuString) return 'نامشخص';
+            const gpu = gpuString.toLowerCase();
+
+            if (gpu.includes('adreno')) {
+                if (gpu.includes('750') || gpu.includes('740') || gpu.includes('730')) return 'Qualcomm Snapdragon 8 Gen 2 / 3 (اسنپ‌دراگون سری ۸)';
+                if (gpu.includes('660') || gpu.includes('650') || gpu.includes('642') || gpu.includes('643')) return 'Qualcomm Snapdragon 7 / 8 Series (اسنپ‌دراگون)';
+                if (gpu.includes('619') || gpu.includes('618') || gpu.includes('610') || gpu.includes('612')) return 'Qualcomm Snapdragon 6 / 7 Series (اسنپ‌دراگون)';
+                return 'Qualcomm Snapdragon (کوآلکام اسنپ‌دراگون)';
+            }
+            if (gpu.includes('mali') || gpu.includes('immortalis')) {
+                if (gpu.includes('g710') || gpu.includes('g715') || gpu.includes('g720') || gpu.includes('immortalis')) return 'MediaTek Dimensity 9000+ / Exynos (دیمنسیتی پرچمدار)';
+                if (gpu.includes('g610') || gpu.includes('g57') || gpu.includes('g68') || gpu.includes('g77')) return 'MediaTek Dimensity / Helio G Series (دیمنسیتی / هلیو)';
+                if (gpu.includes('g52') || gpu.includes('g51')) return 'MediaTek Helio G80/G85/G88 یا Exynos رده‌میانی';
+                return 'MediaTek Dimensity/Helio یا Samsung Exynos';
+            }
+            if (gpu.includes('apple')) return 'Apple A-Series Bionic / M-Series (تراشه اختصاصی اپل)';
+            if (gpu.includes('xclipse')) return 'Samsung Exynos (با گرافیک AMD Xclipse)';
+            if (gpu.includes('powervr')) return 'MediaTek / PowerVR Mobile SoC';
+
+            return 'چیپست موبایل (بر اساس پردازنده گرافیکی)';
+        }
+
+        function loadCPUAndGPU() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const isWebGL2 = 'WebGL2RenderingContext' in window && gl instanceof WebGL2RenderingContext;
+                    document.getElementById('webgl-version').textContent = isWebGL2 ? 'WebGL 2.0' : 'WebGL 1.0';
+
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    if (debugInfo) {
+                        const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
+                        const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                        document.getElementById('gpu-vendor').textContent = vendor ? vendor.replace(/Google Inc\. \((.*)\)/, '$1') : 'اصلی';
+                        document.getElementById('gpu-renderer').textContent = renderer || 'نامشخص';
+
+                        // Infer Chipset
+                        const inferred = inferChipset(renderer);
+                        document.getElementById('inferred-chipset').textContent = inferred;
+                        systemReportData['Chipset'] = inferred;
+                        systemReportData['GPU'] = renderer;
+                    }
+
+                    const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+                    document.getElementById('max-texture-size').textContent = maxTex ? `${maxTex} × ${maxTex} px` : 'نامشخص';
+                }
+            } catch (e) {
+                document.getElementById('inferred-chipset').textContent = 'محدودیت WebGL';
+            }
+
+            const nativeInfo = readNativeDeviceInfo();
+            document.getElementById('cpu-cores').textContent = nativeInfo && nativeInfo.cpuCores > 0
+                ? nativeInfo.cpuCores + ' هسته (اندروید)'
+                : `${navigator.hardwareConcurrency || 'نامشخص'} هسته`;
+            document.getElementById('device-ram').textContent = nativeInfo && nativeInfo.totalRamBytes > 0
+                ? (nativeInfo.totalRamBytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB (واقعی)'
+                : (navigator.deviceMemory ? `حدود ${navigator.deviceMemory} GB` : 'محدود در مرورگر');
+        }
+
+        // 3. Detailed Camera & Lens Scanning (With Permissions & Capabilities)
+        async function scanCamerasDetailed() {
+            const btn = document.getElementById('scan-cam-btn');
+            const container = document.getElementById('camera-lenses-container');
+            btn.disabled = true;
+            btn.innerHTML = `در حال دریافت مجوز و اسکن دقیق...`;
+
+            try {
+                // Request stream to trigger permission prompt & unlock device labels + capabilities
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 4096 }, height: { ideal: 2160 } } });
+                const tracks = stream.getVideoTracks();
+
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+                container.innerHTML = ''; // clear initial fallback text
+
+                if (videoDevices.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-amber-500 text-center py-2">هیچ دوربینی یافت نشد.</p>`;
+                }
+
+                for (let i = 0; i < videoDevices.length; i++) {
+                    const dev = videoDevices[i];
+                    let devTrack = tracks.find(t => t.getSettings().deviceId === dev.deviceId) || tracks[0];
+                    let caps = (devTrack && devTrack.getCapabilities) ? devTrack.getCapabilities() : {};
+                    let settings = (devTrack && devTrack.getSettings) ? devTrack.getSettings() : {};
+
+                    let label = dev.label || `دوربین شماره ${i + 1}`;
+                    let facing = caps.facingMode ? caps.facingMode.join(', ') : (settings.facingMode || 'نامشخص');
+                    if (facing === 'environment') facing = 'پشت (اصلی / عریض / اولتراواید)';
+                    else if (facing === 'user') facing = 'جلو (سلفی)';
+
+                    let maxW = caps.width ? caps.width.max : (settings.width || 'نامشخص');
+                    let maxH = caps.height ? caps.height.max : (settings.height || 'نامشخص');
+                    let mp = (typeof maxW === 'number' && typeof maxH === 'number') ? ((maxW * maxH) / 1000000).toFixed(1) + ' مگاپیکسل' : 'نامشخص';
+                    let maxFps = caps.frameRate ? caps.frameRate.max : (settings.frameRate || 'نامشخص');
+                    let zoom = caps.zoom ? `${caps.zoom.min}x تا ${caps.zoom.max}x` : 'دیجیتال / استاندارد';
+                    let torch = caps.torch ? 'دارد (چراغ‌قوه)' : 'ندارد';
+                    let focus = caps.focusMode ? caps.focusMode.join(', ') : 'اتوماتیک';
+
+                    const subCardHtml = `
+                        <div class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
+                            <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-200/80 dark:border-slate-800">
+                                <span class="font-bold text-xs text-rose-600 dark:text-rose-400 dir-ltr">${label}</span>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 font-semibold">${facing}</span>
+                            </div>
+                            <table class="sys-table text-xs">
+                                <colgroup><col class="col-title"><col class="col-value"></colgroup>
+                                <tbody>
+                                    <tr class="table-row-custom"><td class="text-slate-500">تفکیک‌پذیری و کیفیت:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${maxW} × ${maxH} (${mp})</td></tr>
+                                    <tr class="table-row-custom"><td class="text-slate-500">حداکثر نرخ فریم:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${maxFps} FPS</td></tr>
+                                    <tr class="table-row-custom"><td class="text-slate-500">محدوده زوم:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${zoom}</td></tr>
+                                    <tr class="table-row-custom"><td class="text-slate-500">حالت فوکوس:</td><td class="font-semibold text-slate-800 dark:text-slate-200 text-left dir-ltr">${focus}</td></tr>
+                                    <tr class="table-row-custom"><td class="text-slate-500">پشتیبانی از فلش:</td><td class="font-semibold text-left">${torch}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', subCardHtml);
+                }
+
+                // Close active camera streams to free hardware
+                stream.getTracks().forEach(t => t.stop());
+                btn.innerHTML = `✓ اسکن لنزها کامل شد (بروزرسانی)`;
+                btn.disabled = false;
+                showToast('مشخصات تمام لنزهای دوربین بازخوانی شد');
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = `تلاش مجدد جهت اسکن دوربین‌ها`;
+                showToast('دسترسی به دوربین داده نشد یا مسدود است');
+                container.innerHTML = `<p class="text-xs text-rose-500 mt-2 text-center">دسترسی به دوربین امکان‌پذیر نشد: ${err.message || 'مسدود شده'}</p>`;
+            }
+        }
+
+        // 4. Sensors & Hardware Probing
+        function requestSensorPermissions() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission().then(state => {
+                    if (state === 'granted') showToast('مجوز سنسورهای حرکت اعطا شد');
+                    else showToast('مجوز سنسور حرکت رد شد');
+                }).catch(() => showToast('خطا در درخواست مجوز سنسور'));
+            } else {
+                showToast('سنسورها بدون نیاز به مجوز فعال هستند');
+            }
+        }
+
+        async function loadSensorsAndHardware() {
+            // Biometrics / Fingerprint check
+            const bioEl = document.getElementById('biometric-status');
+            if (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+                try {
+                    const avail = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                    bioEl.innerHTML = avail ? makeBadge('حسگر اثرانگشت / چهره (آماده)', 'success') : makeBadge('غیرفعال / بدون حسگر', 'info');
+                } catch(e) {
+                    bioEl.innerHTML = makeBadge('نامشخص', 'info');
+                }
+            } else {
+                bioEl.innerHTML = makeBadge('پشتیبانی نمی‌شود', 'info');
+            }
+
+            // Web Bluetooth
+            const btEl = document.getElementById('bluetooth-status');
+            if ('bluetooth' in navigator) {
+                btEl.innerHTML = makeBadge('در دسترس مرورگر', 'success');
+            } else {
+                btEl.innerHTML = makeBadge('محدودیت مرورگر / WebView', 'warning', 'بلوتوث گوشی روشن است اما استاندارد Web Bluetooth API در این مرورگر مسدود است.');
+            }
+
+            // GPS
+            document.getElementById('geo-status').innerHTML = ('geolocation' in navigator) ? makeBadge('فعال در سیستم', 'success') : makeBadge('غیرفعال', 'danger');
+
+            // Accelerometer & Gyroscope Live Event Listeners
+            const hasAccel = ('DeviceMotionEvent' in window);
+            document.getElementById('accel-status').innerHTML = hasAccel ? makeBadge('سنسور شتاب فعال', 'success') : makeBadge('پشتیبانی نمی‌شود', 'danger');
+
+            if (hasAccel) {
+                window.addEventListener('devicemotion', function(e) {
+                    if (e.accelerationIncludingGravity && e.accelerationIncludingGravity.x !== null) {
+                        document.getElementById('accel-live-row').classList.remove('hidden');
+                        const ax = e.accelerationIncludingGravity.x.toFixed(1);
+                        const ay = e.accelerationIncludingGravity.y.toFixed(1);
+                        const az = e.accelerationIncludingGravity.z.toFixed(1);
+                        document.getElementById('accel-live-vals').textContent = `X:${ax} Y:${ay} Z:${az} m/s²`;
+                    }
+                }, { once: false });
+            }
+
+            const hasGyro = ('DeviceOrientationEvent' in window);
+            document.getElementById('gyro-status').innerHTML = hasGyro ? makeBadge('سنسور ژیروسکوپ فعال', 'success') : makeBadge('پشتیبانی نمی‌شود', 'danger');
+
+            if (hasGyro) {
+                window.addEventListener('deviceorientation', function(e) {
+                    if (e.beta !== null) {
+                        document.getElementById('gyro-live-row').classList.remove('hidden');
+                        document.getElementById('gyro-live-vals').textContent = `α:${Math.round(e.alpha || 0)}° β:${Math.round(e.beta || 0)}° γ:${Math.round(e.gamma || 0)}°`;
+                    }
+                }, { once: false });
+            }
+
+            // Magnetometer / Compass heading
+            document.getElementById('mag-status').innerHTML = ('Magnetometer' in window || 'ondeviceorientationabsolute' in window) ? makeBadge('فعال / قطب‌نما', 'success') : makeBadge('محدود در مرورگر', 'info');
+
+            // Ambient Light & Proximity
+            document.getElementById('light-status').innerHTML = ('AmbientLightSensor' in window) ? makeBadge('پشتیبانی می‌شود', 'success') : makeBadge('محدود شده', 'info');
+            document.getElementById('proximity-status').innerHTML = ('ProximitySensor' in window || 'ondeviceproximity' in window) ? makeBadge('پشتیبانی می‌شود', 'success') : makeBadge('محدود شده', 'info');
+
+            // NFC & Vibration
+            const hasNFC = 'NDEFReader' in window;
+            const hasVibe = 'vibrate' in navigator;
+            document.getElementById('nfc-vibe-status').innerHTML = `${hasNFC ? makeBadge('NFC', 'success') : makeBadge('بدون NFC', 'info')} ${hasVibe ? makeBadge('ویبره فعال', 'success') : ''}`;
+        }
+
+        // 5. Display & FPS Calculation
+        let fpsFrameCount = 0;
+        let fpsLastTime = performance.now();
+
+        function calcFPS(now) {
+            fpsFrameCount++;
+            if (now - fpsLastTime >= 1000) {
+                const fps = Math.round((fpsFrameCount * 1000) / (now - fpsLastTime));
+                document.getElementById('screen-fps').textContent = `${fps} FPS`;
+                fpsFrameCount = 0;
+                fpsLastTime = now;
+            }
+            requestAnimationFrame(calcFPS);
+        }
+
+        function loadDisplayInfo() {
+            const dpr = window.devicePixelRatio || 1;
+            document.getElementById('pixel-ratio').textContent = `${dpr.toFixed(2)}x`;
+
+            const physW = Math.round(window.screen.width * dpr);
+            const physH = Math.round(window.screen.height * dpr);
+            document.getElementById('screen-physical').textContent = `${physW} × ${physH} px`;
+
+            document.getElementById('screen-logical').textContent = `${window.screen.width} × ${window.screen.height} px`;
+            document.getElementById('viewport-size').textContent = `${window.innerWidth} × ${window.innerHeight} px`;
+
+            const hasP3 = window.matchMedia && window.matchMedia('(color-gamut: p3)').matches;
+            const colorDepth = window.screen.colorDepth || 24;
+            document.getElementById('hdr-support').innerHTML = `${colorDepth} بیت ${hasP3 ? makeBadge('P3 / HDR', 'success') : ''}`;
+
+            const isPortrait = window.innerHeight > window.innerWidth;
+            document.getElementById('screen-orientation').textContent = isPortrait ? 'عمودی (Portrait)' : 'افقی (Landscape)';
+        }
+
+        // Battery capacity is a model specification, not a live battery reading.
+        // Add verified model codes here as additional devices are tested.
+        function updateBatteryCapacity(model, modelCode) {
+            const capacityEl = document.getElementById('battery-capacity');
+            if (!capacityEl) return;
+
+            // Check every available model hint independently. Some browsers expose
+            // the model code in User-Agent while Client Hints return an empty model.
+            const hints = [model, modelCode, navigator.userAgent || '',
+                (navigator.userAgentData && navigator.userAgentData.model) || ''
+            ].join(' ').toUpperCase();
+            const codeMatch = hints.match(/2312DRA50[GC]/i);
+            const code = codeMatch ? codeMatch[0].toUpperCase() :
+                String(modelCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const name = hints.toLowerCase();
+
+            const knownCapacities = {
+                '2312DRA50G': 5100,
+                '2312DRA50C': 5100
+            };
+
+            let capacity = knownCapacities[code] || null;
+            if (!capacity && /redmi[ -]?note[ -]?13[ -]?pro[ -]?5g/.test(name)) capacity = 5100;
+
+            capacityEl.textContent = capacity
+                ? `${capacity.toLocaleString('en-US')} mAh`
+                : 'برای این مدل ثبت نشده';
+        }
+
+        // 6. Battery, Storage & Network
+        function loadBatteryStorageNetwork() {
+            // Online status
+            document.getElementById('online-status').innerHTML = navigator.onLine ? makeBadge('آنلاین (متصل)', 'success') : makeBadge('آفلاین', 'danger');
+
+            // Network speed
+            const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (conn) {
+                document.getElementById('net-downlink').textContent = conn.downlink ? `${conn.downlink} Mbps (${conn.effectiveType || ''})` : 'نامشخص';
+            } else {
+                document.getElementById('net-downlink').textContent = 'محدود در مرورگر';
+            }
+
+            // Prefer the device's real storage figures in the Android app.
+            const nativeInfo = readNativeDeviceInfo(true);
+            if (nativeInfo && nativeInfo.totalStorageBytes > 0) {
+                const totalGb = nativeInfo.totalStorageBytes / (1024 * 1024 * 1024);
+                const freeGb = (nativeInfo.availableStorageBytes || 0) / (1024 * 1024 * 1024);
+                document.getElementById('storage-quota-txt').textContent =
+                    (totalGb - freeGb).toFixed(1) + ' GB استفاده‌شده از ' + totalGb.toFixed(1) + ' GB';
+            } else if (navigator.storage && navigator.storage.estimate) {
+                navigator.storage.estimate().then(est => {
+                    const usedMB = (est.usage / (1024 * 1024)).toFixed(1);
+                    const quotaGB = (est.quota / (1024 * 1024 * 1024)).toFixed(1);
+                    document.getElementById('storage-quota-txt').textContent = `${usedMB}MB از ${quotaGB}GB`;
+                }).catch(() => {
+                    document.getElementById('storage-quota-txt').textContent = 'نامشخص';
+                });
+            } else {
+                document.getElementById('storage-quota-txt').textContent = 'غیرفعال';
+            }
+
+            // Prefer live battery information from Android; use the browser API only on the web.
+            const nativeBatteryInfo = readNativeDeviceInfo(true);
+            if (nativeBatteryInfo && Number(nativeBatteryInfo.batteryPercent) >= 0) {
+                const updateNativeBattery = () => {
+                    const latest = readNativeDeviceInfo(true) || nativeBatteryInfo;
+                    updateBatteryVisual(Number(latest.batteryPercent), latest.batteryStatus, latest.batteryPlugged);
+                    systemReportData['BatteryPercent'] = latest.batteryPercent + '%';
+                    systemReportData['BatteryStatus'] = latest.batteryStatus || 'نامشخص';
+                };
+                updateNativeBattery();
+                if (!window.nativeBatteryRefreshTimer) {
+                    window.nativeBatteryRefreshTimer = setInterval(updateNativeBattery, 30000);
+                }
+            } else if ('getBattery' in navigator) {
+                navigator.getBattery().then(battery => {
+                    function update() {
+                        updateBatteryVisual(Math.round(battery.level * 100),
+                            battery.charging ? 'charging' : 'discharging', 'none');
+                    }
+                    update();
+                    battery.addEventListener('levelchange', update);
+                    battery.addEventListener('chargingchange', update);
+                }).catch(() => {
+                    document.getElementById('battery-charging-badge').textContent = 'عدم دسترسی مرورگر به باتری';
+                });
+            } else {
+                document.getElementById('battery-percentage').textContent = '--%';
+                document.getElementById('battery-bar').style.width = '0%';
+                document.getElementById('battery-charging-badge').textContent = 'در این مرورگر امکان خواندن درصد شارژ وجود ندارد';
+                document.getElementById('battery-charging-badge').title = 'مرورگر این دستگاه رابط Battery Status API را ارائه نمی‌کند.';
+            }
+        }
+
+        // Action: Global Refresh
+        function refreshData() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('animate-spin');
+
+            loadPhoneModelAndOS();
+            loadCPUAndGPU();
+            loadSensorsAndHardware();
+            loadDisplayInfo();
+            loadBatteryStorageNetwork();
+
+            setTimeout(() => {
+                icon.classList.remove('animate-spin');
+                showToast('اطلاعات سیستم به‌روزرسانی شد');
+            }, 400);
+        }
+
+        // Action: Copy Full Report
+        function copyReport() {
+            let txt = `📊 **گزارش جامع اطلاعات سیستم و دستگاه**\n\n`;
+            txt += `📱 مدل دقیق گوشی: ${document.getElementById('phone-model-val').textContent}\n`;
+            txt += `🏭 سازنده / برند: ${document.getElementById('phone-brand-val').textContent}\n`;
+            txt += `💻 سیستم‌عامل: ${document.getElementById('os-info').textContent}\n`;
+            txt += `⚡ تراشه (SoC): ${document.getElementById('inferred-chipset').textContent}\n`;
+            txt += `🎮 مدل گرافیک (GPU): ${document.getElementById('gpu-renderer').textContent}\n`;
+            txt += `🧠 هسته‌های CPU: ${document.getElementById('cpu-cores').textContent}\n`;
+            txt += `🔋 ظرفیت اسمی باتری: ${document.getElementById('battery-capacity').textContent}\n`;
+            txt += `🔋 درصد شارژ باتری: ${document.getElementById('battery-percentage').textContent}\n`;
+            txt += `🖥️ رزولوشن فیزیکی: ${document.getElementById('screen-physical').textContent}\n`;
+            txt += `🌐 وضعیت شبکه: ${navigator.onLine ? 'آنلاین' : 'آفلاین'}\n`;
+            txt += `\nتاریخ ثبت گزارش: ${new Date().toLocaleString('fa-IR')}`;
+
+            const textArea = document.createElement("textarea");
+            textArea.value = txt;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                showToast(successful ? 'گزارش کامل کپی شد!' : 'خطا در کپی');
+            } catch (err) {
+                showToast('خطا در کپی گزارش');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Helper: Toast Message System
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-8', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-8', 'pointer-events-none');
+            }, 2500);
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('sys_theme', 'light');
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('sys_theme', 'dark');
+            }
+        }
+        if (localStorage.getItem('sys_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // Media count passive check
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices().then(devs => {
+                const cams = devs.filter(d => d.kind === 'videoinput').length;
+                const mics = devs.filter(d => d.kind === 'audioinput').length;
+                const spks = devs.filter(d => d.kind === 'audiooutput').length;
+                document.getElementById('media-counts').textContent = `دوربین:${cams} | میکروفون:${mics} | بلندگو:${spks}`;
+            }).catch(() => {});
+        }
+
+        // Event Listeners
+        window.addEventListener('online', loadBatteryStorageNetwork);
+        window.addEventListener('offline', loadBatteryStorageNetwork);
+        window.addEventListener('resize', loadDisplayInfo);
+
+        // Initial Load
+        window.onload = function() {
+            loadPhoneModelAndOS();
+            loadCPUAndGPU();
+            loadSensorsAndHardware();
+            loadDisplayInfo();
+            loadBatteryStorageNetwork();
+            requestAnimationFrame(calcFPS);
+        };
+    </script>
+</body>
+</html>
