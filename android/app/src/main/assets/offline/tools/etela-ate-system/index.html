@@ -839,12 +839,12 @@
                     nativeInfo.hardware, nativeInfo.brand, nativeInfo.manufacturer,
                     navigator.userAgent || ''
                 ].filter(Boolean).join(' ').toUpperCase()
-                    .replace(/[._-]+/g, ' ').replace(/\\s+/g, ' ').trim();
+                    .replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim();
 
                 // Verified manufacturer profile for Redmi Note 13 Pro 5G.
                 // Match both Xiaomi's hardware model code and Android's marketing name.
                 const isRedmiNote13Pro5G =
-                    /2312DRA50[GC]/.test(modelHints.replace(/\\s/g, '')) ||
+                    /2312DRA50[GC]/.test(modelHints.replace(/\s/g, '')) ||
                     modelHints.includes('REDMI NOTE 13 PRO 5G') ||
                     (modelHints.includes('REDMI') && modelHints.includes('NOTE 13 PRO') && modelHints.includes('5G'));
 
