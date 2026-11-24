@@ -126,7 +126,7 @@ jobs:
             curl -fLsS "https://raw.githubusercontent.com/masoud73d/fasle-yab/${TOOL_REFS[fasle-yab]}/$file" -o "$ROOT/tools/fasle-yab/$file"
           done
           # Vendor browser libraries so the core tools do not depend on a CDN at runtime.
-          curl -fLsS https://cdn.tailwindcss.com -o "$ROOT/vendor/tailwind.js"
+          curl -fLsS https://cdn.tailwindcss.com/3.4.17 -o "$ROOT/vendor/tailwind.js"
           curl -fLsS https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js -o "$ROOT/vendor/three.min.js"
           curl -fLsS https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js -o "$ROOT/vendor/qr-code-styling.js"
           curl -fLsS https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js -o "$ROOT/vendor/JsBarcode.all.min.js"
@@ -143,7 +143,7 @@ jobs:
           curl -fLsS https://tessdata.projectnaptha.com/4.0.0/eng.traineddata.gz -o "$ROOT/vendor/tessdata/eng.traineddata.gz"
           curl -fLsS https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css -o "$ROOT/vendor/all.min.css"
           sed -i 's#../webfonts/#webfonts/#g' "$ROOT/vendor/all.min.css"
-          curl -fLsS https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json -o "$ROOT/tools/etela-ate-system-/devices.json"
+          curl -fLsS https://raw.githubusercontent.com/bsthen/device-models/8067dfeb9f9bf3c36643470ba3addaf0b13021da/devices.json -o "$ROOT/tools/etela-ate-system-/devices.json"
           mkdir -p "$ROOT/vendor/webfonts"
           for font in fa-solid-900.woff2 fa-regular-400.woff2 fa-brands-400.woff2; do
             curl -fLsS "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/webfonts/$font" -o "$ROOT/vendor/webfonts/$font"
