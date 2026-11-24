@@ -532,6 +532,21 @@ public class MainActivity extends Activity {
         }
 
         private int readBatteryDesignCapacityMah() {
+            // First ask Android's framework power profile for the manufacturer-provided
+            // design capacity. This can work on devices that restrict direct sysfs access.
+            try {
+                Class<?> profileClass = Class.forName("com.android.internal.os.PowerProfile");
+                java.lang.reflect.Constructor<?> constructor =
+                        profileClass.getConstructor(android.content.Context.class);
+                Object profile = constructor.newInstance(MainActivity.this);
+                Method getCapacity = profileClass.getMethod("getBatteryCapacity");
+                Object rawCapacity = getCapacity.invoke(profile);
+                if (rawCapacity instanceof Number) {
+                    double value = ((Number) rawCapacity).doubleValue();
+                    if (value >= 500 && value <= 30000) return (int) Math.round(value);
+                }
+            } catch (Exception ignored) { }
+
             String[] chargePaths = {
                     "/sys/class/power_supply/battery/charge_full_design",
                     "/sys/class/power_supply/Battery/charge_full_design",
