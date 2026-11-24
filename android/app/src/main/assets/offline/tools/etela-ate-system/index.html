@@ -870,39 +870,53 @@
                 if (window.AndroidApp && typeof AndroidApp.getCameraHardwareInfo === 'function') {
                     const allCameras = JSON.parse(AndroidApp.getCameraHardwareInfo() || '[]');
                     if (allCameras.length) {
-                        // Only logical camera IDs represent the device's usable camera
-                        // endpoints. Physical IDs are auxiliary sensors and must never
-                        // replace the logical list or inflate/under-count the camera list.
-                        const camerasToShow = allCameras.filter(c => !c.physical);
+                        // Keep logical camera endpoints and physical sensor records
+                        // visible as separate groups. Neither group alone proves the
+                        // exact number of independently usable lenses.
+                        const logicalCameras = allCameras.filter(c => !c.physical);
+                        const physicalCameras = allCameras.filter(c => c.physical);
 
-                        if (camerasToShow.length) {
-                            camerasToShow.forEach((cam, index) => {
-                                const facing = cam.facing === 1 ? 'جلو' : cam.facing === 0 ? 'پشت' : 'نامشخص';
-                                const focalValues = cam.focalLengthsMm || [];
-                                const focal = focalValues.length ? focalValues.join(' / ') + ' mm' : 'نامشخص';
-                                const sensor = cam.sensorWidthMm ? cam.sensorWidthMm + ' × ' + cam.sensorHeightMm + ' mm' : 'نامشخص';
-                                const title = cam.facing === 1 ? 'دوربین سلفی' : cam.facing === 0 ? 'دوربین پشت' : 'دوربین منطقی';
-                                container.insertAdjacentHTML('beforeend', `
-                                  <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
-                                    <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
-                                      <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${title} — ${facing}</span>
-                                      <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">شناسه دوربین منطقی</span>
-                                    </div>
-                                    <table class="sys-table text-xs"><tbody>
-                                      <tr class="table-row-custom"><td class="text-slate-500">شناسه:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
-                                      <tr class="table-row-custom"><td class="text-slate-500">ابعاد آرایه پیکسلی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'}</td></tr>
-                                      <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
-                                      <tr class="table-row-custom"><td class="text-slate-500">ابعاد سنسور گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${sensor}</td></tr>
-                                    </tbody></table>
-                                  </div>`);
-                            });
-                            document.getElementById('media-counts').textContent =
-                                camerasToShow.length + ' دوربین منطقی شناسایی‌شده';
+                        const renderCameraRecord = (cam, index, physical) => {
+                            const facing = cam.facing === 1 ? 'جلو' : cam.facing === 0 ? 'پشت' : 'نامشخص';
+                            const focalValues = cam.focalLengthsMm || [];
+                            const focal = focalValues.length ? focalValues.join(' / ') + ' mm' : 'نامشخص';
+                            const sensor = cam.sensorWidthMm ? cam.sensorWidthMm + ' × ' + cam.sensorHeightMm + ' mm' : 'نامشخص';
+                            const title = physical
+                                ? 'سنسور فیزیکی ' + (index + 1)
+                                : (cam.facing === 1 ? 'دوربین منطقی جلو' : cam.facing === 0 ? 'دوربین منطقی پشت' : 'دوربین منطقی');
+                            container.insertAdjacentHTML('beforeend', `
+                              <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
+                                <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+                                  <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${title} — ${facing}</span>
+                                  <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">${physical ? 'شناسه سنسور فیزیکی' : 'شناسه دوربین منطقی'}</span>
+                                </div>
+                                <table class="sys-table text-xs"><tbody>
+                                  <tr class="table-row-custom"><td class="text-slate-500">شناسه:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">شناسه دوربین والد:</td><td class="font-semibold text-left dir-ltr">${cam.logicalCameraId || '—'}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">آرایه پیکسلی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
+                                  <tr class="table-row-custom"><td class="text-slate-500">ابعاد سنسور گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${sensor}</td></tr>
+                                </tbody></table>
+                              </div>`);
+                        };
+
+                        logicalCameras.forEach((cam, index) => renderCameraRecord(cam, index, false));
+                        if (physicalCameras.length) {
                             container.insertAdjacentHTML('beforeend',
-                                '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">شناسه‌های فیزیکیِ اضافه برای شمارش دوربین‌ها استفاده نمی‌شوند. وضوح Camera2 ممکن است وضوح پردازش‌شده باشد و مگاپیکسل واقعی سنسور یا نوع لنز را مشخص نمی‌کند.</p>');
-                            btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
-                            return;
+                                '<p class="text-xs font-bold text-slate-600 dark:text-slate-300 text-right mt-3">شناسه‌های سنسور فیزیکی (اطلاعات تکمیلی)</p>');
+                            physicalCameras.forEach((cam, index) => renderCameraRecord(cam, index, true));
                         }
+
+                        document.getElementById('media-counts').textContent =
+                            logicalCameras.length + ' دوربین منطقی · ' + physicalCameras.length + ' شناسه فیزیکی تکمیلی';
+                        const explanation = physicalCameras.length
+                            ? 'شناسه‌های فیزیکی اطلاعات تکمیلی‌اند و نباید با تعداد دوربین‌های قابل استفاده یکی شمرده شوند.'
+                            : 'این گوشی از طریق Camera2 فقط شناسه‌های منطقی را در اختیار برنامه گذاشته است؛ بنابراین تعداد لنزهای فیزیکی از این رابط به‌تنهایی قابل تأیید نیست.';
+                        container.insertAdjacentHTML('beforeend',
+                            '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">' +
+                            explanation + ' وضوح گزارش‌شده نیز لزوماً مگاپیکسل واقعی سنسور نیست.</p>');
+                        btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
+                        return;
                     }
                 }
 
