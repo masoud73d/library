@@ -389,16 +389,24 @@ public class MainActivity extends Activity {
                 if (manager == null) return result.toString();
                 for (String logicalId : manager.getCameraIdList()) {
                     CameraCharacteristics logical = manager.getCameraCharacteristics(logicalId);
-                    java.util.Set<String> physicalIds = Build.VERSION.SDK_INT >=  physicalIdsApiLevel()
-                            ? logical.getPhysicalCameraIds() : java.util.Collections.<String>emptySet();
-                    if (physicalIds != null && !physicalIds.isEmpty()) {
-                        for (String physicalId : physicalIds) {
-                            try {
-                                result.put(cameraInfo(manager.getCameraCharacteristics(physicalId), physicalId, logicalId, true));
-                            } catch (Exception ignored) { }
+
+                    // Always retain the logical camera (including the front camera).
+                    result.put(cameraInfo(logical, logicalId, logicalId, false));
+
+                    // Physical IDs are supplementary sensor records, not replacements.
+                    if (Build.VERSION.SDK_INT >= physicalIdsApiLevel()) {
+                        java.util.Set<String> physicalIds = logical.getPhysicalCameraIds();
+                        if (physicalIds != null) {
+                            for (String physicalId : physicalIds) {
+                                if (physicalId == null || physicalId.equals(logicalId)) continue;
+                                try {
+                                    result.put(cameraInfo(
+                                            manager.getCameraCharacteristics(physicalId),
+                                            physicalId, logicalId, true
+                                    ));
+                                } catch (Exception ignored) { }
+                            }
                         }
-                    } else {
-                        result.put(cameraInfo(logical, logicalId, logicalId, false));
                     }
                 }
             } catch (Exception ignored) { }
