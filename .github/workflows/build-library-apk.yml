@@ -74,6 +74,27 @@ jobs:
           cp index.html "$ROOT/index.html"
           cp library-bg.png "$ROOT/library-bg.png"
           cp update.json "$ROOT/update.json"
+          declare -A TOOL_REFS=(
+            [jadval-tanavobi]=d2929cecf15f7491422e09b0fbc6590b0d24b733
+            [darooshenas]=b9cc0f03abd5a31cd758fb3718add3218d9a7041
+            [taghvim]=8f5359aa38d686fe8051bc11be1dd2bec12ac331
+            [etela-ate-system-]=9046acb100d4553acd7787601f04b2db3a980dea
+            [azmayeshgah]=23fa13ef2cd4b6141b9cc7123c7eca3b71ba209f
+            [ghoree-keshi]=12de1141e48c5e96247b8d8367895f7c852e4712
+            [calculator]=362bdca3e0d76e9a43e043f1c5fda1a64ae45f54
+            [Khodshenasi-va-taghvim]=4014ead178578e2799cf7ff9d274cdde7227ac81
+            [adad-khan]=64f0c07717c2ffc761a0558277ec77c33507e9b6
+            [Taas]=bfea7aa8faff4fcb10a992f18b2d61850f133884
+            [Qr.Code]=a4628e6b3c9de415fbcd7ae28dbaf4769d9c390d
+            [Colors]=d2b7e669e40115f4c10ea98ae59560512d8217b8
+            [Text-reader]=260b42f8224f87097390c0a6e7677b3374bd17e7
+            [dictionary]=9969c19a1e05758aca911c9ac2e3fe80e0506d8b
+            [motarjeme-ramzi]=ed7d2a13cbfbb6322b5c2ec839367f8a46ca7360
+            [weather]=3892070956b8d25292eb4145e622e6b8664432a5
+            [Jaahaan-shenasi]=affc634ef98d072e3c8a2aab1262e2a121e93f56
+            [markaz-zaman]=8a8f1b09962966725d866b8655f87391d9e5a1ba
+            [fasle-yab]=91012b64faf4e75b7b49f401ff3cbcdc23407120
+          )
           declare -A TOOLS=(
             [jadval-tanavobi]=jadval-tanavobi
             [darooshenas]=darooshenas
@@ -97,10 +118,12 @@ jobs:
           )
           for slug in "${!TOOLS[@]}"; do
             mkdir -p "$ROOT/tools/$slug"
-            curl -fLsS "https://raw.githubusercontent.com/masoud73d/$slug/main/index.html" -o "$ROOT/tools/$slug/index.html"
+            ref="${TOOL_REFS[$slug]:-}"
+            test -n "$ref" || { echo "::error::No pinned source revision for $slug"; exit 1; }
+            curl -fLsS "https://raw.githubusercontent.com/masoud73d/$slug/$ref/index.html" -o "$ROOT/tools/$slug/index.html"
           done
           for file in provinces.json cities.json counties.json county-centers.json; do
-            curl -fLsS "https://raw.githubusercontent.com/masoud73d/fasle-yab/main/$file" -o "$ROOT/tools/fasle-yab/$file"
+            curl -fLsS "https://raw.githubusercontent.com/masoud73d/fasle-yab/${TOOL_REFS[fasle-yab]}/$file" -o "$ROOT/tools/fasle-yab/$file"
           done
           # Vendor browser libraries so the core tools do not depend on a CDN at runtime.
           curl -fLsS https://cdn.tailwindcss.com -o "$ROOT/vendor/tailwind.js"
@@ -199,8 +222,9 @@ jobs:
                   if any(pattern.search(line) for pattern in patterns):
                       found.append(f"{path}:{number}: {line.strip()[:240]}")
           if found:
-              print("WARNING: remaining external references (review individually):")
+              print("ERROR: unvendored external library references remain:")
               print("\n".join(found))
+              raise SystemExit(1)
           else:
               print("Offline dependency validation: PASSED")
           print("Offline asset preparation completed; continuing to APK build.")
