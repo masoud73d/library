@@ -119,7 +119,7 @@ public class MainActivity extends Activity {
                             || request.getUrl().getScheme().equals("https"))
                         && !offlineFallbackLoaded) {
                     offlineFallbackLoaded = true;
-                    view.loadUrl("file:///android_asset/offline/index.html");
+                    view.loadUrl("https://appassets.androidplatform.net/assets/offline/index.html");
                 }
             }
 
