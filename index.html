@@ -924,8 +924,8 @@ function confirmExit() {
 async function fetchUpdateInfo() {
   const stamp = Date.now();
   const sources = [
-    "./update.json?t=" + stamp,
-    "https://raw.githubusercontent.com/masoud73d/library/main/update.json?t=" + stamp
+    "https://raw.githubusercontent.com/masoud73d/library/main/update.json?t=" + stamp,
+    "./update.json?t=" + stamp
   ];
   let lastInfo = null;
   let lastError = null;
