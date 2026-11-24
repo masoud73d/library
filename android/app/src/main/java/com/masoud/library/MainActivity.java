@@ -32,7 +32,7 @@ import android.webkit.PermissionRequest;
 import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
-    // Version-aware update banner release.
+    // Version-aware update banner release. Camera permission is bridged to Android runtime consent.
 
     private WebView webView;
     private WebView popupWebView;
