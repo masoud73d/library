@@ -1,0 +1,758 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10112c">
+<title>آینه | اطلس خودشناسی تولد</title>
+<style>
+:root{--bg:#0b0d20;--panel:#171a38;--text:#f4f4ff;--muted:#b8bad9;--cyan:#61e7f5;--pink:#ff82c8;--gold:#ffd477;--line:#454a7c}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#29215c,#11132d 48%,#090b19);color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:1.9;min-height:100vh}
+header{text-align:center;padding:30px 16px 22px}
+.logo{font-size:40px;filter:drop-shadow(0 0 15px #8a71ff)}
+h1{font-size:clamp(25px,5vw,37px);margin:4px 0}
+header p{color:var(--muted);max-width:650px;margin:auto}
+main{max-width:1050px;margin:auto;padding:0 14px 90px}
+.panel{background:linear-gradient(145deg,#1b1e40ed,#11142eee);border:1px solid var(--line);border-radius:22px;padding:19px;margin:15px 0;box-shadow:0 12px 35px #0003}
+h2{font-size:20px;margin:0 0 14px;color:var(--cyan)}
+h3{font-size:16px;color:var(--gold);margin:0 0 8px}
+.grid,.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px}
+select{width:100%;padding:12px;background:#0c1028;color:#fff;border:1px solid #555b91;border-radius:12px;font:inherit}
+button{font:inherit;border:0;border-radius:12px;padding:11px 16px;background:linear-gradient(100deg,#5f5be8,#b15ad8);color:white;cursor:pointer;font-weight:bold}
+button:hover{filter:brightness(1.12)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.card{background:linear-gradient(140deg,#252952,#171a37);border:1px solid #414775;border-radius:17px;padding:15px;min-width:0;overflow-wrap:anywhere}
+.emoji{font-size:25px}
+.value{font-size:18px;font-weight:bold;color:#fff}
+.small,.muted{font-size:13px;color:var(--muted)}
+.highlight{color:var(--gold)}
+a{color:var(--cyan)}
+ul{padding-right:22px}
+li{margin:12px 0}
+.status{font-size:13px;color:var(--muted);margin-top:9px}
+.error{color:#ffb2bf}
+.translation-note{font-size:12px;color:#aeb5d9;margin-top:10px}
+.item-text{display:block;margin:4px 0}
+.about-btn{position:fixed;bottom:14px;right:14px;z-index:5;background:#242951;border:1px solid #7278bc;font-size:12px}
+.modal{display:none;position:fixed;inset:0;z-index:10;background:#050611dd;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modalbox{max-width:420px;width:100%;background:#191c3c;border:1px solid #686fa7;border-radius:20px;padding:22px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:480px){.panel{padding:14px}.grid,.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.value{font-size:15px}}
+
+/* MASOUD_VISUAL_REDESIGN_V1 */
+:root{--bg:#170f2c;--panel:#26183e;--text:#fff8ff;--muted:#d0bddd;--cyan:#b7a0ff;--pink:#ff9bd2;--gold:#f5d58a;--line:#634879}body{background:radial-gradient(ellipse at 50% -8%,#67438a,transparent 42%),linear-gradient(145deg,#160e29,#241433 60%,#100b1d)!important}.panel,.card,.modalbox{background:linear-gradient(145deg,#352248f2,#21142fee)!important;border-color:#78578c!important;box-shadow:0 18px 45px #08030d88!important}h2{color:#d9c4ff!important}h3{color:#f4d89a!important}button{background:linear-gradient(120deg,#8c5acb,#d05b9e)!important;color:#fff!important;box-shadow:0 8px 22px #a34e9b33!important}select,input,textarea{background:#1a102b!important;border-color:#79568d!important;color:#fff7ff!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">✧ ☾ ✧</div>
+  <h1>آینه | اطلس خودشناسی تولد</h1>
+  <p>پرونده‌ای از تاریخ تولد، تقویم‌ها، آسمان و رویدادهای تاریخی آن روز</p>
+</header>
+
+<main>
+<section class="panel">
+  <h2>🗓️ تاریخ تولدت رو انتخاب کن</h2>
+  <div class="grid">
+    <div><label for="year">سال شمسی</label><select id="year"></select></div>
+    <div><label for="month">ماه شمسی</label><select id="month"></select></div>
+    <div><label for="day">روز ماه</label><select id="day"></select></div>
+  </div>
+  <div class="actions">
+    <button id="todayBtn" type="button">تاریخ امروز</button>
+    <button id="showBtn" type="button">ساخت پرونده تولد ✨</button>
+  </div>
+  <div id="status" class="status" role="status"></div>
+</section>
+
+<section class="panel">
+  <h2>📁 پرونده‌ی تولدت</h2>
+  <div id="dateCards" class="cards"></div>
+</section>
+
+<section class="panel">
+  <h2>🌙 آسمان در آن روز</h2>
+  <div id="skyCards" class="cards"></div>
+  <p class="small">فاز ماه تخمینی است. این نسخه نقشه دقیق نجومی یا طالع صعودی محاسبه نمی‌کند.</p>
+</section>
+
+<section class="panel">
+  <h2>🪞 تحلیل کلی نمادین شخصیت</h2>
+  <div id="personality" class="card"></div>
+  <p class="small">این برداشت‌ها نمادین و برای سرگرمی و خوداندیشی هستند؛ تاریخ تولد معیار علمی تشخیص شخصیت نیست.</p>
+</section>
+
+<section class="panel">
+  <h2>📜 رویدادهای تاریخی این روز</h2>
+  <div id="events" class="muted">در انتظار دریافت اطلاعات…</div>
+</section>
+
+<section class="panel">
+  <h2>🎂 افراد مشهوری که در این روز به دنیا آمده‌اند</h2>
+  <div id="births" class="muted">در انتظار دریافت اطلاعات…</div>
+</section>
+
+<section class="panel">
+  <h2>🕯️ یادبودها و مناسبت‌ها</h2>
+  <div id="holidays" class="muted">در انتظار دریافت اطلاعات…</div>
+</section>
+
+<section class="panel">
+  <h2>🧭 پرسش‌هایی برای خودشناسی</h2>
+  <div id="questions" class="cards"></div>
+</section>
+</main>
+
+<footer>
+  آینه | اطلس نمادین تاریخ تولد<br>
+</footer>
+
+<button class="about-btn" id="aboutBtn" type="button">درباره من</button>
+<div class="modal" id="aboutModal" role="dialog" aria-modal="true">
+  <div class="modalbox">
+    <h2>درباره من</h2>
+    <p>Developer: Masoud delavar</p>
+    <p>Email: <a href="mailto:masoud0098d@gmail.com">masoud0098d@gmail.com</a></p>
+    <button id="closeAbout" type="button">بستن</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const monthNames = [
+  "فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور",
+  "مهر","آبان","آذر","دی","بهمن","اسفند"
+];
+
+const hijriMonths = [
+  "محرم","صفر","ربیع‌الاول","ربیع‌الثانی",
+  "جمادی‌الاول","جمادی‌الثانی","رجب","شعبان",
+  "رمضان","شوال","ذی‌القعده","ذی‌الحجه"
+];
+
+const stones = [
+  "الماس","زمرد","مروارید","یاقوت","عقیق","فیروزه",
+  "اوپال","سیترین","لاجورد","گارنت","آمتیست","فیروزه"
+];
+
+const flowers = [
+  "لاله","گل‌محمدی","سنبل","لاله","آفتابگردان","داوودی",
+  "مریم","نیلوفر","نرگس","کاملیا","بنفشه","نسترن"
+];
+
+const signs = [
+  ["جدی","♑"],["دلو","♒"],["حوت","♓"],["حمل","♈"],
+  ["ثور","♉"],["جوزا","♊"],["سرطان","♋"],["اسد","♌"],
+  ["سنبله","♍"],["میزان","♎"],["عقرب","♏"],["قوس","♐"]
+];
+
+const planets = ["خورشید","ماه","مریخ","عطارد","مشتری","زهره","زحل"];
+
+const chineseAnimals = [
+  "موش","گاو","ببر","خرگوش","اژدها","مار",
+  "اسب","بز","میمون","خروس","سگ","خوک"
+];
+
+/* ---------------- تقویم و تاریخ ---------------- */
+
+function dateUTC(y,m,d) {
+  return new Date(Date.UTC(y,m-1,d,12));
+}
+
+function calendarParts(date, calendar) {
+  const fmt = new Intl.DateTimeFormat(
+    "en-US-u-ca-" + calendar + "-nu-latn",
+    {timeZone:"UTC",year:"numeric",month:"numeric",day:"numeric"}
+  );
+
+  const out = {};
+  for (const part of fmt.formatToParts(date)) {
+    if (part.type !== "literal") out[part.type] = Number(part.value);
+  }
+  return out;
+}
+
+function jalaliParts(date) {
+  return calendarParts(date,"persian");
+}
+
+function jalaliYearStart(jy) {
+  const base = jy + 621;
+
+  for (let y=base-1;y<=base+1;y++) {
+    for (let m=3;m<=4;m++) {
+      const last=m===3?31:5;
+
+      for (let d=18;d<=last;d++) {
+        const dt=dateUTC(y,m,d);
+        const p=jalaliParts(dt);
+
+        if(p.year===jy&&p.month===1&&p.day===1) return dt;
+      }
+    }
+  }
+  return null;
+}
+
+function jalaliToGregorian(jy,jm,jd) {
+  const start=jalaliYearStart(jy);
+  if(!start)return null;
+
+  const offset=(jm<=6?(jm-1)*31:186+(jm-7)*30)+jd-1;
+  const dt=new Date(start.getTime());
+  dt.setUTCDate(dt.getUTCDate()+offset);
+
+  const p=jalaliParts(dt);
+  return p.year===jy&&p.month===jm&&p.day===jd?dt:null;
+}
+
+function monthLength(jy,jm) {
+  const start=jalaliToGregorian(jy,jm,1);
+  const next=jm===12
+    ?jalaliToGregorian(jy+1,1,1)
+    :jalaliToGregorian(jy,jm+1,1);
+
+  if(start&&next)return Math.round((next-start)/86400000);
+  return jm<=6?31:jm<=11?30:29;
+}
+
+function todayJalali() {
+  const n=new Date();
+  return jalaliParts(dateUTC(n.getFullYear(),n.getMonth()+1,n.getDate()));
+}
+
+function fa(n) {
+  return Number(n).toLocaleString("fa-IR");
+}
+
+function formatDate(date,cal) {
+  return new Intl.DateTimeFormat("fa-IR-u-ca-"+cal,{
+    timeZone:"UTC",year:"numeric",month:"long",day:"numeric"
+  }).format(date);
+}
+
+function weekday(date) {
+  return new Intl.DateTimeFormat("fa-IR",{
+    timeZone:"UTC",weekday:"long"
+  }).format(date);
+}
+
+function season(m) {
+  return m<=3?"بهار":m<=6?"تابستان":m<=9?"پاییز":"زمستان";
+}
+
+function hijriDate(date) {
+  const p=calendarParts(date,"islamic-umalqura");
+  return `${fa(p.day)} ${hijriMonths[p.month-1]} ${fa(p.year)} هـ.ق`;
+}
+
+function zodiac(date) {
+  const m=date.getUTCMonth()+1,d=date.getUTCDate();
+
+  if((m===12&&d>=22)||(m===1&&d<=19))return signs[0];
+  if(m===1)return signs[1];
+  if(m===2)return d<=18?signs[1]:signs[2];
+  if(m===3)return d<=20?signs[2]:signs[3];
+  if(m===4)return d<=19?signs[3]:signs[4];
+  if(m===5)return d<=20?signs[4]:signs[5];
+  if(m===6)return d<=20?signs[5]:signs[6];
+  if(m===7)return d<=22?signs[6]:signs[7];
+  if(m===8)return d<=22?signs[7]:signs[8];
+  if(m===9)return d<=22?signs[8]:signs[9];
+  if(m===10)return d<=22?signs[9]:signs[10];
+  if(m===11)return d<=21?signs[10]:signs[11];
+  return signs[11];
+}
+
+function chineseAnimal(date) {
+  try {
+    const p=calendarParts(date,"chinese");
+    const y=p.relatedYear||date.getUTCFullYear();
+    return chineseAnimals[((y-4)%12+12)%12];
+  } catch {
+    return chineseAnimals[((date.getUTCFullYear()-4)%12+12)%12];
+  }
+}
+
+function moonInfo(date) {
+  const known=Date.UTC(2000,0,6,18,14);
+  const cycle=29.530588853;
+  const age=((((date.getTime()-known)/86400000)%cycle)+cycle)%cycle;
+  const light=Math.round((1-Math.cos(2*Math.PI*age/cycle))*50);
+
+  let phase;
+  if(age<1.85||age>27.68)phase="ماه نو";
+  else if(age<7.38)phase="هلال افزاینده";
+  else if(age<9.22)phase="تربیع اول";
+  else if(age<14.76)phase="ماه رو به کامل";
+  else if(age<16.61)phase="ماه کامل";
+  else if(age<22.14)phase="ماه رو به کاهش";
+  else if(age<23.99)phase="تربیع آخر";
+  else phase="هلال کاهنده";
+
+  return {phase,light};
+}
+
+function ageString(birth) {
+  const now=new Date();
+
+  let y=now.getFullYear()-birth.getUTCFullYear();
+  let m=now.getMonth()-birth.getUTCMonth();
+  let d=now.getDate()-birth.getUTCDate();
+
+  if(d<0) {
+    const last=new Date(now.getFullYear(),now.getMonth(),0);
+    d+=last.getDate();
+    m--;
+  }
+
+  if(m<0){m+=12;y--;}
+  if(y<0)return "تاریخ در آینده است";
+
+  return `${fa(y)} سال، ${fa(m)} ماه و ${fa(d)} روز`;
+}
+
+function luckyNumber(y,m,d) {
+  let n=y*3+m*7+d*9;
+  while(n>9)n=String(n).split("").reduce((s,c)=>s+Number(c),0);
+  return n||1;
+}
+
+function fillSelect(el,start,end,selected) {
+  el.replaceChildren();
+
+  for(let n=start;n<=end;n++) {
+    const o=document.createElement("option");
+    o.value=String(n);
+    o.textContent=fa(n);
+    if(n===selected)o.selected=true;
+    el.appendChild(o);
+  }
+}
+
+function selectedDate() {
+  return {
+    y:Number($("year").value),
+    m:Number($("month").value),
+    d:Number($("day").value)
+  };
+}
+
+function refreshDays(day) {
+  const y=Number($("year").value);
+  const m=Number($("month").value);
+  const max=monthLength(y,m);
+  const old=day||Number($("day").value)||1;
+  fillSelect($("day"),1,max,Math.min(old,max));
+}
+
+function card(title,value,emoji,extra="") {
+  return `<div class="card">
+    <div class="emoji">${emoji}</div>
+    <h3>${title}</h3>
+    <div class="value">${value}</div>
+    ${extra?`<div class="small">${extra}</div>`:""}
+  </div>`;
+}
+
+function safe(text) {
+  return String(text??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+function romanDate(dt) {
+  const names=[
+    "یانوس","فبروریوس","مارتیوس","آپریلیس","مایوس","یونیوس",
+    "یولیوس","آگوستوس","سپتمبر","اکتوبر","نوامبر","دسمبر"
+  ];
+  return `${fa(dt.getUTCDate())} ${names[dt.getUTCMonth()]} ${fa(dt.getUTCFullYear())}`;
+}
+
+/* ---------------- نمایش پرونده تولد ---------------- */
+
+function renderAll() {
+  const {y,m,d}=selectedDate();
+  const dt=jalaliToGregorian(y,m,d);
+
+  if(!dt) {
+    $("status").textContent="این تاریخ قابل تبدیل نیست.";
+    return;
+  }
+
+  const wd=weekday(dt);
+  const sg=zodiac(dt);
+  const animal=chineseAnimal(dt);
+  const moon=moonInfo(dt);
+  const lucky=luckyNumber(y,m,d);
+
+  $("status").textContent=`تاریخ انتخاب‌شده: ${formatDate(dt,"persian")}`;
+
+  $("dateCards").innerHTML =
+    card("تاریخ شمسی",formatDate(dt,"persian"),"☀️")+
+    card("تاریخ میلادی",formatDate(dt,"gregory"),"🌍")+
+    card("تاریخ قمری",hijriDate(dt),"🌙","بر اساس تقویم ام‌القری")+
+    card("شاهنشاهی معاصر",fa(y+1180)+" سال","👑","تبدیل نمادین؛ نه تقویم تاریخی دقیق")+
+    card("تاریخ رومی تقریبی",romanDate(dt),"🏛️")+
+    card("روز هفته",wd,"📆")+
+    card("فصل",season(m),"🍂")+
+    card("سن کامل",ageString(dt),"🎂");
+
+  $("skyCards").innerHTML =
+    card("حیوان سال چینی",animal,"🐉")+
+    card("برج خورشیدی",sg[0]+" "+sg[1],"✨")+
+    card("سنگ ماه تولد",stones[m-1],"💎")+
+    card("گل نمادین ماه",flowers[m-1],"🌷")+
+    card("عدد شانس نمادین",fa(lucky),"🔢")+
+    card("نماد سیاره روز هفته",planets[dt.getUTCDay()],"🪐")+
+    card("فاز تقریبی ماه",moon.phase,"🌘",`روشنایی تقریبی: ${fa(moon.light)}٪`);
+
+  $("personality").innerHTML =
+    `<h3>برداشت نمادین</h3>
+    <p>در سنت‌های نمادین، برج خورشیدی <b>${sg[0]}</b> و حیوان سال چینی <b>${animal}</b> به‌عنوان نشانه‌هایی فرهنگی تفسیر می‌شوند. سنگ ماه تولد در این پرونده <b>${stones[m-1]}</b> و عدد شانس نمادین <b>${fa(lucky)}</b> است.</p>
+    <p>می‌توانی این نشانه‌ها را بهانه‌ای برای فکر کردن به ارزش‌ها، هدف‌ها و انتخاب‌هایت قرار بدهی؛ اما این نمادها شخصیت یا آینده را تعیین نمی‌کنند.</p>`;
+
+  const qs=[
+    "این روزها کدام ارزش برای من از همه مهم‌تر است؟",
+    "چه چیزی به من انرژی می‌دهد و چه چیزی انرژی‌ام را می‌گیرد؟",
+    "در چه زمینه‌ای دوست دارم رشد کنم؟",
+    "هنگام تصمیم سخت از چه اصولی کمک می‌گیرم؟",
+    "کدام باور دربارهٔ خودم را بهتر است دوباره بررسی کنم؟",
+    "چه رابطه یا عادتی را دوست دارم بیشتر پرورش بدهم؟"
+  ];
+
+  $("questions").innerHTML=qs.map((q,i)=>
+    `<div class="card"><h3>پرسش ${fa(i+1)}</h3>${q}</div>`
+  ).join("");
+
+  loadWikipedia(dt);
+}
+
+/* ---------------- دریافت و ترجمه اطلاعات تاریخی ---------------- */
+
+async function requestJSON(url,timeout=15000) {
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),timeout);
+
+  try {
+    const res=await fetch(url,{
+      method:"GET",
+      headers:{"Accept":"application/json"},
+      signal:controller.signal,
+      cache:"no-store"
+    });
+
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/*
+  ترجمه با MyMemory:
+  - ترجمه‌ها در حافظه موقت نگه داشته می‌شوند.
+  - متن‌های طولانی به بخش‌های کوچک‌تر تقسیم می‌شوند.
+  - در صورت خطا، متن اصلی حفظ می‌شود.
+*/
+
+const translationCache=new Map();
+
+async function translateChunk(text) {
+  const clean=String(text||"").trim();
+  if(!clean)return "";
+
+  if(translationCache.has(clean))return translationCache.get(clean);
+
+  /* سرویس اول: Google Translate؛ سرویس دوم: MyMemory */
+  try {
+    const url="https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=fa&dt=t&q="+
+      encodeURIComponent(clean);
+    const data=await requestJSON(url,12000);
+    const result=Array.isArray(data?.[0])
+      ?data[0].map(part=>part?.[0]||"").join("").trim()
+      :"";
+    if(result) {
+      translationCache.set(clean,result);
+      return result;
+    }
+  } catch(error) {
+    // تلاش با سرویس جایگزین
+  }
+
+  try {
+    const url="https://api.mymemory.translated.net/get?q="+
+      encodeURIComponent(clean)+"&langpair=en%7Cfa";
+    const data=await requestJSON(url,12000);
+    const translated=data?.responseData?.translatedText;
+    const status=Number(data?.responseStatus);
+    if(translated&&status===200) {
+      const result=decodeTranslation(translated);
+      if(result) {
+        translationCache.set(clean,result);
+        return result;
+      }
+    }
+  } catch(error) {
+    // هر دو سرویس ترجمه ممکن است موقتاً در دسترس نباشند.
+  }
+
+  /* متن انگلیسی هرگز به‌عنوان ترجمه ذخیره یا نمایش داده نمی‌شود. */
+  translationCache.set(clean,"");
+  return "";
+}
+
+function decodeTranslation(text) {
+  const el=document.createElement("textarea");
+  el.innerHTML=String(text??"");
+  return el.value.trim();
+}
+
+async function translateToPersian(text) {
+  const original=String(text||"").trim();
+  if(!original)return {text:"",translated:false};
+
+  if(translationCache.has(original)) {
+    const cached=translationCache.get(original);
+    return {text:cached,translated:Boolean(cached)};
+  }
+
+  const limit=430;
+  if(original.length<=limit) {
+    const result=await translateChunk(original);
+    return {text:result,translated:Boolean(result)};
+  }
+
+  const chunks=[];
+  let remaining=original;
+
+  while(remaining.length>limit) {
+    let cut=remaining.lastIndexOf(". ",limit);
+    if(cut<180)cut=remaining.lastIndexOf(" ",limit);
+    if(cut<100)cut=limit;
+    chunks.push(remaining.slice(0,cut).trim());
+    remaining=remaining.slice(cut).trim();
+  }
+  if(remaining)chunks.push(remaining);
+
+  const translatedParts=[];
+  for(const chunk of chunks) {
+    const part=await translateChunk(chunk);
+    if(!part)return {text:"",translated:false};
+    translatedParts.push(part);
+  }
+
+  const result=translatedParts.join(" ").trim();
+  translationCache.set(original,result);
+  return {text:result,translated:Boolean(result)};
+}
+
+async function fetchOnThisDay(type,mm,dd) {
+  /* اولویت با ویکی‌پدیای فارسی است؛ انگلیسی فقط منبع جایگزین است. */
+  const urls=[
+    `https://fa.wikipedia.org/api/rest_v1/feed/onthisday/${type}/${mm}/${dd}`,
+    `https://api.wikimedia.org/feed/v1/wikipedia/fa/onthisday/${type}/${mm}/${dd}`,
+    `https://en.wikipedia.org/api/rest_v1/feed/onthisday/${type}/${mm}/${dd}`,
+    `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/${type}/${mm}/${dd}`
+  ];
+
+  let lastError;
+
+  for(const url of urls) {
+    try {
+      const data=await requestJSON(url);
+      if(Array.isArray(data?.[type])) {
+        data._sourceLanguage=url.includes("/fa/")||url.includes("fa.wikipedia.org")?"fa":"en";
+        return data;
+      }
+    } catch(error) {
+      lastError=error;
+    }
+  }
+
+  throw lastError||new Error("دریافت اطلاعات ناموفق بود");
+}
+
+function wikipediaLink(item) {
+  const page=item?.pages?.[0];
+  const link=page?.content_urls?.desktop?.page;
+
+  if(link&&link.startsWith("https://en.wikipedia.org/"))return link;
+
+  if(page?.title) {
+    return "https://en.wikipedia.org/wiki/"+
+      encodeURIComponent(page.title.replace(/ /g,"_"));
+  }
+
+  return "";
+}
+
+function renderLoading(container) {
+  container.innerHTML='<p class="muted">در حال دریافت و ترجمه به فارسی…</p>';
+}
+
+async function renderItems(container,items,sourceLanguage="en") {
+  if(!items?.length) {
+    container.innerHTML='<p class="muted">برای این تاریخ موردی در منبع پیدا نشد.</p>';
+    return;
+  }
+
+  const selected=items.slice(0,10);
+  let translatedCount=0;
+
+  container.innerHTML='<p class="muted">در حال ترجمه موارد پیدا شده…</p>';
+
+  /*
+    ترجمه به صورت موردبه‌مورد انجام می‌شود تا فشار زیادی
+    به سرویس ترجمه وارد نشود.
+  */
+  const results=[];
+
+  for(const item of selected) {
+    const original=item.text||item.pages?.[0]?.titles?.normalized||"بدون توضیح";
+    const translated=sourceLanguage==="fa"
+      ?{text:original,translated:true}
+      :await translateToPersian(original);
+
+    if(translated.translated)translatedCount++;
+
+    results.push({
+      year:item.year,
+      text:translated.text,
+      original,
+      link:wikipediaLink(item),
+      translated:translated.translated
+    });
+  }
+
+  container.innerHTML="<ul>"+results.map(item=>{
+    const year=item.year
+      ?`<b class="highlight">${fa(Number(item.year))}</b> — `
+      :"";
+
+    const link=item.link
+      ?` — <a href="${safe(item.link)}" target="_blank" rel="noopener noreferrer">منبع ویکی‌پدیا</a>`
+      :"";
+
+    const translationNote=item.translated
+      ?""
+      :'<div class="translation-note">ترجمه فارسی این مورد در دسترس نیست.</div>';
+    const displayText=item.translated
+      ?item.text
+      :"اطلاعات فارسی این مورد فعلاً در دسترس نیست.";
+
+    return `<li>
+      ${year}<span class="item-text" lang="fa">${safe(displayText)}</span>
+      ${link}
+      ${translationNote}
+    </li>`;
+  }).join("")+"</ul>";
+
+  if(translatedCount===0) {
+    container.insertAdjacentHTML("beforeend",
+      '<p class="translation-note">سرویس ترجمه پاسخ فارسی نداد. اتصال اینترنت یا دسترسی به سرویس ترجمه را بررسی کن.</p>');
+  } else {
+    container.insertAdjacentHTML("beforeend",
+      `<p class="translation-note">ترجمه فارسی ${fa(translatedCount)} مورد انجام شد. نام‌ها و تاریخ‌ها در صورت نیاز از منبع اصلی قابل بررسی‌اند.</p>`);
+  }
+}
+
+async function loadWikipedia(dt) {
+  const mm=String(dt.getUTCMonth()+1).padStart(2,"0");
+  const dd=String(dt.getUTCDate()).padStart(2,"0");
+
+  const targets=[
+    ["events","events"],
+    ["births","births"],
+    ["holidays","holidays"]
+  ];
+
+  targets.forEach(([id])=>renderLoading($(id)));
+
+  await Promise.all(targets.map(async ([id,type])=>{
+    try {
+      const data=await fetchOnThisDay(type,mm,dd);
+      await renderItems($(id),data[type]||[],data._sourceLanguage||"en");
+    } catch(error) {
+      let message="دریافت اطلاعات ناموفق بود.";
+
+      if(error?.name==="AbortError") {
+        message="پاسخ سرور بیش از حد طول کشید.";
+      } else if(error?.message?.startsWith("HTTP")) {
+        message="سرور خطا داد: "+error.message;
+      } else {
+        message="اتصال به منبع اطلاعات برقرار نشد. ممکن است مرورگر یا شبکه درخواست را مسدود کرده باشد.";
+      }
+
+      $(id).innerHTML=`<p class="error">${safe(message)}</p>
+      <p class="small">برای آزمایش منبع اطلاعات،
+      <a href="https://en.wikipedia.org/api/rest_v1/feed/onthisday/${type}/${mm}/${dd}"
+      target="_blank" rel="noopener noreferrer">اینجا بزن</a>.</p>`;
+    }
+  }));
+}
+
+/* ---------------- راه‌اندازی برنامه ---------------- */
+
+function init() {
+  const t=todayJalali();
+
+  fillSelect($("year"),1000,1600,t.year);
+  fillSelect($("month"),1,12,t.month);
+  refreshDays(t.day);
+
+  $("year").addEventListener("change",()=>{
+    refreshDays();
+    renderAll();
+  });
+
+  $("month").addEventListener("change",()=>{
+    refreshDays(1);
+    renderAll();
+  });
+
+  $("day").addEventListener("change",renderAll);
+  $("showBtn").addEventListener("click",renderAll);
+
+  $("todayBtn").addEventListener("click",()=>{
+    const now=todayJalali();
+    $("year").value=now.year;
+    $("month").value=now.month;
+    refreshDays(now.day);
+    renderAll();
+  });
+
+  $("aboutBtn").addEventListener("click",()=>
+    $("aboutModal").classList.add("open")
+  );
+
+  $("closeAbout").addEventListener("click",()=>
+    $("aboutModal").classList.remove("open")
+  );
+
+  $("aboutModal").addEventListener("click",e=>{
+    if(e.target===$("aboutModal")) {
+      $("aboutModal").classList.remove("open");
+    }
+  });
+
+  renderAll();
+}
+
+try {
+  init();
+} catch(error) {
+  $("status").textContent=
+    "خطا در راه‌اندازی تقویم: "+(error.message||error);
+}
+</script>
+</body>
+</html>
+
