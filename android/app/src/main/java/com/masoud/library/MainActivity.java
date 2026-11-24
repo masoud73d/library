@@ -28,6 +28,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.webkit.GeolocationPermissions;
+import android.webkit.PermissionRequest;
 import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
@@ -40,6 +41,8 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> filePathCallback;
     private GeolocationPermissions.Callback pendingGeoCallback;
     private String pendingGeoOrigin;
+    private PermissionRequest pendingCameraPermissionRequest;
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 1003;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1002;
 
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
@@ -165,6 +168,51 @@ public class MainActivity extends Activity {
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
+
+            // Bridge WebView camera permission requests to Android's runtime permission dialog.
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                runOnUiThread(() -> {
+                    Uri origin = request.getOrigin();
+                    String host = origin == null ? "" : origin.getHost();
+                    boolean trustedOrigin = "appassets.androidplatform.net".equals(host)
+                            || "masoud73d.github.io".equals(host);
+                    boolean asksForCamera = false;
+                    for (String resource : request.getResources()) {
+                        if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
+                            asksForCamera = true;
+                            break;
+                        }
+                    }
+
+                    if (!trustedOrigin || !asksForCamera) {
+                        request.deny();
+                        return;
+                    }
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+                            || checkSelfPermission(android.Manifest.permission.CAMERA)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        request.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                    } else {
+                        if (pendingCameraPermissionRequest != null) {
+                            pendingCameraPermissionRequest.deny();
+                        }
+                        pendingCameraPermissionRequest = request;
+                        requestPermissions(
+                                new String[]{android.Manifest.permission.CAMERA},
+                                CAMERA_PERMISSION_REQUEST_CODE
+                        );
+                    }
+                });
+            }
+
+            @Override
+            public void onPermissionRequestCanceled(PermissionRequest request) {
+                if (pendingCameraPermissionRequest == request) {
+                    pendingCameraPermissionRequest = null;
+                }
+            }
 
             // Allow the weather page to request Android location permission through WebView.
             @Override
@@ -446,6 +494,21 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            PermissionRequest cameraRequest = pendingCameraPermissionRequest;
+            pendingCameraPermissionRequest = null;
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            if (cameraRequest != null) {
+                if (granted) {
+                    cameraRequest.grant(new String[]{PermissionRequest.RESOURCE_VIDEO_CAPTURE});
+                } else {
+                    cameraRequest.deny();
+                }
+            }
+            return;
+        }
+
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && pendingGeoCallback != null) {
             boolean granted = false;
             for (int result : grantResults) {
