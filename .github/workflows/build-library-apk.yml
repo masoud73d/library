@@ -79,7 +79,6 @@ jobs:
             [taghvim]=taghvim
             [etela-ate-system-]=etela-ate-system-
             [azmayeshgah]=azmayeshgah
-            [ghoree-keshi]=ghoree-keshi
             [calculator]=calculator
             [Khodshenasi-va-taghvim]=Khodshenasi-va-taghvim
             [adad-khan]=adad-khan
@@ -136,23 +135,21 @@ jobs:
           from pathlib import Path
           p = Path("android/app/src/main/assets/offline/tools/Text-reader/index.html")
           s = p.read_text(encoding="utf-8")
-          import re
-          pattern = r"""Tesseract\.createWorker\(\s*["']fas\+eng["']\s*,\s*1\s*,\s*\{"""
+          needle = 'Tesseract.createWorker("fas+eng", 1, {'
+          if needle not in s:
+              raise SystemExit("Could not find OCR worker configuration in bundled Text-reader")
           replacement = """Tesseract.createWorker("fas+eng", 1, {
                     workerPath: "../../vendor/tesseract/worker.min.js",
                     corePath: "../../vendor/tesseract",
                     langPath: "../../vendor/tessdata",
                     gzip: true,"""
-          s, count = re.subn(pattern, lambda _: replacement, s, count=1)
-          if count != 1:
-              raise SystemExit("Could not find OCR worker configuration in bundled Text-reader")
-          p.write_text(s, encoding="utf-8")
+          p.write_text(s.replace(needle, replacement, 1), encoding="utf-8")
           PY
           sed -i "s#https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json#./devices.json#g" "$ROOT/tools/etela-ate-system-/index.html"
           # Remove optional remote font imports; Android system fonts are used as fallback.
           sed -i '/fonts.googleapis.com/d; /fonts.gstatic.com/d; /Vazirmatn-font-face.css/d' "$ROOT/tools/"*/index.html
           sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css#../../vendor/all.min.css#g; s#https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css#../../vendor/all.min.css#g' "$ROOT/tools/"*/index.html
-          test "$(find "$ROOT/tools" -mindepth 2 -maxdepth 2 -name index.html | wc -l)" -eq 19
+          test "$(find "$ROOT/tools" -mindepth 2 -maxdepth 2 -name index.html | wc -l)" -eq 18
           test -s "$ROOT/tools/fasle-yab/cities.json"
           test -s "$ROOT/tools/taghvim/index.html"
           test -s "$ROOT/tools/etela-ate-system-/devices.json"
