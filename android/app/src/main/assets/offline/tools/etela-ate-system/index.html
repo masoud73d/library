@@ -690,7 +690,7 @@
 
             // Update known battery capacity immediately from the raw browser/device hints.
             // Do not wait for the optional online device database lookup to finish.
-            updateBatteryCapacity(ua + ' ' + rawModelValue, originalModelCode);
+            updateBatteryCapacity(ua + ' ' + rawModelValue, originalModelCode, nativeInfo);
 
             const matchedDevice = await findCommercialDevice(originalModelCode);
 
@@ -721,7 +721,7 @@
 
             document.getElementById('phone-model-val').textContent = model;
             document.getElementById('phone-brand-val').textContent = brand;
-            updateBatteryCapacity(model, originalModelCode);
+            updateBatteryCapacity(model, originalModelCode, nativeInfo);
             if (os !== 'نامشخص') document.getElementById('os-info').textContent = os;
 
             systemReportData['PhoneModel'] = model;
@@ -870,40 +870,39 @@
                 if (window.AndroidApp && typeof AndroidApp.getCameraHardwareInfo === 'function') {
                     const allCameras = JSON.parse(AndroidApp.getCameraHardwareInfo() || '[]');
                     if (allCameras.length) {
-                        const physicalCameras = allCameras.filter(c => c.physical);
-                        const camerasToShow = physicalCameras.length
-                            ? physicalCameras
-                            : allCameras.filter(c => !c.physical);
+                        // Only logical camera IDs represent the device's usable camera
+                        // endpoints. Physical IDs are auxiliary sensors and must never
+                        // replace the logical list or inflate/under-count the camera list.
+                        const camerasToShow = allCameras.filter(c => !c.physical);
 
-                        camerasToShow.forEach((cam, index) => {
-                            const facing = cam.facing === 1 ? 'جلو' : cam.facing === 0 ? 'پشت' : 'نامشخص';
-                            const focalValues = cam.focalLengthsMm || [];
-                            const focal = focalValues.length ? focalValues.join(' / ') + ' mm' : 'نامشخص';
-                            const mp = cam.megapixels ? cam.megapixels + ' مگاپیکسل (گزارش Camera2)' : 'نامشخص';
-                            const sensor = cam.sensorWidthMm ? cam.sensorWidthMm + ' × ' + cam.sensorHeightMm + ' mm' : 'نامشخص';
-                            const title = cam.physical
-                                ? 'اطلاعات سنسور فیزیکی ' + (index + 1)
-                                : (cam.facing === 1 ? 'دوربین سلفی (منطقی)' : 'دوربین پشت (منطقی)');
-                            container.insertAdjacentHTML('beforeend', `
-                              <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
-                                <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
-                                  <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${title} — ${facing}</span>
-                                  <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">${cam.physical ? 'شناسه سنسور فیزیکی' : 'دوربین منطقی'}</span>
-                                </div>
-                                <table class="sys-table text-xs"><tbody>
-                                  <tr class="table-row-custom"><td class="text-slate-500">شناسه:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
-                                  <tr class="table-row-custom"><td class="text-slate-500">آرایه پیکسلی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'} (${mp})</td></tr>
-                                  <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
-                                  <tr class="table-row-custom"><td class="text-slate-500">ابعاد سنسور:</td><td class="font-semibold text-left dir-ltr">${sensor}</td></tr>
-                                </tbody></table>
-                              </div>`);
-                        });
-                        document.getElementById('media-counts').textContent =
-                            camerasToShow.length + ' رکورد سخت‌افزاری Camera2';
-                        container.insertAdjacentHTML('beforeend',
-                            '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">اعداد Camera2 ممکن است مربوط به آرایه پردازش‌شده یا دوربین منطقی باشند؛ نوع لنز و مگاپیکسل واقعی فقط با مشخصات معتبر سازنده قابل تأیید است.</p>');
-                        btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
-                        return;
+                        if (camerasToShow.length) {
+                            camerasToShow.forEach((cam, index) => {
+                                const facing = cam.facing === 1 ? 'جلو' : cam.facing === 0 ? 'پشت' : 'نامشخص';
+                                const focalValues = cam.focalLengthsMm || [];
+                                const focal = focalValues.length ? focalValues.join(' / ') + ' mm' : 'نامشخص';
+                                const sensor = cam.sensorWidthMm ? cam.sensorWidthMm + ' × ' + cam.sensorHeightMm + ' mm' : 'نامشخص';
+                                const title = cam.facing === 1 ? 'دوربین سلفی' : cam.facing === 0 ? 'دوربین پشت' : 'دوربین منطقی';
+                                container.insertAdjacentHTML('beforeend', `
+                                  <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-right">
+                                    <div class="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-200 dark:border-slate-700">
+                                      <span class="font-bold text-xs text-rose-600 dark:text-rose-400">${title} — ${facing}</span>
+                                      <span class="text-[10px] px-2 py-1 rounded bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300">شناسه دوربین منطقی</span>
+                                    </div>
+                                    <table class="sys-table text-xs"><tbody>
+                                      <tr class="table-row-custom"><td class="text-slate-500">شناسه:</td><td class="font-semibold text-left dir-ltr">${cam.id}</td></tr>
+                                      <tr class="table-row-custom"><td class="text-slate-500">ابعاد آرایه پیکسلی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${cam.width || '—'} × ${cam.height || '—'}</td></tr>
+                                      <tr class="table-row-custom"><td class="text-slate-500">فاصله کانونی گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${focal}</td></tr>
+                                      <tr class="table-row-custom"><td class="text-slate-500">ابعاد سنسور گزارش‌شده:</td><td class="font-semibold text-left dir-ltr">${sensor}</td></tr>
+                                    </tbody></table>
+                                  </div>`);
+                            });
+                            document.getElementById('media-counts').textContent =
+                                camerasToShow.length + ' دوربین منطقی شناسایی‌شده';
+                            container.insertAdjacentHTML('beforeend',
+                                '<p class="text-[11px] text-amber-600 dark:text-amber-400 text-center p-2">شناسه‌های فیزیکیِ اضافه برای شمارش دوربین‌ها استفاده نمی‌شوند. وضوح Camera2 ممکن است وضوح پردازش‌شده باشد و مگاپیکسل واقعی سنسور یا نوع لنز را مشخص نمی‌کند.</p>');
+                            btn.textContent = '✓ اسکن سخت‌افزاری کامل شد (اسکن مجدد)';
+                            return;
+                        }
                     }
                 }
 
@@ -1051,12 +1050,17 @@
 
         // Battery capacity is a model specification, not a live battery reading.
         // Add verified model codes here as additional devices are tested.
-        function updateBatteryCapacity(model, modelCode) {
+        function updateBatteryCapacity(model, modelCode, nativeInfo = null) {
             const capacityEl = document.getElementById('battery-capacity');
             if (!capacityEl) return;
 
-            // Check every available model hint independently. Some browsers expose
-            // the model code in User-Agent while Client Hints return an empty model.
+            // Prefer a capacity read from Android's power-supply driver.
+            const nativeCapacity = Number(nativeInfo && nativeInfo.batteryCapacityMah);
+            if (Number.isFinite(nativeCapacity) && nativeCapacity >= 500 && nativeCapacity <= 30000) {
+                capacityEl.textContent = nativeCapacity.toLocaleString('en-US') + ' mAh (اطلاعات سیستم)';
+                return;
+            }
+
             const hints = [model, modelCode, navigator.userAgent || '',
                 (navigator.userAgentData && navigator.userAgentData.model) || ''
             ].join(' ').toUpperCase();
@@ -1064,7 +1068,6 @@
             const code = codeMatch ? codeMatch[0].toUpperCase() :
                 String(modelCode || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
             const name = hints.toLowerCase();
-
             const knownCapacities = {
                 '2312DRA50G': 5100,
                 '2312DRA50C': 5100
@@ -1074,8 +1077,8 @@
             if (!capacity && /redmi[ -]?note[ -]?13[ -]?pro[ -]?5g/.test(name)) capacity = 5100;
 
             capacityEl.textContent = capacity
-                ? `${capacity.toLocaleString('en-US')} mAh`
-                : 'برای این مدل ثبت نشده';
+                ? `${capacity.toLocaleString('en-US')} mAh (مشخصات مدل)`
+                : 'از سیستم یا مشخصات مدل قابل دریافت نیست';
         }
 
         // 6. Battery, Storage & Network
