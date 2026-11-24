@@ -137,7 +137,8 @@ public class MainActivity extends Activity {
                 String url = uri.toString();
 
                 if (url.startsWith("http://")
-                        || url.startsWith("https://")) {
+                        || url.startsWith("https://")
+                        || url.startsWith("file:///android_asset/")) {
                     return false;
                 }
 
