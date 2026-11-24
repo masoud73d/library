@@ -149,6 +149,24 @@ jobs:
           test "$(find "$ROOT/tools" -mindepth 2 -maxdepth 2 -name index.html | wc -l)" -eq 19
           test -s "$ROOT/tools/fasle-yab/cities.json"
           test -s "$ROOT/tools/taghvim/index.html"
+          test -s "$ROOT/tools/etela-ate-system-/devices.json"
+          test -s "$ROOT/vendor/tailwind.js"
+          test -s "$ROOT/vendor/three.min.js"
+          test -s "$ROOT/vendor/qr-code-styling.js"
+          test -s "$ROOT/vendor/JsBarcode.all.min.js"
+          test -s "$ROOT/vendor/zxing.min.js"
+          test -s "$ROOT/vendor/tesseract.min.js"
+          test -s "$ROOT/vendor/tesseract/worker.min.js"
+          test -s "$ROOT/vendor/tessdata/fas.traineddata.gz"
+          test -s "$ROOT/vendor/tessdata/eng.traineddata.gz"
+          for variant in wasm simd lstm simd-lstm; do
+            test -s "$ROOT/vendor/tesseract/tesseract-core-$variant.wasm.js"
+            test -s "$ROOT/vendor/tesseract/tesseract-core-$variant.wasm"
+          done
+          if grep -R -E "cdn\.tailwindcss\.com|cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net/npm/(qr-code-styling|jsbarcode|tesseract\.js)|unpkg\.com/@zxing|fonts\.googleapis\.com" "$ROOT/tools"; then
+            echo "A required runtime CDN dependency remains in the offline tools."
+            exit 1
+          fi
 
       - name: Build APK
         working-directory: android
