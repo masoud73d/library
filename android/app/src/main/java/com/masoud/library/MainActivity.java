@@ -2,6 +2,13 @@
 package com.masoud.library;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+import android.os.Environment;
+import android.os.StatFs;
+import org.json.JSONObject;
+import java.lang.reflect.Method;
 import android.os.Bundle;
 import android.os.Build;
 import android.os.Message;
@@ -257,7 +264,109 @@ public class MainActivity extends Activity {
         }
     }
 
+    private String readSystemProperty(String key) {
+        try {
+            Class<?> systemProperties = Class.forName("android.os.SystemProperties");
+            Method get = systemProperties.getMethod("get", String.class);
+            Object value = get.invoke(null, key);
+            return value == null ? "" : String.valueOf(value);
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
     private class AndroidBridge {
+
+        @JavascriptInterface
+        public String getNativeDeviceInfo() {
+            try {
+                JSONObject info = new JSONObject();
+
+                info.put("nativeSource", "Android");
+                info.put("manufacturer", Build.MANUFACTURER);
+                info.put("brand", Build.BRAND);
+                info.put("model", Build.MODEL);
+                info.put("device", Build.DEVICE);
+                info.put("product", Build.PRODUCT);
+                info.put("hardware", Build.HARDWARE);
+                info.put("display", Build.DISPLAY);
+                info.put("buildNumber", Build.VERSION.INCREMENTAL);
+                info.put("androidVersion", Build.VERSION.RELEASE);
+                info.put("apiLevel", Build.VERSION.SDK_INT);
+                info.put("securityPatch", Build.VERSION.SECURITY_PATCH);
+                info.put("romVersion", firstNonEmpty(
+                        readSystemProperty("ro.mi.os.version.name"),
+                        readSystemProperty("ro.miui.ui.version.name")
+                ));
+                info.put("supportedAbis", android.text.TextUtils.join(", ", Build.SUPPORTED_ABIS));
+                info.put("cpuCores", Runtime.getRuntime().availableProcessors());
+
+                ActivityManager activityManager =
+                        (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+                ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+                if (activityManager != null) {
+                    activityManager.getMemoryInfo(memoryInfo);
+                    info.put("totalRamBytes", memoryInfo.totalMem);
+                    info.put("availableRamBytes", memoryInfo.availMem);
+                }
+
+                StatFs storage = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+                info.put("totalStorageBytes", storage.getTotalBytes());
+                info.put("availableStorageBytes", storage.getAvailableBytes());
+
+                Intent batteryIntent = registerReceiver(
+                        null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                );
+                if (batteryIntent != null) {
+                    int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                    int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                    int status = batteryIntent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                    int plugged = batteryIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+
+                    int percent = (level >= 0 && scale > 0)
+                            ? Math.round(level * 100f / scale) : -1;
+
+                    String batteryStatus = "unknown";
+                    if (status == BatteryManager.BATTERY_STATUS_CHARGING) batteryStatus = "charging";
+                    else if (status == BatteryManager.BATTERY_STATUS_FULL) batteryStatus = "full";
+                    else if (status == BatteryManager.BATTERY_STATUS_DISCHARGING) batteryStatus = "discharging";
+                    else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) batteryStatus = "not_charging";
+
+                    String pluggedType = "none";
+                    if (plugged == BatteryManager.BATTERY_PLUGGED_AC) pluggedType = "ac";
+                    else if (plugged == BatteryManager.BATTERY_PLUGGED_USB) pluggedType = "usb";
+                    else if (plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS) pluggedType = "wireless";
+
+                    info.put("batteryPercent", percent);
+                    info.put("batteryStatus", batteryStatus);
+                    info.put("batteryPlugged", pluggedType);
+                    info.put("batteryTemperatureC",
+                            batteryIntent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1) / 10.0);
+                    info.put("batteryVoltageMv",
+                            batteryIntent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, -1));
+                    info.put("batteryTechnology",
+                            batteryIntent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY));
+                }
+
+                BatteryManager batteryManager =
+                        (BatteryManager) getSystemService(BATTERY_SERVICE);
+                if (batteryManager != null) {
+                    int chargeCounter = batteryManager.getIntProperty(
+                            BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER
+                    );
+                    info.put("batteryChargeCounterUah",
+                            chargeCounter == Integer.MIN_VALUE ? -1 : chargeCounter);
+                }
+
+                return info.toString();
+            } catch (Exception e) {
+                return "{}";
+            }
+        }
+
+        private String firstNonEmpty(String first, String second) {
+            return first != null && !first.trim().isEmpty() ? first : (second == null ? "" : second);
+        }
 
         @JavascriptInterface
         public String getAppVersion() {
