@@ -168,8 +168,7 @@ public class MainActivity extends Activity {
             public void onPermissionRequest(PermissionRequest request) {
                 runOnUiThread(() -> {
                     Uri origin = request.getOrigin();
-                    String host = origin == null ? "" : origin.getHost();
-                    boolean trustedOrigin = isTrustedLocalOrigin(origin == null ? null : origin.toString());
+                    boolean trustedOrigin = isTrustedLocalPermissionOrigin(origin == null ? null : origin.toString());
                     boolean asksForCamera = false;
                     for (String resource : request.getResources()) {
                         if (PermissionRequest.RESOURCE_VIDEO_CAPTURE.equals(resource)) {
@@ -210,7 +209,7 @@ public class MainActivity extends Activity {
             // Allow the weather page to request Android location permission through WebView.
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                if (!isTrustedLocalOrigin(origin)) {
+                if (!isTrustedLocalPermissionOrigin(origin)) {
                     callback.invoke(origin, false, false);
                     return;
                 }
@@ -318,6 +317,17 @@ public class MainActivity extends Activity {
             return "https".equalsIgnoreCase(uri.getScheme())
                     && "appassets.androidplatform.net".equalsIgnoreCase(uri.getHost())
                     && path != null && path.startsWith("/assets/offline/");
+        } catch (Exception ignored) { return false; }
+    }
+
+    private boolean isTrustedLocalPermissionOrigin(String rawOrigin) {
+        if (rawOrigin == null) return false;
+        try {
+            Uri uri = Uri.parse(rawOrigin);
+            String path = uri.getPath();
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && "appassets.androidplatform.net".equalsIgnoreCase(uri.getHost())
+                    && (path == null || path.isEmpty() || "/".equals(path));
         } catch (Exception ignored) { return false; }
     }
 
