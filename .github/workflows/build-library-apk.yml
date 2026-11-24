@@ -137,10 +137,16 @@ jobs:
           import re
           p = Path("android/app/src/main/assets/offline/tools/Text-reader/index.html")
           s = p.read_text(encoding="utf-8")
-          pattern = r'(return\s+Tesseract\.createWorker\(\s*["\']fas\+eng["\']\s*,\s*1\s*,\s*\{)'
-          s2, count = re.subn(pattern, r'\1\n          workerPath: "../../vendor/tesseract/worker.min.js",\n          corePath: "../../vendor/tesseract",\n          langPath: "../../vendor/tessdata",\n          gzip: true,', s, count=1)
-          if count != 1:
-              raise SystemExit("Could not locate Tesseract.createWorker(fas+eng) call in bundled Text-reader")
+          needle = 'return Tesseract.createWorker("fas+eng", 1, {'
+          replacement = needle + """
+                  workerPath: "../../vendor/tesseract/worker.min.js",
+                  corePath: "../../vendor/tesseract",
+                  langPath: "../../vendor/tessdata",
+                  gzip: true,"""
+          if needle not in s:
+              raise SystemExit("Could not locate exact Tesseract.createWorker call")
+          s2 = s.replace(needle, replacement, 1)
+          count = 1
           p.write_text(s2, encoding="utf-8")
           PY
           sed -i "s#https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json#./devices.json#g" "$ROOT/tools/etela-ate-system-/index.html"
