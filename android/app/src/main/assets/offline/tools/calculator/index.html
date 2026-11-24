@@ -1,0 +1,503 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f8eaff">
+<title>ماشین حساب مهندسی | Masoud</title>
+<style>
+:root{
+  --bg:#fff9ff;
+  --surface:#f5eaff;
+  --key:#f1e6ff;
+  --key2:#ffdfeb;
+  --accent:#ff8fbd;
+  --accent2:#a78bfa;
+  --text:#302342;
+  --muted:#8d7b9d;
+  --line:#e8d8f5;
+  --shadow:0 5px 13px #9471b51a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;min-height:100%;font-family:Tahoma,Arial,sans-serif}
+body{background:linear-gradient(145deg,#fffaff,#f8efff 55%,#fff0f6);color:var(--text);overflow-x:hidden}
+button,input,select{font:inherit}
+button{cursor:pointer;color:inherit}
+.app{
+ width:100%;max-width:540px;min-height:100dvh;margin:auto;
+ display:flex;flex-direction:column;padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
+}
+header{
+ min-height:76px;display:flex;align-items:center;
+ justify-content:space-between;gap:7px;padding:8px 4px;
+}
+.brand{font-size:13px;font-weight:bold;color:#7956a6;line-height:1.8}
+.toolbar{display:flex;align-items:center;gap:5px}
+.icon-btn{
+ min-width:39px;height:40px;border:1px solid #eadcf6;
+ border-radius:14px;background:#ffffffc9;display:grid;
+ place-items:center;font-size:20px;box-shadow:var(--shadow);
+}
+.icon-btn:active{transform:scale(.95)}
+.about-btn{
+ display:flex;align-items:center;justify-content:center;gap:5px;
+ padding:0 10px;width:auto;background:linear-gradient(135deg,#d9c5ff,#f9c5e2);
+ color:#48315f;font-size:11px;font-weight:bold;border:0;
+}
+.display{
+ min-height:180px;flex:1;max-height:34dvh;
+ background:linear-gradient(145deg,#f1e6ff,#ffe7f1);
+ border:1px solid #fff;
+ border-radius:29px;padding:20px 19px 23px;
+ display:flex;flex-direction:column;justify-content:flex-end;
+ overflow:hidden;margin-bottom:13px;box-shadow:0 9px 26px #b18bd51c;
+}
+.display-top{display:flex;justify-content:space-between;align-items:center;color:#8a6ca7;font-size:12px;margin-bottom:auto}
+.display-expression{
+ direction:ltr;text-align:right;white-space:nowrap;overflow-x:auto;
+ min-height:35px;font-size:20px;color:#907da2;scrollbar-width:none
+}
+.display-result{
+ direction:ltr;text-align:right;white-space:nowrap;overflow-x:auto;
+ scrollbar-width:none;font-size:clamp(39px,10vw,57px);
+ font-weight:500;min-height:65px;display:flex;align-items:center;
+ justify-content:flex-start;flex-direction:row-reverse
+}
+.result-value{margin-left:auto}
+.modebar{display:flex;align-items:center;gap:7px;margin-bottom:12px}
+.mode-btn{
+ border:1px solid var(--line);background:#ffffffd9;border-radius:18px;
+ padding:9px 13px;font-size:12px;color:#826e97;box-shadow:var(--shadow)
+}
+.mode-btn.active{
+ background:linear-gradient(135deg,#d5c1ff,#f5c5e1);
+ border-color:transparent;color:#45315d;font-weight:bold
+}
+.mode-spacer{flex:1}
+.science-row{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 48px;
+ gap:7px;margin-bottom:12px
+}
+.key{
+ border:1px solid #ffffffb5;display:flex;align-items:center;
+ justify-content:center;min-width:0;border-radius:23px;
+ background:linear-gradient(145deg,#fff,#f0e4ff);
+ font-weight:500;box-shadow:0 4px 9px #8862a414;
+ transition:filter .08s,transform .08s;user-select:none;
+ touch-action:manipulation;
+}
+.key:active{filter:brightness(.96);transform:scale(.96)}
+.science-row .key{height:53px;font-size:25px}
+.science-row .tool-key{background:var(--surface)}
+.science-row .flask{
+ background:linear-gradient(145deg,#d8c4ff,#bca1ff);
+ color:#fff;font-size:21px
+}
+.pad{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+ grid-template-rows:repeat(5,minmax(60px,1fr));
+ direction:ltr;
+ gap:7px;flex:1;min-height:330px;max-height:470px
+}
+.pad .key{font-size:clamp(27px,7vw,36px)}
+.pad .operator{
+ background:linear-gradient(145deg,#ffdfeb,#ffc9e0);color:#a83c75
+}
+.pad .special{background:linear-gradient(145deg,#e8dcff,#d9c7ff);color:#6947a0}
+.pad .clear{background:linear-gradient(145deg,#ffd8e7,#ffb8d5);color:#9c3567}
+.pad .delete{background:linear-gradient(145deg,#c6b2ff,#a58af5);color:white}
+.pad .equals{
+ background:linear-gradient(145deg,#ff9ec9,#f278b1);
+ color:#fff;font-size:34px;border:0;
+ box-shadow:0 5px 13px #e66ba633
+}
+footer{text-align:center;padding:12px 4px 7px;color:#a18cae;font-size:10px}
+.overlay{
+ position:fixed;inset:0;z-index:20;display:none;
+ align-items:flex-end;justify-content:center;padding:12px;
+ background:#28173570;backdrop-filter:blur(5px)
+}
+.overlay.show{display:flex}
+.modal{
+ width:100%;max-width:510px;max-height:87dvh;overflow:auto;
+ background:linear-gradient(145deg,#fffaff,#f8efff);
+ border:1px solid #fff;border-radius:26px 26px 18px 18px;
+ padding:19px;box-shadow:0 12px 40px #301b4930
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}
+.modal-head h2{font-size:17px;margin:0;color:#7953a5}
+.close{
+ width:36px;height:36px;border:0;border-radius:12px;
+ background:linear-gradient(135deg,#f0e2ff,#ffddeb);font-size:22px
+}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:13px;min-width:0}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select{
+ width:100%;min-width:0;border:1px solid var(--line);
+ border-radius:13px;background:white;padding:12px;
+ color:var(--text);outline:none;font-size:14px
+}
+.field input:focus,.field select:focus{border-color:#c0a0f6}
+.convert-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.convert-result{
+ min-height:44px;background:linear-gradient(135deg,#e8dcff,#ffdfeb);
+ border-radius:13px;display:flex;align-items:center;justify-content:center;
+ padding:10px;direction:ltr;overflow-wrap:anywhere;font-weight:bold
+}
+.about-card{
+ text-align:center;background:linear-gradient(145deg,#efe4ff,#ffe4f0);
+ border-radius:21px;padding:23px 15px
+}
+.about-avatar{
+ width:65px;height:65px;border-radius:22px;margin:0 auto 12px;
+ display:grid;place-items:center;font-size:30px;color:white;
+ background:linear-gradient(135deg,#aa8af7,#f18bbd);
+ box-shadow:0 6px 16px #9e78c733
+}
+.about-name{font-size:17px;font-weight:bold;margin-bottom:8px;color:#66458e}
+.about-subtitle{font-size:12px;color:#9279a5;margin-bottom:17px}
+.about-info{
+ direction:ltr;overflow-wrap:anywhere;background:#ffffffb8;
+ padding:12px;border-radius:12px;margin-top:8px;font-size:12px
+}
+.about-info a{color:#7953a5;text-decoration:none}
+.history-list{display:flex;flex-direction:column;gap:8px}
+.history-item{
+ text-align:left;direction:ltr;border:0;background:linear-gradient(135deg,#f0e5ff,#ffe7f1);
+ border-radius:13px;padding:13px;width:100%
+}
+.history-item div{color:var(--muted);font-size:13px;margin-bottom:7px}
+.history-item strong{font-size:20px;font-weight:500}
+.scientific-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.scientific-grid .key{height:48px;font-size:16px;background:linear-gradient(145deg,#fff,#f0e4ff)}
+@media(max-height:740px){
+ header{min-height:57px}
+ .display{min-height:105px;margin-bottom:9px;padding:13px 16px;max-height:26dvh}
+ .display-result{font-size:39px;min-height:47px}
+ .modebar{margin-bottom:8px}
+ .science-row{margin-bottom:8px;gap:5px}
+ .science-row .key{height:42px}
+ .pad{gap:5px;grid-template-rows:repeat(5,minmax(47px,1fr));min-height:255px}
+ .pad .key{font-size:27px}
+ footer{padding:7px 3px}
+}
+@media(min-width:520px){
+ .pad{grid-template-rows:repeat(5,70px);flex:none}
+ .display{min-height:210px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="brand">ماشین حساب مهندسی</div>
+ <div class="toolbar">
+  <button class="icon-btn" id="historyBtn" title="تاریخچه">◷</button>
+  <button class="icon-btn about-btn" id="aboutBtn" title="درباره من">
+   <span>✦</span><span>درباره من</span>
+  </button>
+ </div>
+</header>
+
+<section class="display">
+ <div class="display-top"><span id="memoryLabel"></span><span id="modeLabel">DEG</span></div>
+ <div class="display-expression" id="expression"></div>
+ <div class="display-result"><span class="result-value" id="result">0</span></div>
+</section>
+
+<div class="modebar">
+ <button class="mode-btn active" id="degBtn">DEG</button>
+ <button class="mode-btn" id="radBtn">RAD</button>
+ <span class="mode-spacer"></span>
+ <button class="mode-btn" id="scienceBtn">توابع علمی ⌄</button>
+ <button class="mode-btn" id="converterBtn">تبدیل واحد ها</button>
+</div>
+
+<div class="science-row">
+ <button class="key" data-fn="sqrt">√</button>
+ <button class="key" data-insert="pi">π</button>
+ <button class="key" data-insert="^">xⁿ</button>
+ <button class="key" data-insert="!">!</button>
+ <button class="key flask" id="extraScienceBtn" title="توابع بیشتر">⚗</button>
+</div>
+
+<div class="pad">
+ <button class="key clear" data-action="clear">AC</button>
+ <button class="key special" data-action="parentheses">( )</button>
+ <button class="key special" data-insert="%">%</button>
+ <button class="key operator" data-insert="/">÷</button>
+
+ <button class="key" data-insert="7">7</button>
+ <button class="key" data-insert="8">8</button>
+ <button class="key" data-insert="9">9</button>
+ <button class="key operator" data-insert="*">×</button>
+
+ <button class="key" data-insert="4">4</button>
+ <button class="key" data-insert="5">5</button>
+ <button class="key" data-insert="6">6</button>
+ <button class="key operator" data-insert="-">−</button>
+
+ <button class="key" data-insert="1">1</button>
+ <button class="key" data-insert="2">2</button>
+ <button class="key" data-insert="3">3</button>
+ <button class="key operator" data-insert="+">+</button>
+
+ <button class="key" data-insert="0">0</button>
+ <button class="key" data-insert=".">.</button>
+ <button class="key delete" data-action="backspace">⌫</button>
+ <button class="key equals" data-action="equals">=</button>
+</div>
+<footer>ماشین حساب مهندسی · طراحی رنگی · قابل استفاده آفلاین</footer>
+</div>
+
+<div class="overlay" id="aboutModal">
+ <div class="modal">
+  <div class="modal-head"><h2>درباره من</h2><button class="close" data-close="aboutModal">×</button></div>
+  <div class="about-card">
+   <div class="about-avatar">✦</div>
+   <div class="about-name">Masoud delavar</div>
+   <div class="about-subtitle">سازنده ماشین حساب مهندسی</div>
+   <div class="about-info">Developer: Masoud delavar</div>
+   <div class="about-info">Email: <a href="mailto:masoud0098d@gmail.com">masoud0098d@gmail.com</a></div>
+  </div>
+ </div>
+</div>
+
+<div class="overlay" id="converterModal">
+ <div class="modal">
+  <div class="modal-head"><h2>تبدیل واحدها</h2><button class="close" data-close="converterModal">×</button></div>
+  <div class="field"><label for="category">نوع تبدیل</label><select id="category">
+   <option value="length">طول و مسافت</option><option value="area">مساحت</option>
+   <option value="volume">حجم</option><option value="mass">جرم</option>
+   <option value="temp">دما</option><option value="speed">سرعت</option>
+   <option value="time">زمان</option><option value="pressure">فشار</option>
+   <option value="energy">انرژی</option><option value="power">توان</option>
+   <option value="data">حجم داده</option>
+  </select></div>
+  <div class="field"><label for="fromValue">مقدار</label><input id="fromValue" type="number" value="1" step="any"></div>
+  <div class="convert-grid">
+   <div class="field"><label for="fromUnit">از واحد</label><select id="fromUnit"></select></div>
+   <div class="field"><label for="toUnit">به واحد</label><select id="toUnit"></select></div>
+  </div>
+  <div class="field"><label>نتیجه تبدیل</label><div class="convert-result" id="convertResult">—</div></div>
+ </div>
+</div>
+
+<div class="overlay" id="historyModal">
+ <div class="modal">
+  <div class="modal-head"><h2>تاریخچه محاسبات</h2><button class="close" data-close="historyModal">×</button></div>
+  <div class="history-list" id="historyList"><p>هنوز محاسبه‌ای ثبت نشده است.</p></div>
+  <button class="mode-btn" id="clearHistory">پاک‌کردن تاریخچه</button>
+ </div>
+</div>
+
+<div class="overlay" id="scienceModal">
+ <div class="modal">
+  <div class="modal-head"><h2>توابع علمی</h2><button class="close" data-close="scienceModal">×</button></div>
+  <div class="scientific-grid">
+   <button class="key" data-fn="sin">sin</button><button class="key" data-fn="cos">cos</button>
+   <button class="key" data-fn="tan">tan</button><button class="key" data-fn="asin">sin⁻¹</button>
+   <button class="key" data-fn="acos">cos⁻¹</button><button class="key" data-fn="atan">tan⁻¹</button>
+   <button class="key" data-fn="ln">ln</button><button class="key" data-fn="log">log</button>
+   <button class="key" data-fn="exp">eˣ</button><button class="key" data-fn="abs">|x|</button>
+   <button class="key" data-fn="square">x²</button><button class="key" data-fn="cube">x³</button>
+   <button class="key" data-fn="sqrt">√x</button><button class="key" data-fn="fact">x!</button>
+   <button class="key" data-action="memoryPlus">M+</button><button class="key" data-action="memoryRecall">MR</button>
+   <button class="key" data-action="memoryClear">MC</button><button class="key" data-insert="e">e</button>
+   <button class="key" data-insert="Ans">Ans</button><button class="key" data-insert="^">xʸ</button>
+  </div>
+ </div>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+let expr='',answer=0,memory=0,angle='DEG',lastAnswer=false,history=[];
+const functions={
+ sin:x=>Math.sin(angle==='DEG'?x*Math.PI/180:x),
+ cos:x=>Math.cos(angle==='DEG'?x*Math.PI/180:x),
+ tan:x=>Math.tan(angle==='DEG'?x*Math.PI/180:x),
+ asin:x=>angle==='DEG'?Math.asin(x)*180/Math.PI:Math.asin(x),
+ acos:x=>angle==='DEG'?Math.acos(x)*180/Math.PI:Math.acos(x),
+ atan:x=>angle==='DEG'?Math.atan(x)*180/Math.PI:Math.atan(x),
+ sqrt:Math.sqrt,ln:Math.log,log:Math.log10,exp:Math.exp,abs:Math.abs
+};
+function render(){
+ $('expression').textContent=expr.replace(/\*/g,'×').replace(/\//g,'÷').replace(/pi/g,'π');
+ $('modeLabel').textContent=angle;$('memoryLabel').textContent=memory!==0?'M':'';
+}
+function add(v){
+ if(lastAnswer&&/^[0-9.]$/.test(v))expr='';
+ lastAnswer=false;expr+=v;render();
+}
+function clear(){expr='';lastAnswer=false;$('result').textContent='0';render()}
+function backspace(){expr=expr.slice(0,-1);lastAnswer=false;render()}
+function factorial(n){
+ if(n<0||n>170||!Number.isInteger(n))throw Error('فاکتوریل فقط برای اعداد صحیح نامنفی تعریف شده است');
+ let r=1;for(let i=2;i<=n;i++)r*=i;return r;
+}
+function tokenize(s){
+ s=s.replace(/×/g,'*').replace(/÷/g,'/').replace(/π/g,'pi').replace(/Ans/g,'ANS');
+ const re=/\s*(?:(\d+(?:\.\d*)?|\.\d+)(?:[eE]([+-]?\d+))?|([A-Za-z]+)|(\*\*|[+\-*/^()%!,]))/gy;
+ let out=[],i=0;
+ while(i<s.length){
+  re.lastIndex=i;const m=re.exec(s);if(!m)throw Error('عبارت نامعتبر است');i=re.lastIndex;
+  if(m[1]!==undefined)out.push({t:'num',v:Number(m[1]+(m[2]!==undefined?'e'+m[2]:''))});
+  else if(m[3])out.push({t:'id',v:m[3]});else out.push({t:m[4],v:m[4]});
+ }
+ return out;
+}
+function calculate(source){
+ if(!source.trim())return 0;
+ const ts=tokenize(source);let p=0;
+ const peek=()=>ts[p],take=()=>ts[p++];
+ const precedence={'%':1,'+':2,'-':2,'*':3,'/':3,'^':5,'**':5};
+ function primary(){
+  const t=take();if(!t)throw Error('عبارت ناقص است');
+  if(t.t==='num')return t.v;
+  if(t.t==='+'||t.t==='-')return(t.t==='-'?-1:1)*primary();
+  if(t.t==='('){
+   const x=expression(0);
+   if(!peek()||take().t!==')')throw Error('پرانتز بسته نشده است');return x;
+  }
+  if(t.t==='id'){
+   if(t.v==='pi')return Math.PI;if(t.v==='e')return Math.E;if(t.v==='ANS')return answer;
+   if(!Object.hasOwn(functions,t.v))throw Error('تابع ناشناخته: '+t.v);
+   if(!peek()||take().t!=='(')throw Error('بعد از نام تابع پرانتز بگذارید');
+   const x=expression(0);if(!peek()||take().t!==')')throw Error('پرانتز بسته نشده است');
+   return functions[t.v](x);
+  }
+  throw Error('عبارت نامعتبر است');
+ }
+ function expression(min){
+  let left=primary();
+  while(peek()){
+   const op=peek().t;
+   if(op==='!'){take();left=factorial(left);continue}
+   if(op==='%'){take();left/=100;continue}
+   if(op===')'||!(op in precedence)||precedence[op]<min)break;
+   take();const prec=precedence[op];
+   const right=expression(prec+(op==='^'||op==='**'?0:1));
+   if(op==='+')left+=right;if(op==='-')left-=right;
+   if(op==='*')left*=right;if(op==='/')left/=right;
+   if(op==='^'||op==='**')left=Math.pow(left,right);
+  }
+  return left;
+ }
+ const value=expression(0);
+ if(p!==ts.length)throw Error('بخشی از عبارت قابل محاسبه نیست');
+ if(!Number.isFinite(value))throw Error('نتیجه تعریف‌نشده است');
+ return value;
+}
+function fmt(n){if(Object.is(n,-0))n=0;return Number(n.toPrecision(12)).toString()}
+function equals(){
+ if(!expr.trim())return;
+ const original=expr;
+ try{
+  const value=calculate(expr),formatted=fmt(value);
+  answer=value;$('result').textContent=formatted;
+  $('expression').textContent=original.replace(/\*/g,'×').replace(/\//g,'÷')+' =';
+  history.unshift({expression:original,result:formatted});history=history.slice(0,50);
+  renderHistory();expr=formatted;lastAnswer=true;render();
+ }catch(e){$('result').textContent='خطا';$('expression').textContent=e.message||'عبارت نامعتبر است';lastAnswer=false}
+}
+function scientific(fn){
+ if(fn==='square')return add('^2');if(fn==='cube')return add('^3');
+ if(fn==='fact')return add('!');if(fn==='sqrt')return add('sqrt(');
+ add(fn+'(');
+}
+function renderHistory(){
+ const list=$('historyList');list.innerHTML='';
+ if(!history.length){list.textContent='هنوز محاسبه‌ای ثبت نشده است.';return}
+ history.forEach(item=>{
+  const b=document.createElement('button');b.className='history-item';
+  const a=document.createElement('div');a.textContent=item.expression;
+  const r=document.createElement('strong');r.textContent=item.result;
+  b.append(a,r);b.onclick=()=>{
+   expr=item.expression;lastAnswer=false;render();$('result').textContent=item.result;
+   $('historyModal').classList.remove('show');
+  };list.appendChild(b);
+ });
+}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.insert!==undefined){add(b.dataset.insert);return}
+ if(b.dataset.fn){scientific(b.dataset.fn);return}
+ const a=b.dataset.action;
+ if(a==='clear')clear();if(a==='backspace')backspace();if(a==='equals')equals();
+ if(a==='parentheses'){
+  const opens=(expr.match(/\(/g)||[]).length,closes=(expr.match(/\)/g)||[]).length;
+  add(opens>closes?')':'(');
+ }
+ if(a==='memoryPlus'){try{memory=calculate(expr);render()}catch{}}
+ if(a==='memoryRecall')add(String(memory));
+ if(a==='memoryClear'){memory=0;render()}
+ if(b.dataset.close)$(b.dataset.close).classList.remove('show');
+});
+$('degBtn').onclick=()=>setAngle('DEG');
+$('radBtn').onclick=()=>setAngle('RAD');
+function setAngle(a){
+ angle=a;$('degBtn').classList.toggle('active',a==='DEG');
+ $('radBtn').classList.toggle('active',a==='RAD');render();
+}
+$('aboutBtn').onclick=()=>$('aboutModal').classList.add('show');
+$('converterBtn').onclick=()=>$('converterModal').classList.add('show');
+$('historyBtn').onclick=()=>$('historyModal').classList.add('show');
+$('scienceBtn').onclick=()=>$('scienceModal').classList.add('show');
+$('extraScienceBtn').onclick=()=>$('scienceModal').classList.add('show');
+$('clearHistory').onclick=()=>{history=[];renderHistory()};
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
+ if(e.target===o)o.classList.remove('show');
+}));
+document.addEventListener('keydown',e=>{
+ if(e.target.matches('input,select'))return;
+ if(/^[0-9.]$/.test(e.key))add(e.key);
+ else if(['+','-','*','/','(',')','%','^','!'].includes(e.key))add(e.key);
+ else if(e.key==='Enter'||e.key==='='){e.preventDefault();equals()}
+ else if(e.key==='Backspace')backspace();
+ else if(e.key==='Escape')document.querySelectorAll('.overlay.show').forEach(o=>o.classList.remove('show'));
+});
+const units={
+ length:{'میلی‌متر':.001,'سانتی‌متر':.01,'متر':1,'کیلومتر':1000,'اینچ':.0254,'فوت':.3048,'یارد':.9144,'مایل':1609.344},
+ area:{'سانتی‌متر مربع':.0001,'متر مربع':1,'هکتار':10000,'کیلومتر مربع':1e6,'فوت مربع':.09290304,'جریب':4046.8564224},
+ volume:{'میلی‌لیتر':.001,'لیتر':1,'متر مکعب':1000,'سانتی‌متر مکعب':.001,'گالن آمریکا':3.785411784,'فوت مکعب':28.3168466},
+ mass:{'میلی‌گرم':.000001,'گرم':.001,'کیلوگرم':1,'تن':1000,'اونس':.028349523125,'پوند':.45359237},
+ speed:{'متر بر ثانیه':1,'کیلومتر بر ساعت':1/3.6,'مایل بر ساعت':.44704,'فوت بر ثانیه':.3048,'گره دریایی':.514444},
+ time:{'میلی‌ثانیه':.001,'ثانیه':1,'دقیقه':60,'ساعت':3600,'روز':86400,'هفته':604800},
+ pressure:{'پاسکال':1,'کیلوپاسکال':1000,'بار':100000,'اتمسفر':101325,'PSI':6894.757293,'میلی‌متر جیوه':133.322387},
+ energy:{'ژول':1,'کیلوژول':1000,'کالری':4.184,'کیلوکالری':4184,'وات‌ساعت':3600,'کیلووات‌ساعت':3600000},
+ power:{'وات':1,'کیلووات':1000,'اسب بخار':745.699872},
+ data:{'بیت':1,'بایت':8,'کیلوبایت':8000,'مگابایت':8e6,'گیگابایت':8e9,'کیبی‌بایت':8192,'مبی‌بایت':8388608,'گیبی‌بایت':8589934592}
+};
+function fillUnits(){
+ const cat=$('category').value;
+ const list=cat==='temp'?['سلسیوس','فارنهایت','کلوین']:Object.keys(units[cat]);
+ $('fromUnit').innerHTML='';$('toUnit').innerHTML='';
+ list.forEach(u=>{$('fromUnit').add(new Option(u,u));$('toUnit').add(new Option(u,u))});
+ if(list.length>1)$('toUnit').selectedIndex=1;convert();
+}
+function convert(){
+ const cat=$('category').value,v=Number($('fromValue').value);
+ const from=$('fromUnit').value,to=$('toUnit').value;
+ if(!from||!to||$('fromValue').value.trim()===''||!Number.isFinite(v)){
+  $('convertResult').textContent='—';return;
+ }
+ let result;
+ if(cat==='temp'){
+  const c=from==='سلسیوس'?v:from==='فارنهایت'?(v-32)*5/9:v-273.15;
+  result=to==='سلسیوس'?c:to==='فارنهایت'?c*9/5+32:c+273.15;
+ }else result=v*units[cat][from]/units[cat][to];
+ $('convertResult').textContent=Number(result.toPrecision(11)).toLocaleString('en-US',{maximumSignificantDigits:11});
+}
+$('category').addEventListener('change',fillUnits);
+$('fromValue').addEventListener('input',convert);
+$('fromUnit').addEventListener('change',convert);
+$('toUnit').addEventListener('change',convert);
+fillUnits();render();renderHistory();
+})();
+</script>
+</body>
+</html>
+
