@@ -420,6 +420,7 @@ public class MainActivity extends Activity {
             item.put("id", id);
             item.put("logicalCameraId", parent);
             item.put("physical", physical);
+            item.put("cameraType", physical ? "physical" : "logical");
             Integer facing = c.get(CameraCharacteristics.LENS_FACING);
             item.put("facing", facing == null ? -1 : facing);
             Size pixels = c.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
