@@ -155,7 +155,12 @@ jobs:
               s = re.sub(r"""https?://cdnjs\.cloudflare\.com/ajax/libs/font-awesome/[^"' ]+/css/all\.min\.css""", "../../vendor/all.min.css", s)
               p.write_text(s, encoding="utf-8")
           PY
-          test "$(find "$ROOT/tools" -mindepth 2 -maxdepth 2 -name index.html | wc -l)" -eq 19
+          echo "Downloaded tool entry points:"
+          find "$ROOT/tools" -mindepth 2 -maxdepth 2 -name index.html -print | sort
+          for slug in "${!TOOLS[@]}"; do
+            test -s "$ROOT/tools/$slug/index.html" || { echo "::error::Missing tool entry point: $slug"; exit 1; }
+          done
+          echo "All 19 tool entry points verified."
           test -s "$ROOT/tools/fasle-yab/cities.json"
           test -s "$ROOT/tools/taghvim/index.html"
           test -s "$ROOT/tools/etela-ate-system-/devices.json"
