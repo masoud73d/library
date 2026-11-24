@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سامانه جامع داروشناس | مرجع تخصصی دارویی و استودیو ۳بعدی</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        medical: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    },
+                    fontFamily: {
+                        vazir: ['Vazirmatn', 'sans-serif']
+                    },
+                    boxShadow: {
+                        '3d-sm': '0 4px 12px -2px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02), inset 0 1px 0 0 rgba(255,255,255,0.8)',
+                        '3d-md': '0 10px 25px -5px rgba(0,0,0,0.07), 0 4px 10px -2px rgba(0,0,0,0.03), inset 0 1px 1px 0 rgba(255,255,255,0.9)',
+                        '3d-lg': '0 20px 35px -10px rgba(13,148,136,0.18), 0 8px 16px -4px rgba(0,0,0,0.06)',
+                        '3d-button': '0 6px 14px -4px rgba(13,148,136,0.35), inset 0 1px 0 0 rgba(255,255,255,0.4)',
+                        'inset-soft': 'inset 0 2px 4px 0 rgba(0,0,0,0.05)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Vazirmatn Font CDN -->
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Three.js Engine for 3D Drug Studio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+            font-family: 'Vazirmatn', sans-serif;
+            scroll-behavior: smooth;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        .dark ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #14b8a6; }
+        
+        .glass-spatial {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .dark .glass-spatial {
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .card-spatial {
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+        .card-spatial:hover {
+            transform: translateY(-4px);
+        }
+
+        .ambient-orb {
+            position: fixed;
+            border-radius: 9999px;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200 overflow-x-hidden w-full relative">
+
+    <!-- Ambient Background Glow Spheres -->
+    <div class="ambient-orb w-96 h-96 bg-teal-400/25 dark:bg-teal-600/15 -top-20 -right-20"></div>
+    <div class="ambient-orb w-96 h-96 bg-cyan-400/20 dark:bg-cyan-600/10 top-1/3 -left-32"></div>
+
+    <!-- Toast Notification Message -->
+    <div id="toast-message" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-slate-900/90 text-white text-xs font-bold shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 pointer-events-none transform translate-y-4 flex items-center gap-2 border-0">
+        <i class="fa-solid fa-circle-info text-teal-400"></i>
+        <span id="toast-text">جهت خروج از سامانه از منوی مرورگر استفاده کنید</span>
+    </div>
+
+    <!-- Header Navigation (RTL, Title/Logo Right, Bookmarks Left) -->
+    <header class="sticky top-0 z-40 glass-spatial shadow-3d-sm w-full overflow-x-hidden border-0">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between w-full relative z-10">
+            
+            <!-- Brand Logo & Title -->
+            <div class="flex items-center gap-2.5 cursor-pointer shrink-0" onclick="resetToInitialState()">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-teal-600 via-teal-500 to-cyan-400 flex items-center justify-center text-white shadow-3d-button transform hover:rotate-6 transition duration-300 shrink-0">
+                    <i class="fa-solid fa-capsules text-lg sm:text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">داروشناس</h1>
+                </div>
+            </div>
+
+            <!-- Header Navigation Buttons -->
+            <nav class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <button onclick="switchTab('cabinet')" id="nav-cabinet" class="px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition flex items-center gap-2 text-slate-700 dark:text-slate-200 bg-white/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-3d-sm active:scale-95 shrink-0 border-0">
+                    <i class="fa-solid fa-bookmark text-rose-500"></i> <span>نشان‌ها</span>
+                    <span id="fav-count-badge" class="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black shadow-sm">0</span>
+                </button>
+                <button onclick="toggleTheme()" class="p-2 sm:p-2.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition shadow-3d-sm active:scale-95 shrink-0 border-0" title="تغییر تم (روز/شب)">
+                    <i id="theme-icon" class="fa-solid fa-moon text-sm"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Application Body -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 overflow-x-hidden relative z-10">
+
+        <!-- TAB 1: DRUG EXPLORER SECTION -->
+        <section id="tab-explorer" class="space-y-6 w-full">
+            
+            <!-- Filter & Search Controls Container -->
+            <div class="glass-spatial rounded-3xl p-4 sm:p-6 shadow-3d-md space-y-4 w-full border-0">
+                
+                <!-- Search Box -->
+                <div class="relative w-full">
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-teal-600 dark:text-teal-400">
+                        <i class="fa-solid fa-magnifying-glass text-base"></i>
+                    </div>
+                    <input type="text" id="main-search-input" oninput="handleSearchInput(this.value)"
+                           placeholder="جستجوی پیشرفته نام یا برند دارو..." 
+                           class="w-full pr-11 pl-11 py-3.5 bg-white/90 dark:bg-slate-900/90 border-0 rounded-2xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/80 transition shadow-inset-soft dark:text-white">
+                    <button id="search-clear-btn" onclick="clearSearch()" class="hidden absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Dropdowns Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full">
+                    
+                    <!-- Category Dropdown Selector (#category-select) -->
+                    <div class="sm:col-span-2 w-full">
+                        <label for="category-select" class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-layer-group text-teal-500"></i> دسته‌بندی تخصصی دارویی:
+                        </label>
+                        <select id="category-select" onchange="handleCategorySelect(this.value)" 
+                                class="w-full bg-white/90 dark:bg-slate-900/90 border-0 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/80 transition cursor-pointer shadow-3d-sm">
+                            <option value="all">در حال بارگذاری دسته‌بندی‌ها...</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort Select Dropdown -->
+                    <div class="w-full">
+                        <label for="sort-select" class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrow-down-a-z text-cyan-500"></i> مرتب‌سازی:
+                        </label>
+                        <select id="sort-select" onchange="handleSortSelect(this.value)" 
+                                class="w-full bg-white/90 dark:bg-slate-900/90 border-0 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/80 transition cursor-pointer shadow-3d-sm">
+                            <option value="fa">نام فارسی (الف-ی)</option>
+                            <option value="en">نام انگلیسی (A-Z)</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Initial State Helpful Guide Card -->
+            <div id="initial-welcome-box" class="py-6 px-6 text-center glass-spatial rounded-3xl shadow-3d-md space-y-4 w-full relative overflow-hidden border-0">
+                <div class="max-w-lg mx-auto space-y-2">
+                    <h3 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">سامانه جامع داروشناس (۶۰۰ داروی یکتا)</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                        جهت مشاهده اطلاعات کامل بالینی، مدل سه‌بعدی و تداخلات دارویی، نام دارو را در کادر بالا جستجو کنید یا دسته‌بندی مورد نظر را انتخاب نمایید.
+                    </p>
+                </div>
+                <div class="pt-1 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <span class="px-4 py-2 rounded-2xl bg-white/90 dark:bg-slate-800/90 shadow-3d-sm flex items-center gap-2 border-0">
+                        <i class="fa-solid fa-database text-teal-500 text-sm"></i> <strong id="total-db-count-text">۶۰۰</strong> داروی یکتای بالینی
+                    </span>
+                    <span class="px-4 py-2 rounded-2xl bg-white/90 dark:bg-slate-800/90 shadow-3d-sm flex items-center gap-2 border-0">
+                        <i class="fa-solid fa-layer-group text-cyan-500 text-sm"></i> ۱۲ دسته‌بندی تخصصی (۵۰ دارو در هر دسته)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Search & Filter Results Grid (Stacked Vertical List) -->
+            <div id="results-wrapper" class="space-y-4">
+                <div class="flex items-center justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-400 px-2 font-bold">
+                    <span>لیست داروها: <strong id="result-count-text" class="text-teal-600 dark:text-teal-400 text-base">۶۰۰</strong> دارو</span>
+                    <span id="active-filter-label" class="bg-white/90 dark:bg-slate-800/90 px-3 py-1 rounded-xl shadow-3d-sm border-0">همه دسته‌ها</span>
+                </div>
+
+                <!-- Vertical Stacked Cards Container -->
+                <div id="drug-cards-grid" class="grid grid-cols-1 gap-3.5 w-full"></div>
+
+                <div id="load-more-container" class="hidden text-center pt-4">
+                    <button onclick="loadMoreDrugs()" class="px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs sm:text-sm font-bold rounded-2xl transition shadow-3d-button active:scale-95 border-0 flex items-center justify-center gap-2 mx-auto">
+                        <i class="fa-solid fa-angles-down text-xs"></i>
+                        <span id="load-more-btn-text">بارگذاری موارد بیشتر...</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty Search Result Box -->
+            <div id="no-results-box" class="hidden text-center py-16 glass-spatial rounded-3xl shadow-3d-md space-y-3 border-0">
+                <i class="fa-solid fa-magnifying-glass-minus text-5xl text-slate-400 dark:text-slate-500 block"></i>
+                <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">دارویی با این مشخصات یافت نشد</h4>
+                <p class="text-xs text-slate-500">لطفاً عبارت دیگری را جستجو کنید یا دسته‌بندی را تغییر دهید.</p>
+            </div>
+
+        </section>
+
+        <!-- TAB 2: SAVED MARKS (FAVORITES CABINET) -->
+        <section id="tab-cabinet" class="hidden space-y-6">
+            <div class="glass-spatial rounded-3xl p-5 sm:p-6 shadow-3d-md border-0 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bookmark text-rose-500"></i> لیست نشان‌شده‌ها
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">داروهای ذخیره‌شده جهت دسترسی سریع</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="switchTab('explorer')" class="px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-2xl shadow-3d-sm transition active:scale-95 border-0">
+                        <i class="fa-solid fa-arrow-right ml-1"></i> بازگشت به لیست
+                    </button>
+                    <button onclick="clearAllFavorites()" class="px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-2xl shadow-3d-sm transition active:scale-95 border-0">
+                        حذف همه
+                    </button>
+                </div>
+            </div>
+
+            <div id="cabinet-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+
+            <div id="cabinet-empty-state" class="hidden text-center py-16 glass-spatial rounded-3xl shadow-3d-md space-y-4 border-0">
+                <i class="fa-solid fa-bookmark text-5xl text-slate-400 dark:text-slate-500 block"></i>
+                <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">لیست نشان‌شده‌های شما خالی است</h4>
+                <p class="text-xs text-slate-500">با کلیک روی آیکون نشان در کارت هر دارو، آن را به این بخش اضافه کنید.</p>
+                <button onclick="switchTab('explorer')" class="px-6 py-2.5 text-xs font-bold bg-teal-600 text-white rounded-2xl hover:bg-teal-500 shadow-3d-button transition border-0">
+                    بازگشت به جستجوی داروها
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- DRUG DETAIL MODAL (BORDERLESS, STRICT VERTICAL ORDER, MOBILE-FULLSCREEN) -->
+    <div id="drug-detail-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-5 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 w-full h-full sm:h-auto sm:max-h-[92vh] max-w-3xl rounded-none sm:rounded-3xl flex flex-col shadow-2xl overflow-hidden relative border-0">
+            
+            <!-- Modal Header -->
+            <div class="p-4 sm:p-6 bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600 text-white flex items-start justify-between relative shrink-0 border-0">
+                <div>
+                    <span id="modal-category-badge" class="inline-block px-3 py-1 rounded-full text-[10px] font-black bg-white/20 text-white mb-2 backdrop-blur-md border-0 shadow-sm"></span>
+                    <h2 id="modal-title-fa" class="text-xl sm:text-2xl font-black tracking-wide cursor-pointer hover:underline"></h2>
+                    <p id="modal-title-en" class="text-xs sm:text-sm font-medium text-cyan-100 italic dir-ltr text-right mt-0.5 cursor-pointer hover:underline"></p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="modal-fav-btn" onclick="" class="w-10 h-10 rounded-2xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition border-0 shadow-3d-sm active:scale-95">
+                        <i class="fa-solid fa-bookmark text-base"></i>
+                    </button>
+                    <button onclick="closeModal()" class="w-10 h-10 rounded-2xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition border-0 shadow-3d-sm active:scale-95" title="بستن پنجره">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body (Strict Vertical Order) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 flex-grow bg-white dark:bg-slate-900 border-0">
+
+                <!-- 1. COMPACT 3D STUDIO BOX (max-w-sm & Height h-40/h-44) -->
+                <div class="space-y-2 border-0">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-cube text-indigo-500 text-base"></i> مدل سه‌بعدی تعاملی دارو:
+                        </h4>
+                        <button onclick="reset3dCamera()" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-teal-600 hover:text-white dark:hover:bg-teal-600 text-slate-700 dark:text-slate-200 transition flex items-center gap-1.5 shadow-3d-sm border-0">
+                            <i class="fa-solid fa-rotate-left text-[10px]"></i> زاویه اولیه
+                        </button>
+                    </div>
+                    
+                    <div id="canvas-3d-wrapper" class="w-full max-w-sm mx-auto h-40 sm:h-44 bg-slate-900 rounded-2xl overflow-hidden relative shadow-inner flex items-center justify-center select-none touch-none border-0">
+                        <!-- Three.js Canvas Injected Here -->
+                    </div>
+                </div>
+
+                <!-- 2. PRIMARY INDICATIONS / MAIN USES (FIRST CLINICAL BOX IMMEDIATELY AFTER 3D VIEWER) -->
+                <div class="space-y-2.5 border-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-notes-medical text-teal-600 dark:text-teal-400 text-base"></i> موارد اصلی مصرف درمانی
+                    </h4>
+                    <div class="bg-teal-50/80 dark:bg-teal-950/40 p-4 rounded-2xl shadow-3d-sm space-y-2 border-0">
+                        <span class="font-bold text-teal-950 dark:text-teal-200 text-xs block">کاربردها و دلایل اصلی تجویز بالینی:</span>
+                        <ul id="modal-indications" class="list-disc list-inside space-y-1.5 text-xs text-teal-900 dark:text-teal-200 font-medium"></ul>
+                    </div>
+                </div>
+
+                <!-- 3. General Information & Clinical Forms -->
+                <div class="space-y-3 border-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm pb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-teal-500"></i> اطلاعات کلی و اشکال دارویی
+                    </h4>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 shadow-3d-sm border-0">
+                            <span class="text-[11px] font-bold text-slate-400 block mb-2">نام‌های تجاری معروف:</span>
+                            <div id="modal-brands" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 shadow-3d-sm border-0">
+                            <span class="text-[11px] font-bold text-slate-400 block mb-2">اشکال دارویی و دوزها:</span>
+                            <div id="modal-forms" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 shadow-3d-sm border-0">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs block mb-1">دستور و دوز مصرف بالینی:</span>
+                        <p id="modal-dosage" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+                    </div>
+                </div>
+
+                <!-- 4. Mechanism of Action -->
+                <div class="space-y-3 border-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm pb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-microscope text-cyan-500"></i> مکانیسم اثر فارماکولوژیک
+                    </h4>
+                    <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl shadow-3d-sm space-y-1 border-0">
+                        <span class="font-bold text-slate-800 dark:text-slate-200 text-xs block">مکانیسم عمل:</span>
+                        <p id="modal-mechanism" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300"></p>
+                    </div>
+                </div>
+
+                <!-- 5. Side Effects & Warnings -->
+                <div class="space-y-3 border-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm pb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> عوارض جانبی و هشدارها
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <div class="p-4 bg-amber-50/80 dark:bg-amber-950/30 rounded-2xl shadow-3d-sm border-0">
+                            <span class="text-xs font-bold text-amber-800 dark:text-amber-400 block mb-1.5">عوارض جانبی شایع:</span>
+                            <ul id="modal-side-common" class="list-disc list-inside space-y-1 text-xs text-slate-700 dark:text-slate-300"></ul>
+                        </div>
+                        <div class="p-4 bg-rose-50/80 dark:bg-rose-950/30 rounded-2xl shadow-3d-sm border-0">
+                            <span class="text-xs font-bold text-rose-800 dark:text-rose-400 block mb-1.5">عوارض جدی و مخاطرات:</span>
+                            <ul id="modal-side-severe" class="list-disc list-inside space-y-1 text-xs text-rose-700 dark:text-rose-300"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Pregnancy, Lactation & Contraindications -->
+                <div class="space-y-3 border-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm pb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-ban text-rose-500"></i> رده بارداری، شیردهی و منع مصرف
+                    </h4>
+                    <div class="p-4 bg-purple-50/80 dark:bg-purple-950/30 rounded-2xl shadow-3d-sm border-0">
+                        <span class="font-bold text-purple-900 dark:text-purple-300 text-xs block mb-1">مصرف در دوران بارداری و شیردهی:</span>
+                        <p id="modal-pregnancy" class="text-xs leading-relaxed text-purple-800 dark:text-purple-200 font-medium"></p>
+                    </div>
+                    <div class="p-4 bg-red-50/80 dark:bg-red-950/30 rounded-2xl shadow-3d-sm border-0">
+                        <span class="font-bold text-red-900 dark:text-red-300 text-xs block mb-1">موارد منع مصرف قطعی:</span>
+                        <ul id="modal-contraindications" class="list-disc list-inside space-y-1 text-xs text-red-700 dark:text-red-300"></ul>
+                    </div>
+                </div>
+
+                <!-- 7. Drug Interactions -->
+                <div class="space-y-3 border-0">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-xs sm:text-sm pb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate text-blue-500"></i> تداخلات دارویی مهم
+                    </h4>
+                    <div id="modal-interactions-list" class="space-y-2.5 border-0"></div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-950 flex justify-end shrink-0 border-0">
+                <button onclick="closeModal()" class="px-6 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-2xl transition shadow-3d-sm active:scale-95 border-0">
+                    بستن پنجره
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT ENGINE -->
+    <script>
+        /* ----------------------------------------------------
+           1. CATEGORIES DEFINITION & GLOBAL STATE
+        ---------------------------------------------------- */
+        const CATEGORIES = [
+            { id: 'analgesic', name: 'مسکن و ضدالتهاب', icon: 'fa-hand-dots' },
+            { id: 'antibiotic', name: 'آنتی‌بیوتیک و ضدعفونی', icon: 'fa-virus-slash' },
+            { id: 'cardio', name: 'قلب و عروق و فشارخون', icon: 'fa-heart-pulse' },
+            { id: 'neuro', name: 'اعصاب و روان', icon: 'fa-brain' },
+            { id: 'gi', name: 'گوارش و کبد', icon: 'fa-stomach' },
+            { id: 'respiratory', name: 'تنفس و آلرژی', icon: 'fa-lungs' },
+            { id: 'endocrine', name: 'غدد و دیابت', icon: 'fa-syringe' },
+            { id: 'blood', name: 'خون و ایمنی', icon: 'fa-droplet' },
+            { id: 'derma', name: 'پوست و مو', icon: 'fa-allergies' },
+            { id: 'ent', name: 'چشم و گوش', icon: 'fa-eye' },
+            { id: 'vitamins', name: 'ویتامین و مکمل', icon: 'fa-apple-whole' },
+            { id: 'emergency', name: 'هورمونی و اورژانس', icon: 'fa-kit-medical' }
+        ];
+
+        let ALL_DRUGS = [];
+        let FILTERED_DRUGS = [];
+        let FAVORITES = [];
+        let currentPage = 1;
+        const PAGE_SIZE = 24;
+
+        let isModalOpen = false;
+        let currentTab = 'explorer';
+
+        // Three.js Studio Scene State
+        let renderer3D = null;
+        let scene3D = null;
+        let camera3D = null;
+        let mesh3D = null;
+        let animationFrameId = null;
+        let targetRotation = { x: 0, y: 0 };
+        let currentRotation = { x: 0, y: 0 };
+        let isDragging3D = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        /* ----------------------------------------------------
+           2. UN-ESCAPABLE MOBILE BACK BUTTON HISTORY TRAP
+        ---------------------------------------------------- */
+        function initHistoryTrap() {
+            try {
+                // Step A: Set base root history entry
+                history.replaceState({ drugShenas: true, layer: 'root' }, '', window.location.href);
+                // Step B: Push immediate in-app guard state so Back button hits this first without leaving page
+                history.pushState({ drugShenas: true, layer: 'home' }, '', window.location.href);
+            } catch(e) {}
+        }
+
+        window.addEventListener('popstate', (event) => {
+            const state = event.state || {};
+
+            // 1. If Modal is open UI-wise, close the modal first
+            if (isModalOpen) {
+                closeModalUI();
+                // Ensure state stays locked at home level
+                if (!state.layer || state.layer === 'root') {
+                    history.pushState({ drugShenas: true, layer: 'home' }, '', window.location.href);
+                }
+                return;
+            }
+
+            // 2. If Bookmarks/Cabinet view is open, switch back to Main Catalog
+            if (currentTab === 'cabinet') {
+                switchTabUI('explorer');
+                if (!state.layer || state.layer === 'root') {
+                    history.pushState({ drugShenas: true, layer: 'home' }, '', window.location.href);
+                }
+                return;
+            }
+
+            // 3. If at top home level and user hits Back, re-push guard state & show Toast so app doesn't close
+            if (!state.layer || state.layer === 'root') {
+                history.pushState({ drugShenas: true, layer: 'home' }, '', window.location.href);
+                showToast('جهت خروج از سامانه از منوی مرورگر استفاده کنید');
+            }
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast-message');
+            const toastText = document.getElementById('toast-text');
+            if (!toast || !toastText) return;
+
+            toastText.textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+            }, 2600);
+        }
+
+        /* ----------------------------------------------------
+           3. GENERATE EXACTLY 600 UNIQUE REAL CLINICAL DRUGS
+        ---------------------------------------------------- */
+        function generate600UniqueClinicalDatabase() {
+            const rawCategoryData = {
+                analgesic: [
+                    { fa: 'استامینوفن', en: 'Acetaminophen', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای خفیف تا متوسط (سردرد، دندان‌درد)', 'کاهش تب و کنترل علائم سرماخوردگی'] },
+                    { fa: 'ایبوپروفن', en: 'Ibuprofen', shape: 'capsule', color: '#e11d48', uses: ['تسکین دردهای التهابی و عضلانی-مفاصل', 'کاهش دردهای قاعدگی و تب'] },
+                    { fa: 'ناپروکسن', en: 'Naproxen', shape: 'tablet', color: '#38bdf8', uses: ['درمان التهاب مفاصل و آرتریت روماتوئید', 'تسکین سردردهای میگرنی'] },
+                    { fa: 'دیکلوفناک', en: 'Diclofenac', shape: 'gel', color: '#e11d48', uses: ['تسکین دردهای موضعی مفاصل و عضلات', 'کاهش تورم ناشی از ضرب دیدگی'] },
+                    { fa: 'سلکوکسیب', en: 'Celecoxib', shape: 'capsule', color: '#f59e0b', uses: ['تسکین درد مفاصل بدون آسیب گوارشی', 'درمان استئوآرتریت و روماتیسم'] },
+                    { fa: 'پیروکسیکام', en: 'Piroxicam', shape: 'capsule', color: '#10b981', uses: ['کاهش التهاب شدید مفاصل و نقرس حاد'] },
+                    { fa: 'ملوکسیکام', en: 'Meloxicam', shape: 'tablet', color: '#fef08a', uses: ['درمان آرتروز و آرتریت روماتوئید'] },
+                    { fa: 'ایندومتاسین', en: 'Indomethacin', shape: 'capsule', color: '#8b5cf6', uses: ['مسکن قوی در حملات حاد نقرس و اسپوندیلیت'] },
+                    { fa: 'مفنامیک اسید', en: 'Mefenamic Acid', shape: 'capsule', color: '#3b82f6', uses: ['تسکین دردهای دندان و دردهای قاعدگی'] },
+                    { fa: 'کتورولاک', en: 'Ketorolac', shape: 'syrup', color: '#38bdf8', uses: ['تسکین شدید دردهای پس از عمل جراحی'] },
+                    { fa: 'متوکاربامول', en: 'Methocarbamol', shape: 'tablet', color: '#ffffff', uses: ['تسکین اسپاسم و گرفتگی‌های عضلانی حاد'] },
+                    { fa: 'ترامادول', en: 'Tramadol', shape: 'capsule', color: '#a855f7', uses: ['تسکین دردهای متوسط تا شدید مزمن'] },
+                    { fa: 'باکلوفن', en: 'Baclofen', shape: 'tablet', color: '#ffffff', uses: ['شُلكننده عضلانی در بیماری ام‌اس و اسپاستیسیتی'] },
+                    { fa: 'تیزانیدین', en: 'Tizanidine', shape: 'tablet', color: '#ffffff', uses: ['تسکین اسپاسم‌های دردناک عضلات اسکلتی'] },
+                    { fa: 'گاباپنتین', en: 'Gabapentin', shape: 'capsule', color: '#f97316', uses: ['درمان دردهای عصبی (نوروپاتی دیابتی) و تشنج'] },
+                    { fa: 'پرگابالین', en: 'Pregabalin', shape: 'capsule', color: '#8b5cf6', uses: ['تسکین دردهای نوروپاتیک و فیبرومپالژیا'] },
+                    { fa: 'کتوپروفن', en: 'Ketoprofen', shape: 'capsule', color: '#ec4899', uses: ['تسکین دردهای مفصلی و روماتیسمی'] },
+                    { fa: 'فنوپروفن', en: 'Fenoprofen', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای آرتریت روماتوئید'] },
+                    { fa: 'فلبیناک', en: 'Felbinac', shape: 'gel', color: '#06b6d4', uses: ['تسکین موضعی التهاب عضلانی'] },
+                    { fa: 'نابومتون', en: 'Nabumetone', shape: 'tablet', color: '#ffffff', uses: ['درمان طولانی‌مدت التهاب مفاصل'] },
+                    { fa: 'اوکسپروزین', en: 'Oxaprozin', shape: 'tablet', color: '#fef08a', uses: ['کاهش درد و خشکی مفاصل در آرتروز'] },
+                    { fa: 'اتودولاک', en: 'Etodolac', shape: 'capsule', color: '#f59e0b', uses: ['تسکین درد پس از جراحی و روماتیسم'] },
+                    { fa: 'تنوکسیکام', en: 'Tenoxicam', shape: 'tablet', color: '#ffffff', uses: ['کاهش التهاب حاد مفاصل'] },
+                    { fa: 'لورنوکسیکام', en: 'Lornoxicam', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای حاد استخوانی'] },
+                    { fa: 'دکس کتوپروفن', en: 'Dexketoprofen', shape: 'tablet', color: '#ffffff', uses: ['تسکین سریع دردهای دندان و جراحی'] },
+                    { fa: 'کلوزوکسازون', en: 'Chlorzoxazone', shape: 'tablet', color: '#ffffff', uses: ['شل‌کننده عضلات اسکلتی'] },
+                    { fa: 'کاریزوپرودول', en: 'Carisoprodol', shape: 'tablet', color: '#ffffff', uses: ['تسکین اسپاسم‌های شدید عضلانی'] },
+                    { fa: 'اورفنادرین', en: 'Orphenadrine', shape: 'tablet', color: '#ffffff', uses: ['درمان گرفتگی‌های دردناک عضلانی'] },
+                    { fa: 'دانترولن', en: 'Dantrolene', shape: 'capsule', color: '#ef4444', uses: ['درمان اسپاستیسیتی ناشی از سکته یا قطع نخاع'] },
+                    { fa: 'نفوپام', en: 'Nefopam', shape: 'syrup', color: '#38bdf8', uses: ['مسکن غیرمخدری پس از عمل جراحی'] },
+                    { fa: 'تبایین', en: 'Thebaine', shape: 'tablet', color: '#ffffff', uses: ['آلکالوئید پایه مسکن‌های تخصصی'] },
+                    { fa: 'متادون', en: 'Methadone', shape: 'syrup', color: '#f59e0b', uses: ['تسکین دردهای شدید سرطانی و ترک اعتیاد'] },
+                    { fa: 'بوپرنورفین', en: 'Buprenorphine', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای شدید و درمان نگهدارنده'] },
+                    { fa: 'پنتتازوسین', en: 'Pentazocine', shape: 'syrup', color: '#38bdf8', uses: ['مسکن در دردهای متوسط تا شدید'] },
+                    { fa: 'بوتورفانول', en: 'Butorphanol', shape: 'drop', color: '#0284c7', uses: ['تسکین سردردهای میگرنی شدید'] },
+                    { fa: 'نالبوفین', en: 'Nalbuphine', shape: 'syrup', color: '#38bdf8', uses: ['تسکین دردهای جراحی و زایمان'] },
+                    { fa: 'هیدرومورفون', en: 'Hydromorphone', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای بسیار شدید سرطانی'] },
+                    { fa: 'اکسی کودون', en: 'Oxycodone', shape: 'tablet', color: '#f59e0b', uses: ['کنترل دردهای شدید مزمن پس از جراحی'] },
+                    { fa: 'فنتانیل', en: 'Fentanyl', shape: 'syrup', color: '#38bdf8', uses: ['بیهوشی و تسکین شدیدترین دردهای حاد'] },
+                    { fa: 'الفنتانیل', en: 'Alfentanil', shape: 'syrup', color: '#38bdf8', uses: ['مسکن کوتاه‌اثر در بیهوشی اتاق عمل'] },
+                    { fa: 'سوفنتانیل', en: 'Sufentanil', shape: 'syrup', color: '#38bdf8', uses: ['مسکن بسیار قوی در جراحی‌های قلب'] },
+                    { fa: 'رمی فنتانیل', en: 'Remifentanil', shape: 'syrup', color: '#38bdf8', uses: ['مسکن فوق‌العاده کوتاه‌اثر در بیهوشی'] },
+                    { fa: 'کدئین', en: 'Codeine', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای خفیف تا متوسط و سرکوب سرفه'] },
+                    { fa: 'دی هیدروکدئین', en: 'Dihydrocodeine', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای متوسط استخوانی'] },
+                    { fa: 'پتی دین', en: 'Pethidine', shape: 'syrup', color: '#38bdf8', uses: ['تسکین دردهای شدید حاد و زایمان'] },
+                    { fa: 'آنتی پیرین', en: 'Antipyrine', shape: 'drop', color: '#06b6d4', uses: ['تسکین دردهای گوش و کاهش تب'] },
+                    { fa: 'فنیل بوتازون', en: 'Phenylbutazone', shape: 'tablet', color: '#ffffff', uses: ['تسکین التهاب شدید مفاصل'] },
+                    { fa: 'دیپیرون', en: 'Dipyrone', shape: 'syrup', color: '#38bdf8', uses: ['مسکن و تب‌بر شدید در موارد اورژانسی'] },
+                    { fa: 'فلوربی پروفن', en: 'Flurbiprofen', shape: 'tablet', color: '#ffffff', uses: ['تسکین دردهای گلو و التهاب مفاصل'] },
+                    { fa: 'تولفتین', en: 'Tolmetin', shape: 'capsule', color: '#3b82f6', uses: ['درمان التهاب مفاصل در کودکان و بزرگسالان'] }
+                ],
+                antibiotic: [
+                    { fa: 'آموکسی‌سیلین', en: 'Amoxicillin', shape: 'capsule', color: '#3b82f6', uses: ['عفونت‌های مجاری تنفسی، گوش میان و سینوزیت'] },
+                    { fa: 'کوآموکسی‌کلاو', en: 'Co-Amoxiclav', shape: 'tablet', color: '#ffffff', uses: ['عفونت‌های مقاوم تنفسی و عفونت‌های دندان'] },
+                    { fa: 'آزیترومایسین', en: 'Azithromycin', shape: 'tablet', color: '#ffffff', uses: ['عفونت‌های ریوی، تنفسی و پوست'] },
+                    { fa: 'سیپروفلوکساسین', en: 'Ciprofloxacin', shape: 'tablet', color: '#ffffff', uses: ['عفونت‌های ادراری، گوارشی و استخوان'] },
+                    { fa: 'سفیکسیم', en: 'Cefixime', shape: 'tablet', color: '#a855f7', uses: ['عفونت‌های ادراری و تنفسی'] },
+                    { fa: 'سفتریاکسون', en: 'Ceftriaxone', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های شدید بیمارستانی و پنومونی'] },
+                    { fa: 'سفالکسین', en: 'Cephalexin', shape: 'capsule', color: '#ef4444', uses: ['عفونت‌های پوستی و مجاری ادراری'] },
+                    { fa: 'مترونیدازول', en: 'Metronidazole', shape: 'tablet', color: '#ffffff', uses: ['درمان عفونت‌های باکتریایی بی‌هوازی و انگل‌های گوارشی'] },
+                    { fa: 'کلیندامایسین', en: 'Clindamycin', shape: 'capsule', color: '#10b981', uses: ['عفونت‌های دهان و دندان، پوست و استخوان'] },
+                    { fa: 'داکسی‌سایکلین', en: 'Doxycycline', shape: 'capsule', color: '#f59e0b', uses: ['درمان آکنه شدید، کلامیدیا و عفونت‌های میکروبی'] },
+                    { fa: 'لووفلوکساسین', en: 'Levofloxacin', shape: 'tablet', color: '#ffffff', uses: ['پنومونی شدید، سینوزیت و عفونت‌های ادراری پیچیده'] },
+                    { fa: 'مروپنم', en: 'Meropenem', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های شدید شکمی و مننژیت باکتریایی'] },
+                    { fa: 'پنی‌سیلین G', en: 'Penicillin G', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های شدید استرپتوکوکی و سیفلیس'] },
+                    { fa: 'پنی‌سیلین V', en: 'Penicillin V', shape: 'tablet', color: '#ffffff', uses: ['درمان گلودرد چرکی و گلودرد استرپتوکوکی'] },
+                    { fa: 'آمپی‌سیلین', en: 'Ampicillin', shape: 'capsule', color: '#f59e0b', uses: ['عفونت‌های مجاری ادراری و گوارشی'] },
+                    { fa: 'پیپراسیلین', en: 'Piperacillin', shape: 'syrup', color: '#ffffff', uses: ['درمان عفونت‌های بسیار شدید بیمارستانی'] },
+                    { fa: 'تیکارسیلین', en: 'Ticarcillin', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های ناشی از سودوموناس'] },
+                    { fa: 'سفازولین', en: 'Cefazolin', shape: 'syrup', color: '#ffffff', uses: ['پیشگیری از عفونت پیش از جراحی'] },
+                    { fa: 'سفورکسیم', en: 'Cefuroxime', shape: 'tablet', color: '#ffffff', uses: ['درمان عفونت‌های تنفسی و ادراری'] },
+                    { fa: 'سفتازیدیم', en: 'Ceftazidime', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های شدید بیمارستانی گرم منفی'] },
+                    { fa: 'سفپیم', en: 'Cefepime', shape: 'syrup', color: '#ffffff', uses: ['درمان تب نوتروپنیک و پنومونی شدید'] },
+                    { fa: 'سفتازارولین', en: 'Cftaroline', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های مقاوم MRSA پوستی'] },
+                    { fa: 'آمیكاسین', en: 'Amikacin', shape: 'syrup', color: '#38bdf8', uses: ['عفونت‌های شدید کلیه و خون گرم منفی'] },
+                    { fa: 'جنتامایسین', en: 'Gentamicin', shape: 'syrup', color: '#38bdf8', uses: ['عفونت‌های ادراری شدید و اندوکاردیت'] },
+                    { fa: 'توبرامایسین', en: 'Tobramycin', shape: 'syrup', color: '#38bdf8', uses: ['عفونت‌های ریوی در بیماران سیستیک فیبروزیس'] },
+                    { fa: 'استرپتومایسین', en: 'Streptomycin', shape: 'syrup', color: '#ffffff', uses: ['درمان سل و بروسلوز (تب مالتا)'] },
+                    { fa: 'نئومایسین', en: 'Neomycin', shape: 'tablet', color: '#ffffff', uses: ['استریل کردن روده پیش از جراحی گوارشی'] },
+                    { fa: 'اریترومایسین', en: 'Erythromycin', shape: 'tablet', color: '#ffffff', uses: ['جایگزین پنی‌سیلین در افراد حساس'] },
+                    { fa: 'کلاریترومایسین', en: 'Clarithromycin', shape: 'tablet', color: '#ffffff', uses: ['درمان میکروب معده (هلیکوباکتر) و سینوزیت'] },
+                    { fa: 'روکسیدرومایسین', en: 'Roxithromycin', shape: 'tablet', color: '#ffffff', uses: ['عفونت‌های مجاری تنفسی و تناسلی'] },
+                    { fa: 'کوتریموکسازول', en: 'Co-Trimoxazole', shape: 'tablet', color: '#ffffff', uses: ['عفونت‌های ادراری، گوارشی و ریوی'] },
+                    { fa: 'سولفامتوکسازول', en: 'Sulfamethoxazole', shape: 'tablet', color: '#ffffff', uses: ['درمان عفونت‌های باکتریایی ادراری'] },
+                    { fa: 'تری متوپریم', en: 'Trimethoprim', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری و درمان عفونت مجاری ادراری'] },
+                    { fa: 'افلوکساسین', en: 'Ofloxacin', shape: 'tablet', color: '#ffffff', uses: ['عفونت‌های ادراری و پروستات'] },
+                    { fa: 'موکسی فلوکساسین', en: 'Moxifloxacin', shape: 'tablet', color: '#fef08a', uses: ['پنومونی و سینوزیت حاد باکتریایی'] },
+                    { fa: 'نورفلوکساسین', en: 'Norfloxacin', shape: 'tablet', color: '#ffffff', uses: ['درمان اسهال باکتریایی و عفونت ادراری'] },
+                    { fa: 'ژمی فلوکساسین', en: 'Gemifloxacin', shape: 'tablet', color: '#ffffff', uses: ['درمان پنومونی جامعه‌مبتلا'] },
+                    { fa: 'نترومایسین', en: 'Netilmicin', shape: 'syrup', color: '#38bdf8', uses: ['عفونت‌های باکتریایی شدید مقاوم'] },
+                    { fa: 'تیکوپلانین', en: 'Teicoplanin', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های شدید گرام مثبت مقاوم به پنی‌سیلین'] },
+                    { fa: 'ونکومایسین', en: 'Vancomycin', shape: 'syrup', color: '#ffffff', uses: ['درمان عفونت‌های شدید MRSA و کولیت کاذب'] },
+                    { fa: 'لینزولید', en: 'Linezolid', shape: 'tablet', color: '#ffffff', uses: ['پنومونی و عفونت‌های پوستی مقاوم به ونکومایسین'] },
+                    { fa: 'داپتومایسین', en: 'Daptomycin', shape: 'syrup', color: '#ffffff', uses: ['عفونت‌های پیچیده پوست و اندوکاردیت راست'] },
+                    { fa: 'کلسیتین', en: 'Colistin', shape: 'syrup', color: '#ffffff', uses: ['آخرین خط درمان عفونت‌های فوق‌مقاوم گرم منفی'] },
+                    { fa: 'پلی میکسین B', en: 'Polymyxin B', shape: 'syrup', color: '#ffffff', uses: ['درمان عفونت‌های مقاوم بیمارستانی'] },
+                    { fa: 'نیتروفورانتوئین', en: 'Nitrofurantoin', shape: 'capsule', color: '#f59e0b', uses: ['درمان و پیشگیری از عفونت‌های ادراری حاد'] },
+                    { fa: 'فپومایسین', en: 'Fosfomycin', shape: 'tablet', color: '#ffffff', uses: ['درمان تک‌دوز عفونت‌های ادراری مثانه'] },
+                    { fa: 'نیفوروکسازید', en: 'Nifuroxazide', shape: 'capsule', color: '#f59e0b', uses: ['درمان اسهال عفونی باکتریایی'] },
+                    { fa: 'ریفامپین', en: 'Rifampin', shape: 'capsule', color: '#ef4444', uses: ['درمان اصلی سل و بروسلوز'] },
+                    { fa: 'ایزونیازید', en: 'Isoniazid', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری و درمان خط اول سل'] },
+                    { fa: 'پیرازینامید', en: 'Pyrazinamide', shape: 'tablet', color: '#ffffff', uses: ['داروی ترکیبی خط اول درمان سل'] }
+                ],
+                cardio: [
+                    { fa: 'لوزارتان', en: 'Losartan', shape: 'tablet', color: '#ffffff', uses: ['کنترل فشارخون بالا و محافظت از کلیه در بیماران دیابتی'] },
+                    { fa: 'والزارتان', en: 'Valsartan', shape: 'tablet', color: '#f43f5e', uses: ['کنترل فشارخون و درمان نارسایی قلبی'] },
+                    { fa: 'آملودیپین', en: 'Amlodipine', shape: 'tablet', color: '#ffffff', uses: ['کنترل فشارخون بالا و آنژین صدری'] },
+                    { fa: 'آتورواستاتین', en: 'Atorvastatin', shape: 'tablet', color: '#ffffff', uses: ['کاهش کلسترول بد (LDL) و پیشگیری از سکته'] },
+                    { fa: 'روزوواستاتین', en: 'Rosuvastatin', shape: 'tablet', color: '#ec4899', uses: ['کاهش شدید چربی خون و پلاک‌های عروقی'] },
+                    { fa: 'کلوپیدوگرل', en: 'Clopidogrel', shape: 'tablet', color: '#f97316', uses: ['جلوگیری از تشکیل لخته خون پس از استنت‌گذاری قلبی'] },
+                    { fa: 'وارفارین', en: 'Warfarin', shape: 'tablet', color: '#38bdf8', uses: ['پیشگیری از لخته‌شدن خون در فیبریلاسیون دهلیزی'] },
+                    { fa: 'متوپرولول', en: 'Metoprolol', shape: 'tablet', color: '#ffffff', uses: ['کنترل تپش قلب، فشارخون و آریتمی'] },
+                    { fa: 'کاپتوپریل', en: 'Captopril', shape: 'tablet', color: '#ffffff', uses: ['کاهش اورژانسی فشارخون بالا'] },
+                    { fa: 'انالاپریل', en: 'Enalapril', shape: 'tablet', color: '#ffffff', uses: ['درمان فشارخون بالا و نارسایی قلبی'] },
+                    { fa: 'بیزوپرولول', en: 'Bisoprolol', shape: 'tablet', color: '#fef08a', uses: ['کنترل نارسایی قلبی و ضربان قلب'] },
+                    { fa: 'دیگوکسین', en: 'Digoxin', shape: 'tablet', color: '#ffffff', uses: ['افزایش قدرت انقباضی قلب در نارسایی قلبی'] },
+                    { fa: 'پروپانوئول', en: 'Propranolol', shape: 'tablet', color: '#f43f5e', uses: ['کنترل تپش قلب، اضطراب و پیشگیری از میگرن'] },
+                    { fa: 'آتنولول', en: 'Atenolol', shape: 'tablet', color: '#ffffff', uses: ['کاهش فشارخون و درد قفسه سینه'] },
+                    { fa: 'کارودیلول', en: 'Carvedilol', shape: 'tablet', color: '#ffffff', uses: ['درمان نارسایی قلبی و فشارخون بالا'] },
+                    { fa: 'نادولول', en: 'Nadolol', shape: 'tablet', color: '#ffffff', uses: ['کنترل فشارخون و آنژین صدری'] },
+                    { fa: 'نیتروگلیسیرین', en: 'Nitroglycerin', shape: 'tablet', color: '#ffffff', uses: ['تسکین سریع درد قفسه سینه (آنژین)'] },
+                    { fa: 'ایزوسرباید', en: 'Isosorbide', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از حملات درد قفسه سینه'] },
+                    { fa: 'نیفدیپین', en: 'Nifedipine', shape: 'capsule', color: '#f59e0b', uses: ['درمان فشارخون بالا و پدیده رینو'] },
+                    { fa: 'دیلتیازم', en: 'Diltiazem', shape: 'tablet', color: '#ffffff', uses: ['کنترل آریتمی قلبی و فشارخون'] },
+                    { fa: 'ورپامیل', en: 'Verapamil', shape: 'tablet', color: '#ffffff', uses: ['کنترل ضربان نامنظم قلب و فشارخون'] },
+                    { fa: 'کندسارتان', en: 'Candesartan', shape: 'tablet', color: '#ffffff', uses: ['درمان فشارخون و نارسایی قلبی'] },
+                    { fa: 'ایربسارتان', en: 'Irbesartan', shape: 'tablet', color: '#ffffff', uses: ['محافظت از کلیه دیابتی و کنترل فشارخون'] },
+                    { fa: 'تلمیسارتان', en: 'Telmisartan', shape: 'tablet', color: '#ffffff', uses: ['کاهش ریسک حوادث قلبی عروقی'] },
+                    { fa: 'اولمسارتان', en: 'Olmesartan', shape: 'tablet', color: '#ffffff', uses: ['درمان فشارخون بالای اساسی'] },
+                    { fa: 'هیدرالازین', en: 'Hydralazine', shape: 'tablet', color: '#ffffff', uses: ['درمان فشارخون بالای شدید در بارداری'] },
+                    { fa: 'مینوکسیدیل خوراکی', en: 'Oral Minoxidil', shape: 'tablet', color: '#ffffff', uses: ['درمان فشارخون بالای مقاوم به دارو'] },
+                    { fa: 'کلونیدین', en: 'Clonidine', shape: 'tablet', color: '#ffffff', uses: ['کاهش فشارخون و کنترل علائم ترک'] },
+                    { fa: 'متیل دوپا', en: 'Methyldopa', shape: 'tablet', color: '#fef08a', uses: ['داروی انتخابی فشارخون در دوران بارداری'] },
+                    { fa: 'دوبوتامین', en: 'Dobutamine', shape: 'syrup', color: '#38bdf8', uses: ['تقویت قدرت انقباض قلب در شوک قلبی'] },
+                    { fa: 'دوپامین', en: 'Dopamine', shape: 'syrup', color: '#38bdf8', uses: ['افزایش فشارخون در شوک و نارسایی کلیه'] },
+                    { fa: 'نوراپی نفرین', en: 'Norepinephrine', shape: 'syrup', color: '#38bdf8', uses: ['افزایش شدید فشارخون در شوک سپتیک'] },
+                    { fa: 'میلرینون', en: 'Milrinone', shape: 'syrup', color: '#38bdf8', uses: ['درمان کوتاه‌مدت نارسایی شدید قلبی'] },
+                    { fa: 'آمیودارون', en: 'Amiodarone', shape: 'tablet', color: '#ffffff', uses: ['درمان آریتمی‌های فوق‌العاده خطرناک قلبی'] },
+                    { fa: 'فلوکائینید', en: 'Flecainide', shape: 'tablet', color: '#ffffff', uses: ['کنترل ضربان نامنظم دهلیزی و بطنی'] },
+                    { fa: 'پروپافنون', en: 'Propafenone', shape: 'tablet', color: '#ffffff', uses: ['درمان فیبریلاسیون دهلیزی'] },
+                    { fa: 'سوتالول', en: 'Sotalol', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از آریتمی‌های بطنی شدید'] },
+                    { fa: 'آدنوزین', en: 'Adenosine', shape: 'syrup', color: '#38bdf8', uses: ['تبدیل سریع آریتمی فوق‌بطنی به ریتم طبیعی'] },
+                    { fa: 'فنو فیبرات', en: 'Fenofibrate', shape: 'capsule', color: '#3b82f6', uses: ['کاهش شدید تری‌گلیسرید خون'] },
+                    { fa: 'جم فیبروزیل', en: 'Gemfibrozil', shape: 'tablet', color: '#ffffff', uses: ['کاهش چربی خون و پیشگیری از پانکراتیت'] },
+                    { fa: 'ازتیمیب', en: 'Ezetimibe', shape: 'tablet', color: '#ffffff', uses: ['ممانعت از جذب کلسترول در روده'] },
+                    { fa: 'سیمواستاتین', en: 'Simvastatin', shape: 'tablet', color: '#ffffff', uses: ['کاهش کلسترول و چربی خون'] },
+                    { fa: 'پراواستاتین', en: 'Pravastatin', shape: 'tablet', color: '#ffffff', uses: ['کاهش چربی خون با عارضه عضلانی کمتر'] },
+                    { fa: 'فلوواستاتین', en: 'Fluvastatin', shape: 'capsule', color: '#f59e0b', uses: ['کاهش کلسترول بد خون'] },
+                    { fa: 'آلیسکرین', en: 'Aliskiren', shape: 'tablet', color: '#ffffff', uses: ['مهارکننده مستقیم رنین در فشارخون'] },
+                    { fa: 'اسپیراپریل', en: 'Spirapril', shape: 'tablet', color: '#ffffff', uses: ['کاهش فشارخون بالا'] },
+                    { fa: 'بنازپریل', en: 'Benazepril', shape: 'tablet', color: '#ffffff', uses: ['کنترل فشارخون شریانی'] },
+                    { fa: 'فوروزماید', en: 'Furosemide', shape: 'tablet', color: '#ffffff', uses: ['دفع ادرار و کاهش ورم (ادم) ریه و پا'] },
+                    { fa: 'هیدروکلروتیازید', en: 'Hydrochlorothiazide', shape: 'tablet', color: '#ffffff', uses: ['کاهش فشارخون و دفع مایعات اضافی'] },
+                    { fa: 'اسپیرونولاکتون', en: 'Spironolactone', shape: 'tablet', color: '#ffffff', uses: ['دیورتیک نگهدارنده پتاسیم و درمان سیروز'] }
+                ],
+                neuro: [
+                    { fa: 'سرترالین', en: 'Sertraline', shape: 'tablet', color: '#ffffff', uses: ['درمان افسردگی، اضطراب فراگیر و وسواس فکری'] },
+                    { fa: 'فلوکستین', en: 'Fluoxetine', shape: 'capsule', color: '#3b82f6', uses: ['درمان افسردگی، اختلالات اشتها و حملات پانیک'] },
+                    { fa: 'آلپرازولام', en: 'Alprazolam', shape: 'tablet', color: '#fef08a', uses: ['تسکین سریع اضطراب شدید و حملات پانیک'] },
+                    { fa: 'کلونازپام', en: 'Clonazepam', shape: 'tablet', color: '#ffffff', uses: ['کنترل تشنج و درمان اختلالات اضطرابی'] },
+                    { fa: 'سیتالوپرام', en: 'Citalopram', shape: 'tablet', color: '#ffffff', uses: ['درمان افسردگی و اضطراب'] },
+                    { fa: 'اس‌سیتالوپرام', en: 'Escitalopram', shape: 'tablet', color: '#ffffff', uses: ['درمان اضطراب اجتماعی و افسردگی'] },
+                    { fa: 'دلوکستین', en: 'Duloxetine', shape: 'capsule', color: '#10b981', uses: ['درمان افسردگی و دردهای مزمن عصبی'] },
+                    { fa: 'ونلافاکسین', en: 'Venlafaxine', shape: 'capsule', color: '#f97316', uses: ['درمان افسردگی مقاوم و اختلال اضطراب'] },
+                    { fa: 'کوئتیاپین', en: 'Quetiapine', shape: 'tablet', color: '#ffffff', uses: ['درمان اختلال دوقطبی و بی‌خوابی شدید'] },
+                    { fa: 'اولانزاپین', en: 'Olanzapine', shape: 'tablet', color: '#fef08a', uses: ['درمان سایکوز و اختلالات خلقی'] },
+                    { fa: 'ریسپریدون', en: 'Risperidone', shape: 'tablet', color: '#38bdf8', uses: ['کنترل بی‌قراری و اختلالات سایکوتیک'] },
+                    { fa: 'دیاپام', en: 'Diazepam', shape: 'tablet', color: '#ffffff', uses: ['تسکین اضطراب، شل‌کننده عضلانی و ضدتشنج'] },
+                    { fa: 'لورازپام', en: 'Lorazepam', shape: 'tablet', color: '#ffffff', uses: ['درمان اضطراب حاد و بی‌خوابی'] },
+                    { fa: 'اگزازپام', en: 'Oxazepam', shape: 'tablet', color: '#ffffff', uses: ['تسکین اضطراب خفیف و علائم ترک الکل'] },
+                    { fa: 'میدازولام', en: 'Midazolam', shape: 'syrup', color: '#38bdf8', uses: ['ایجاد آرام‌بخشی پیش از جراحی و آندوسکوپی'] },
+                    { fa: 'پاروکستین', en: 'Paroxetine', shape: 'tablet', color: '#ffffff', uses: ['درمان وسواس فکری شدید و فوبیا'] },
+                    { fa: 'فلووکسامین', en: 'Fluvoxamine', shape: 'tablet', color: '#ffffff', uses: ['درمان اختلال وسواسی-جبری (OCD)'] },
+                    { fa: 'میرتازاپین', en: 'Mirtazapine', shape: 'tablet', color: '#fef08a', uses: ['درمان افسردگی همراه با بی‌خوابی و بی‌اشتهایی'] },
+                    { fa: 'بوپروپیون', en: 'Bupropion', shape: 'tablet', color: '#ffffff', uses: ['درمان افسردگی و کمک به ترک سیگار'] },
+                    { fa: 'ترازودون', en: 'Trazodone', shape: 'tablet', color: '#ffffff', uses: ['درمان بی‌خوابی ناشی از افسردگی'] },
+                    { fa: 'نورتریپتیلین', en: 'Nortriptyline', shape: 'capsule', color: '#f59e0b', uses: ['درمان افسردگی و سردردهای مزمن'] },
+                    { fa: 'آمی تریپتیلین', en: 'Amitriptyline', shape: 'tablet', color: '#f43f5e', uses: ['درمان دردهای عصبی و پیشگیری از میگرن'] },
+                    { fa: 'ایمی پرامین', en: 'Imipramine', shape: 'tablet', color: '#f59e0b', uses: ['درمان شب‌ادراری کودکان و افسردگی'] },
+                    { fa: 'کلومیپرامین', en: 'Clomipramine', shape: 'capsule', color: '#3b82f6', uses: ['درمان وسواس فکری شدید'] },
+                    { fa: 'دوکسپین', en: 'Doxepin', shape: 'capsule', color: '#10b981', uses: ['تسکین اضطراب و بیخوابی'] },
+                    { fa: 'آریپیپرازول', en: 'Aripiprazole', shape: 'tablet', color: '#ffffff', uses: ['تثبیت‌کننده خلق و درمان اسکیزوفرنی'] },
+                    { fa: 'زیپراسیدون', en: 'Ziprasidone', shape: 'capsule', color: '#8b5cf6', uses: ['درمان اختلالات سایکوتیک حاد'] },
+                    { fa: 'هالوپریدول', en: 'Haloperidol', shape: 'tablet', color: '#ffffff', uses: ['کنترل بی‌قراری شدید و هذیان'] },
+                    { fa: 'کلرپرومازین', en: 'Chlorpromazine', shape: 'tablet', color: '#ffffff', uses: ['درمان سایکوز و سکسکه مقاوم'] },
+                    { fa: 'فلوفنازین', en: 'Fluphenazine', shape: 'syrup', color: '#38bdf8', uses: ['درمان طولانی‌مدت اسکیزوفرنی مزمن'] },
+                    { fa: 'تیوریدازین', en: 'Thioridazine', shape: 'tablet', color: '#ffffff', uses: ['درمان اختلالات روانی شدید'] },
+                    { fa: 'لیتیم', en: 'Lithium', shape: 'capsule', color: '#ffffff', uses: ['تثبیت‌کننده اصلی خلق در اختلال دوقطبی'] },
+                    { fa: 'لاموتریژین', en: 'Lamotrigine', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از فاز افسردگی در دوقطبی و ضدتشنج'] },
+                    { fa: 'والپروات سدیم', en: 'Sodium Valproate', shape: 'tablet', color: '#f59e0b', uses: ['کنترل تشنج و تثبیت خلق'] },
+                    { fa: 'کاربامازپین', en: 'Carbamazepine', shape: 'tablet', color: '#ffffff', uses: ['درمان تشنج و درد عصب سه قلو'] },
+                    { fa: 'اگزکاربازپین', en: 'Oxcarbazepine', shape: 'tablet', color: '#ffffff', uses: ['کنترل حملات صرع قسمتی'] },
+                    { fa: 'توپیرامات', en: 'Topiramate', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از میگرن و ضدتشنج'] },
+                    { fa: 'زونیساماید', en: 'Zonisamide', shape: 'capsule', color: '#3b82f6', uses: ['درمان کمکی تشنج‌های صرعی'] },
+                    { fa: 'لوتیراستام', en: 'Levetiracetam', shape: 'tablet', color: '#ffffff', uses: ['کنترل صرع با حداقل عوارض جانبی'] },
+                    { fa: 'فنی توئین', en: 'Phenytoin', shape: 'capsule', color: '#ffffff', uses: ['پیشگیری و درمان تشنج‌های بزرگ صرع'] },
+                    { fa: 'فنوباربیتال', en: 'Phenobarbital', shape: 'tablet', color: '#ffffff', uses: ['ضدتشنج در کودکان و نوزادان'] },
+                    { fa: 'پریمیدون', en: 'Primidone', shape: 'tablet', color: '#ffffff', uses: ['درمان لرزش اساسی و صرع'] },
+                    { fa: 'روپینیرول', en: 'Ropinirole', shape: 'tablet', color: '#ffffff', uses: ['درمان پارکینسون و سندروم پای بی‌قرار'] },
+                    { fa: 'پرامی پکسول', en: 'Pramipexole', shape: 'tablet', color: '#ffffff', uses: ['کاهش لرزش و علائم پارکینسون'] },
+                    { fa: 'لوودوپا', en: 'Levodopa', shape: 'tablet', color: '#ffffff', uses: ['داروی اصلی جایگزین دوپامین در پارکینسون'] },
+                    { fa: 'آمانتادین', en: 'Amantadine', shape: 'capsule', color: '#f59e0b', uses: ['کاهش اختلالات حرکتی در پارکینسون'] },
+                    { fa: 'بیپریدن', en: 'Biperiden', shape: 'tablet', color: '#ffffff', uses: ['درمان عوارض عضلانی داروهای اعصاب'] },
+                    { fa: 'دونپزیل', en: 'Donepezil', shape: 'tablet', color: '#ffffff', uses: ['کند کردن روند آلزایمر و بهبود حافظه'] },
+                    { fa: 'ریواستیگمین', en: 'Rivastigmine', shape: 'capsule', color: '#10b981', uses: ['درمان آلزایمر و زوال عقل'] },
+                    { fa: 'ممانتین', en: 'Memantine', shape: 'tablet', color: '#ffffff', uses: ['درمان آلزایمر متوسط تا شدید'] }
+                ],
+                gi: [
+                    { fa: 'امپرازول', en: 'Omeprazole', shape: 'capsule', color: '#ec4899', uses: ['کاهش اسید معده، درمان رفلاکس (GERD) و زخم معده'] },
+                    { fa: 'پنتوپرازول', en: 'Pantoprazole', shape: 'tablet', color: '#fef08a', uses: ['درمان سوزش سر دل و رفلاکس شدید گوارشی'] },
+                    { fa: 'فاموتیدین', en: 'Famotidine', shape: 'tablet', color: '#ffffff', uses: ['تسکین سریع ترش‌کردن معده و سوزش گوارشی'] },
+                    { fa: 'اندانسترون', en: 'Ondansetron', shape: 'tablet', color: '#3b82f6', uses: ['پیشگیری و درمان تهوع شدید شیمی‌درمانی'] },
+                    { fa: 'لوپرامید', en: 'Loperamide', shape: 'capsule', color: '#10b981', uses: ['کنترل و کاهش دفعات اسهال'] },
+                    { fa: 'اسومپرازول', en: 'Esomeprazole', shape: 'capsule', color: '#a855f7', uses: ['درمان زخم مری و رفلاکس معده'] },
+                    { fa: 'لانزوپرازول', en: 'Lansoprazole', shape: 'capsule', color: '#f59e0b', uses: ['ترمیم زخم معده و اثنی‌عشر'] },
+                    { fa: 'دی‌سیکلومین', en: 'Dicyclomine', shape: 'tablet', color: '#ffffff', uses: ['کاهش دل‌پیچه و اسپاسم روده بزرگ'] },
+                    { fa: 'هیوسین', en: 'Hyoscine', shape: 'tablet', color: '#ffffff', uses: ['تسکین مغص و دردهای احشایی شکم'] },
+                    { fa: 'متوکلوپرامید', en: 'Metoclopramide', shape: 'tablet', color: '#ffffff', uses: ['تحریک تخلیه معده و ضدتهوع'] },
+                    { fa: 'رابپرازول', en: 'Rabeprazole', shape: 'tablet', color: '#ffffff', uses: ['کاهش اسید معده و ترمیم زخم روده'] },
+                    { fa: 'سایمتیدین', en: 'Cimetidine', shape: 'tablet', color: '#ffffff', uses: ['کاهش ترشح اسید معده'] },
+                    { fa: 'رانیتیدین', en: 'Ranitidine', shape: 'tablet', color: '#ffffff', uses: ['تسکین سوءهاضمه و زخم معده'] },
+                    { fa: 'دومپریدون', en: 'Domperidone', shape: 'tablet', color: '#ffffff', uses: ['رفع حالت تهوع و نفخ معده'] },
+                    { fa: 'گرانیسترون', en: 'Granisetron', shape: 'tablet', color: '#ffffff', uses: ['ضدتهوع قوی در پرتو درمانی'] },
+                    { fa: 'پالونوسترون', en: 'Palonosetron', shape: 'syrup', color: '#38bdf8', uses: ['پیشگیری از تهوع تاخیری شیمی‌درمانی'] },
+                    { fa: 'آلاسترون', en: 'Alosetron', shape: 'tablet', color: '#ffffff', uses: ['درمان سندروم روده تحریک‌پذیر اسهالی'] },
+                    { fa: 'پرومتازین', en: 'Promethazine', shape: 'syrup', color: '#3b82f6', uses: ['ضدتهوع و درمان تهوع حرکت'] },
+                    { fa: 'سایپروهپتادین', en: 'Cyproheptadine', shape: 'syrup', color: '#f59e0b', uses: ['تحریک اشتها و تسکین آلرژی'] },
+                    { fa: 'بیساکودیل', en: 'Bisacodyl', shape: 'tablet', color: '#f59e0b', uses: ['ملین تماسی برای درمان یبوست'] },
+                    { fa: 'سنا', en: 'Senna', shape: 'tablet', color: '#10b981', uses: ['ملین گیاهی برای تخلیه روده'] },
+                    { fa: 'سیلیوم', en: 'Psyllium', shape: 'syrup', color: '#f59e0b', uses: ['ملین حجم‌دهنده و تنظیم حرکات روده'] },
+                    { fa: 'لاکتولوز', en: 'Lactulose', shape: 'syrup', color: '#f59e0b', uses: ['درمان یبوست مزمن و انسفالوپاتی کبدی'] },
+                    { fa: 'پلی اتیلن گلیکول', en: 'PEG 3350', shape: 'syrup', color: '#38bdf8', uses: ['آماده‌سازی روده برای کولونوسکوپی'] },
+                    { fa: 'منیزیم هیدروکساید', en: 'Magnesium Hydroxide', shape: 'syrup', color: '#ffffff', uses: ['ضداسید و ملین اسموتیک'] },
+                    { fa: 'آلومینیوم ام جی اس', en: 'Aluminum MG S', shape: 'syrup', color: '#ffffff', uses: ['تسکین فوری سوزش معده و نفخ'] },
+                    { fa: 'بیسموت ساب سالیسیلات', en: 'Bismuth Subsalicylate', shape: 'tablet', color: '#ec4899', uses: ['درمان اسهال مسافرتی و سوءهاضمه'] },
+                    { fa: 'مسالازین', en: 'Mesalazine', shape: 'tablet', color: '#f97316', uses: ['درمان التهاب روده در کولیت اولسرو'] },
+                    { fa: 'سولفاسالازین', en: 'Sulfasalazine', shape: 'tablet', color: '#f59e0b', uses: ['درمان بیماری‌های التهابی روده و آرتریت'] },
+                    { fa: 'بالسالازید', en: 'Balsalazide', shape: 'capsule', color: '#f59e0b', uses: ['درمان کولیت اولسروز فعال'] },
+                    { fa: 'آزاتیوپرین گوارشی', en: 'Azathioprine GI', shape: 'tablet', color: '#ffffff', uses: ['سرکوب ایمنی در بیماری کرون'] },
+                    { fa: 'اورسودئوکسی کولیک اسید', en: 'Ursodeoxycholic Acid', shape: 'capsule', color: '#ffffff', uses: ['حل کردن سنگ‌های صفراوی و درمان سیروز'] },
+                    { fa: 'کلردیازپوکساید', en: 'Chlordiazepoxide', shape: 'capsule', color: '#10b981', uses: ['تسکین دردهای عصبی معده'] },
+                    { fa: 'کلووردیوم', en: 'Clidinium C', shape: 'tablet', color: '#10b981', uses: ['کاهش اسپاسم و اسید معده عصبی'] },
+                    { fa: 'اورسودیول', en: 'Ursodiol', shape: 'capsule', color: '#ffffff', uses: ['درمان بیماری‌های مجاری صفراوی'] },
+                    { fa: 'سوکرالفات', en: 'Sucralfate', shape: 'tablet', color: '#ffffff', uses: ['ایجاد پوشش محافظ روی زخم معده'] },
+                    { fa: 'اورلیستات', en: 'Orlistat', shape: 'capsule', color: '#3b82f6', uses: ['ممانعت از جذب چربی غذا جهت لاغری'] },
+                    { fa: 'کلسیتریول گوارشی', en: 'Calcitriol GI', shape: 'capsule', color: '#f59e0b', uses: ['تنظیم جذب کلسیم از روده'] },
+                    { fa: 'سیلیمارین', en: 'Silymarin', shape: 'capsule', color: '#10b981', uses: ['محافظت از سلول‌های کبد و درمان کبد چرب'] },
+                    { fa: 'نئوستیگمین گوارشی', en: 'Neostigmine GI', shape: 'syrup', color: '#38bdf8', uses: ['تحریک انسداد کاذب حاد روده'] },
+                    { fa: 'پیریدوستیگمین', en: 'Pyridostigmine', shape: 'tablet', color: '#ffffff', uses: ['بهبود حرکات روده در میاستنی گراو'] },
+                    { fa: 'سایمتیکون', en: 'Simethicone', shape: 'drop', color: '#06b6d4', uses: ['شکستن حباب‌های گاز و رفع نفخ شدید'] },
+                    { fa: 'پاپاورین', en: 'Papaverine', shape: 'syrup', color: '#38bdf8', uses: ['شل کردن عضلات صاف مجاری گوارشی'] },
+                    { fa: 'مکلیزین', en: 'Meclizine', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از تهوع ناشی از سرگیجه'] },
+                    { fa: 'دیمن هیدرینات', en: 'Dimenhydrinate', shape: 'tablet', color: '#ffffff', uses: ['درمان تهوع مسافرت و اختلال تعادل'] },
+                    { fa: 'اپرپیتانت', en: 'Aprepitant', shape: 'capsule', color: '#ffffff', uses: ['پیشگیری از تهوع شدید شیمی‌درمانی'] },
+                    { fa: 'لوپروستون', en: 'Lubiprostone', shape: 'capsule', color: '#f59e0b', uses: ['درمان یبوست مزمن ناشناخته'] },
+                    { fa: 'پیناوریم', en: 'Pinaverium', shape: 'tablet', color: '#fef08a', uses: ['تسکین دردهای سندروم روده تحریک‌پذیر'] },
+                    { fa: 'مبورین', en: 'Mebeverine', shape: 'tablet', color: '#ffffff', uses: ['کاهش اسپاسم‌های دردناک روده'] },
+                    { fa: 'تری مپوتین', en: 'Trimebutine', shape: 'tablet', color: '#ffffff', uses: ['تنظیم حرکات اختلال‌یافته دستگاه گوارش'] }
+                ],
+                respiratory: [
+                    { fa: 'سالبوتامول', en: 'Salbutamol', shape: 'drop', color: '#0284c7', uses: ['بازکردن مجاری تنفسی در آسم و تنگی نفس'] },
+                    { fa: 'فلوتیکازون', en: 'Fluticasone', shape: 'drop', color: '#8b5cf6', uses: ['پیشگیری از حملات آسم و رینیت آلرژیک'] },
+                    { fa: 'سیتریزین', en: 'Cetirizine', shape: 'tablet', color: '#ffffff', uses: ['تسکین حساسیت، خارش پوستی و عطسه'] },
+                    { fa: 'لوراتادین', en: 'Loratadine', shape: 'tablet', color: '#ffffff', uses: ['درمان آلرژی فصلی بدون خواب‌آلودگی'] },
+                    { fa: 'دکسترومتورفان', en: 'Dextromethorphan', shape: 'syrup', color: '#e11d48', uses: ['سرکوب سرفه‌های خشک و تحریکی'] },
+                    { fa: 'دیفن‌هیدرامین', en: 'Diphenhydramine', shape: 'syrup', color: '#3b82f6', uses: ['تسکین علائم سرماخوردگی و سرفه'] },
+                    { fa: 'بودسوناید', en: 'Budesonide', shape: 'drop', color: '#10b981', uses: ['کاهش التهاب مجاری تنفسی و ریه'] },
+                    { fa: 'مونته‌لوکاست', en: 'Montelukast', shape: 'tablet', color: '#fef08a', uses: ['پیشگیری از حملات آسم و کنترل آلرژی'] },
+                    { fa: 'فکسوفنادین', en: 'Fexofenadine', shape: 'tablet', color: '#ffffff', uses: ['درمان کهیر و آلرژی فصلی شدید'] },
+                    { fa: 'سالمیترول', en: 'Salmeterol', shape: 'drop', color: '#06b6d4', uses: ['گشادکننده طولانی‌اثر برونش در آسم'] },
+                    { fa: 'فورموترول', en: 'Formoterol', shape: 'drop', color: '#38bdf8', uses: ['تسکین و پیشگیری از اسپاسم ریه'] },
+                    { fa: 'ایپراتروپیوم', en: 'Ipratropium', shape: 'drop', color: '#10b981', uses: ['درمان تنگی نفس در بیماری COPD'] },
+                    { fa: 'تیوتروپیوم', en: 'Tiotropium', shape: 'drop', color: '#0284c7', uses: ['گشادکننده مجاری تنفسی ۲۴ ساعته'] },
+                    { fa: 'کتوتیفن', en: 'Ketotifen', shape: 'syrup', color: '#f59e0b', uses: ['پیشگیری از بروز حملات آلرژی و آسم'] },
+                    { fa: 'زافیرلوکاست', en: 'Zafirlukast', shape: 'tablet', color: '#ffffff', uses: ['کنترل آسم مزمن در بزرگسالان'] },
+                    { fa: 'تئوفیلین', en: 'Theophylline', shape: 'tablet', color: '#ffffff', uses: ['شُل کردن عضلات مجاری تنفسی'] },
+                    { fa: 'آتینوفیلین', en: 'Aminophylline', shape: 'syrup', color: '#38bdf8', uses: ['درمان اورژانسی اسپاسم شدید ریوی'] },
+                    { fa: 'گایافنزین', en: 'Guaifenesin', shape: 'syrup', color: '#f59e0b', uses: ['رقیق‌کننده خلط و تسهیل خروج سرفه'] },
+                    { fa: 'بروم هگزین', en: 'Bromhexine', shape: 'syrup', color: '#f59e0b', uses: ['کاهش غلظت ترشحات مخاطی ریه'] },
+                    { fa: 'آمبروکسول', en: 'Ambroxol', shape: 'syrup', color: '#f59e0b', uses: ['تحریک خروج خلط در بیماری‌های ریوی'] },
+                    { fa: 'استیل سیستئین', en: 'Acetylcysteine', shape: 'tablet', color: '#ffffff', uses: ['حل‌کننده خلط و پادزهر مسمومیت استامینوفن'] },
+                    { fa: 'کلرفنیرامین', en: 'Chlorpheniramine', shape: 'tablet', color: '#ffffff', uses: ['تسکین حساسیت و علائم سرماخوردگی'] },
+                    { fa: 'کلماستین', en: 'Clemastine', shape: 'tablet', color: '#ffffff', uses: ['درمان خارش و حساسیت‌های پوستی و تنفسی'] },
+                    { fa: 'هیدروکسی زینو', en: 'Hydroxyzine', shape: 'tablet', color: '#ffffff', uses: ['کاهش اضطراب و خارش‌های شدید آلرژیک'] },
+                    { fa: 'دسلوراتادین', en: 'Desloratadine', shape: 'tablet', color: '#38bdf8', uses: ['درمان آلرژی بدون ایجاد خواب‌آلودگی'] },
+                    { fa: 'اولوپاتادین تنفسی', en: 'Olopatadine Nasal', shape: 'drop', color: '#06b6d4', uses: ['درمان گرفتگی و خارش آلرژیک بینی'] },
+                    { fa: 'آزلاستین تنفسی', en: 'Azelastine Nasal', shape: 'drop', color: '#06b6d4', uses: ['تسکین سریع رینیت آلرژیک'] },
+                    { fa: 'بکلومتازون', en: 'Beclomethasone', shape: 'drop', color: '#e11d48', uses: ['کاهش التهاب مزمن برونش‌ها'] },
+                    { fa: 'مومتازون تنفسی', en: 'Mometasone Nasal', shape: 'drop', color: '#8b5cf6', uses: ['درمان حساسیت فصلی و پلیپ بینی'] },
+                    { fa: 'سیپلیسوناید', en: 'Ciclesonide', shape: 'drop', color: '#10b981', uses: ['استروئید استنشاقی با عارضه موضعی کمتر'] },
+                    { fa: 'اکسپکتورانت', en: 'Expectorant', shape: 'syrup', color: '#f59e0b', uses: ['تسکین سرفه و نرم کردن گلو'] },
+                    { fa: 'نوزکاپین', en: 'Noscapine', shape: 'syrup', color: '#f59e0b', uses: ['سرکوب سرفه‌های خشک بدون اثر مخدری'] },
+                    { fa: 'دوکسوفیلین', en: 'Doxofylline', shape: 'tablet', color: '#ffffff', uses: ['گشادکننده برونش با عارضه قلبی کمتر'] },
+                    { fa: 'روفلومیلاست', en: 'Roflumilast', shape: 'tablet', color: '#ffffff', uses: ['کاهش حملات شدید در بیماری COPD'] },
+                    { fa: 'اومالیزوماب', en: 'Omalizumab', shape: 'syrup', color: '#38bdf8', uses: ['درمان آسم شدید آلرژیک مقاوم'] },
+                    { fa: 'بنرالیزوماب', en: 'Benralizumab', shape: 'syrup', color: '#38bdf8', uses: ['کاهش ائوزینوفیل‌ها در آسم شدید'] },
+                    { fa: 'مپولیزوماب', en: 'Mepolizumab', shape: 'syrup', color: '#38bdf8', uses: ['درمان بیولوژیک آسم ائوزینوفیلیک'] },
+                    { fa: 'بنزوناتات', en: 'Benzonatate', shape: 'capsule', color: '#f59e0b', uses: ['بی‌حس کردن گیرنده‌های سرفه در ریه'] },
+                    { fa: 'کلوبوتینول', en: 'Clobutinol', shape: 'syrup', color: '#f59e0b', uses: ['ضدسرفه غیرمخدری'] },
+                    { fa: 'بنزیدامین', en: 'Benzydamine', shape: 'drop', color: '#06b6d4', uses: ['تسکین درد و التهاب گلو و دهان'] },
+                    { fa: 'اکسلوادین', en: 'Oxeladin', shape: 'syrup', color: '#f59e0b', uses: ['تسکین سرفه‌های تحریکی'] },
+                    { fa: 'افدرین تنفسی', en: 'Ephedrine Respiratory', shape: 'tablet', color: '#ffffff', uses: ['برطرف کردن احتقان و تنگی نفس'] },
+                    { fa: 'سودوافدرین', en: 'Pseudoephedrine', shape: 'tablet', color: '#ffffff', uses: ['کاهش احتقان و گرفتگی بینی در سرماخوردگی'] },
+                    { fa: 'فنیل افدرین تنفسی', en: 'Phenylephrine Respiratory', shape: 'tablet', color: '#ffffff', uses: ['ضداحتقان مجاری تنفسی فوقانی'] },
+                    { fa: 'ایزوپرنالین', en: 'Isoprenaline', shape: 'drop', color: '#0284c7', uses: ['تحریک گیرنده‌های بتا و بازکردن برونش'] },
+                    { fa: 'ارسی پرنالین', en: 'Orciprenaline', shape: 'drop', color: '#0284c7', uses: ['تسکین اسپاسم مجاری تنفسی'] },
+                    { fa: 'بامبوترول', en: 'Bambuterol', shape: 'tablet', color: '#ffffff', uses: ['گشادکننده طولانی‌مدت مجاری ریه'] },
+                    { fa: 'پیربوترول', en: 'Pirbuterol', shape: 'drop', color: '#0284c7', uses: ['تسکین سریع حملات تنگی نفس'] },
+                    { fa: 'برمکسین تزریقی', en: 'Bromhexine Injectable', shape: 'syrup', color: '#38bdf8', uses: ['تخلیه ترشحات ریوی در مراقبت ویژه'] },
+                    { fa: 'دیفن هیدرامین کامپاند', en: 'Diphenhydramine Compound', shape: 'syrup', color: '#e11d48', uses: ['تسکین سرفه‌های خلط‌دار همراه احتقان'] }
+                ],
+                endocrine: [
+                    { fa: 'متفورمین', en: 'Metformin', shape: 'tablet', color: '#ffffff', uses: ['کاهش قند خون در دیابت نوع ۲'] },
+                    { fa: 'لووتیروکسین', en: 'Levothyroxine', shape: 'tablet', color: '#ffffff', uses: ['جایگزینی هورمون تیروئید در کم‌کاری تیروئید'] },
+                    { fa: 'پردنیزولون', en: 'Prednisolone', shape: 'tablet', color: '#ffffff', uses: ['سرکوب شدید التهاب و کنترل بیماری‌های خودایمنی'] },
+                    { fa: 'دگزامتازون', en: 'Dexamethasone', shape: 'syrup', color: '#ffffff', uses: ['کورتون قوی ضدالتهاب و ضدحساسیت شدید'] },
+                    { fa: 'گلی‌بن‌کلامید', en: 'Glibenclamide', shape: 'tablet', color: '#ffffff', uses: ['تحریک ترشح انسولین در بیماران دیابتی'] },
+                    { fa: 'پیوگلیتازون', en: 'Pioglitazone', shape: 'tablet', color: '#ffffff', uses: ['افزایش حساسیت سلول‌ها به انسولین'] },
+                    { fa: 'سیتاگلیپتین', en: 'Sitagliptin', shape: 'tablet', color: '#fef08a', uses: ['کنترل قند خون پس از غذا در دیابت'] },
+                    { fa: 'انسولین رگولار', en: 'Insulin Regular', shape: 'syrup', color: '#38bdf8', uses: ['انسولین کوتاه‌اثر برای کنترل سریع قند خون'] },
+                    { fa: 'انسولین ان پی اچ', en: 'Insulin NPH', shape: 'syrup', color: '#38bdf8', uses: ['انسولین متوسط‌الاثر جهت کنترل قند پایه'] },
+                    { fa: 'انسولین گلارژین', en: 'Insulin Glargine', shape: 'syrup', color: '#38bdf8', uses: ['انسولین طولانی‌اثر ۲۴ ساعته'] },
+                    { fa: 'انسولین لیسپرو', en: 'Insulin Lispro', shape: 'syrup', color: '#38bdf8', uses: ['انسولین فوق‌العاده سریع‌الاثر وعده غذایی'] },
+                    { fa: 'انسولین آسپارت', en: 'Insulin Aspart', shape: 'syrup', color: '#38bdf8', uses: ['کنترل سریع قند خون پس از غذا'] },
+                    { fa: 'انسولین دتمیر', en: 'Insulin Detemir', shape: 'syrup', color: '#38bdf8', uses: ['انسولین پایه جهت تزریق روزانه'] },
+                    { fa: 'امپاگلیفلوزین', en: 'Empagliflozin', shape: 'tablet', color: '#ffffff', uses: ['دفع قند اضافی از طریق ادرار و حفاظت قلبی'] },
+                    { fa: 'داپاگلیفلوزین', en: 'Dapagliflozin', shape: 'tablet', color: '#ffffff', uses: ['کاهش قند خون و خطر نارسایی قلبی'] },
+                    { fa: 'کاناگلیفلوزین', en: 'Canagliflozin', shape: 'tablet', color: '#ffffff', uses: ['کاهش قند و کنترل فشارخون در دیابت'] },
+                    { fa: 'لیناگلیفلوزین', en: 'Linagliptin', shape: 'tablet', color: '#ffffff', uses: ['کنترل قند خون بدون عارضه کلیوی'] },
+                    { fa: 'ساکساگلیپتین', en: 'Saxagliptin', shape: 'tablet', color: '#ffffff', uses: ['داروی خوراکی کمکی دیابت نوع ۲'] },
+                    { fa: 'لیراگلوتاید', en: 'Liraglutide', shape: 'syrup', color: '#38bdf8', uses: ['کاهش قند خون و کاهش وزن موثر'] },
+                    { fa: 'سمگلوتاید', en: 'Semaglutide', shape: 'tablet', color: '#ffffff', uses: ['کاهش شدید قند خون و لاغری'] },
+                    { fa: 'دولاگلوتاید', en: 'Dulaglutide', shape: 'syrup', color: '#38bdf8', uses: ['تزریق هفتگی کنترل دیابت'] },
+                    { fa: 'گلی مپرید', en: 'Glimepiride', shape: 'tablet', color: '#ffffff', uses: ['تحریک ترشح انسولین با دوز پایین'] },
+                    { fa: 'گلی کلازید', en: 'Gliclazide', shape: 'tablet', color: '#ffffff', uses: ['کنترل دیابت با عارضه افت قند کمتر'] },
+                    { fa: 'ناتگلیناید', en: 'Nateglinide', shape: 'tablet', color: '#ffffff', uses: ['تحریک سریع و کوتاه‌مدت انسولین'] },
+                    { fa: 'رپاگلیناید', en: 'Repaglinide', shape: 'tablet', color: '#ffffff', uses: ['کنترل قند خون بلافاصله پس از غذا'] },
+                    { fa: 'آکاربوز', en: 'Acarbose', shape: 'tablet', color: '#ffffff', uses: ['به تاخیر انداختن جذب کربوهیدرات در روده'] },
+                    { fa: 'هیدروکورتیزون غدد', en: 'Hydrocortisone Endocrine', shape: 'tablet', color: '#ffffff', uses: ['جایگزینی هورمون در نارسایی غده فوق کلیوی'] },
+                    { fa: 'متیل پردنیزولون', en: 'Methylprednisolone', shape: 'syrup', color: '#ffffff', uses: ['سرکوب شدید سیستم ایمنی در پالس درمانی'] },
+                    { fa: 'تریامسینولون', en: 'Triamcinolone', shape: 'syrup', color: '#ffffff', uses: ['کاهش التهابات مزمن مفاصل و پوست'] },
+                    { fa: 'بتامتازون غدد', en: 'Betamethasone Endocrine', shape: 'syrup', color: '#ffffff', uses: ['کورتون تزریقی با اثر طولانی‌مدت'] },
+                    { fa: 'فلودروکورتیزون', en: 'Fludrocortisone', shape: 'tablet', color: '#ffffff', uses: ['تنظیم تعادل آب و نمک در بیماری آدیون'] },
+                    { fa: 'متی مازول', en: 'Methimazole', shape: 'tablet', color: '#ffffff', uses: ['کاهش ترشح هورمون در پرکاری تیروئید'] },
+                    { fa: 'پروپیل تیواوراسیل', en: 'Propylthiouracil', shape: 'tablet', color: '#ffffff', uses: ['درمان پرکاری تیروئید در سه ماهه اول بارداری'] },
+                    { fa: 'یدید پتاسیم', en: 'Potassium Iodide', shape: 'drop', color: '#06b6d4', uses: ['محافظت از تیروئید و مهار ترشح هورمون'] },
+                    { fa: 'سوماتروپین', en: 'Somatropin', shape: 'syrup', color: '#38bdf8', uses: ['هورمون رشد جهت درمان کوتاهی قد'] },
+                    { fa: 'دسموپرسین', en: 'Desmopressin', shape: 'drop', color: '#06b6d4', uses: ['درمان دیابت بی‌مزه و شب‌ادراری'] },
+                    { fa: 'اوکتروتاید', en: 'Octreotide', shape: 'syrup', color: '#38bdf8', uses: ['درمان آکرومگالی و خونریزی‌های گوارشی'] },
+                    { fa: 'کابرگولین', en: 'Cabergoline', shape: 'tablet', color: '#ffffff', uses: ['کاهش ترشح هورمون پرولاکتین'] },
+                    { fa: 'بروموکریپتین', en: 'Bromocriptine', shape: 'tablet', color: '#ffffff', uses: ['درمان هیپرپرولاکتینمی و پارکینسون'] },
+                    { fa: 'دانازول', en: 'Danazol', shape: 'capsule', color: '#f59e0b', uses: ['درمان اندومتریوز و کیست پستان'] },
+                    { fa: 'سیپروترون استات', en: 'Cyproterone Acetate', shape: 'tablet', color: '#ffffff', uses: ['کاهش هورمون مردانه و درمان پرمویی'] },
+                    { fa: 'فنوفیبرات غدد', en: 'Fenofibrate Endocrine', shape: 'capsule', color: '#3b82f6', uses: ['کاهش اختلالات چربی در دیابتی‌ها'] },
+                    { fa: 'کلومیفن', en: 'Clomifene', shape: 'tablet', color: '#ffffff', uses: ['تحریک تخمک‌گذاری در درمان نازایی'] },
+                    { fa: 'تاموکسیفن', en: 'Tamoxifen', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری و درمان سرطان پستان حساس به هورمون'] },
+                    { fa: 'آناستروزول', en: 'Anastrozole', shape: 'tablet', color: '#ffffff', uses: ['مهار آروماتاز در سرطان پستان بعد یائسگی'] },
+                    { fa: 'لتروزول', en: 'Letrozole', shape: 'tablet', color: '#fef08a', uses: ['تحریک تخمک‌گذاری و درمان سرطان پستان'] },
+                    { fa: 'اگزمستان', en: 'Exemestane', shape: 'tablet', color: '#ffffff', uses: ['مهار غیرقابل برگشت استروژن'] },
+                    { fa: 'تستوسترون', en: 'Testosterone', shape: 'syrup', color: '#38bdf8', uses: ['جایگزینی هورمون مردانه در کمبود آندروژن'] },
+                    { fa: 'ناندرولون', en: 'Nandrolone', shape: 'syrup', color: '#38bdf8', uses: ['درمان پوکی استخوان و کم‌خونی شديد'] },
+                    { fa: 'استرادیول', en: 'Estradiol', shape: 'tablet', color: '#ec4899', uses: ['جایگزینی استروژن در علائم یائسگی'] }
+                ],
+                blood: [
+                    { fa: 'فروس سولفات', en: 'Ferrous Sulfate', shape: 'tablet', color: '#ef4444', uses: ['درمان و پیشگیری از کم‌خونی ناشی از کمبود آهن'] },
+                    { fa: 'اسید فولیک', en: 'Folic Acid', shape: 'tablet', color: '#fef08a', uses: ['پیشگیری از نقص لوله عصبی جنین و درمان کم‌خونی'] },
+                    { fa: 'انکساپارین', en: 'Enoxaparin', shape: 'syrup', color: '#3b82f6', uses: ['پیشگیری و درمان لخته‌شدن خون در عروق عمقی (DVT)'] },
+                    { fa: 'هپارین', en: 'Heparin', shape: 'syrup', color: '#ffffff', uses: ['ضدانعقاد سریع در اورژانس‌های قلبی و عروقی'] },
+                    { fa: 'ریواروکسابان', en: 'Rivaroxaban', shape: 'tablet', color: '#f97316', uses: ['پیشگیری از سکته مغزی و لخته خون جدید'] },
+                    { fa: 'آپیکسابان', en: 'Apixaban', shape: 'tablet', color: '#ffffff', uses: ['ضدانعقاد خوراکی با عارضه خونریزی کمتر'] },
+                    { fa: 'دابیگاتران', en: 'Dabigatran', shape: 'capsule', color: '#3b82f6', uses: ['مهار مستقیم ترومبین جهت ممانعت از لخته'] },
+                    { fa: 'فوندوپارینوکس', en: 'Fondaparinux', shape: 'syrup', color: '#38bdf8', uses: ['پیشگیری از ترومبوز پس از جراحی ارتوپدی'] },
+                    { fa: 'تیروفیبان', en: 'Tirofiban', shape: 'syrup', color: '#38bdf8', uses: ['مهار تجمع پلاکت‌ها در آنژیوپلاستی'] },
+                    { fa: 'اپتیفیباتاید', en: 'Eptifibatide', shape: 'syrup', color: '#38bdf8', uses: ['جلوگیری از لخته شدن خون در سندرم حاد کرونری'] },
+                    { fa: 'آبسیکسی مب', en: 'Abciximab', shape: 'syrup', color: '#38bdf8', uses: ['ممانعت از انسداد مجدد عروق قلبی'] },
+                    { fa: 'آلتپلاز', en: 'Alteplase', shape: 'syrup', color: '#ffffff', uses: ['حل کردن سریع لخته خون در سکته مغزی حاد'] },
+                    { fa: 'استرپتوکیناز', en: 'Streptokinase', shape: 'syrup', color: '#ffffff', uses: ['ذوب کردن لخته خون در سکته قلبی'] },
+                    { fa: 'ترانگزامیک اسید', en: 'Tranexamic Acid', shape: 'syrup', color: '#ffffff', uses: ['توقف خونریزی‌های شدید غیرقابل کنترل'] },
+                    { fa: 'آمینواکاپروئیک اسید', en: 'Aminocaproic Acid', shape: 'syrup', color: '#ffffff', uses: ['ممانعت از فیبرینولیز و توقف خونریزی'] },
+                    { fa: 'ویتامین K1', en: 'Phytomenadione (Vit K1)', shape: 'syrup', color: '#f59e0b', uses: ['پادزهر و بازگرداننده اثر وارفارین'] },
+                    { fa: 'سیلوستازول', en: 'Cilostazol', shape: 'tablet', color: '#ffffff', uses: ['بهبود گرفتگی پا هنگام راه رفتن (لنگش)'] },
+                    { fa: 'آناگرلید', en: 'Anagrelide', shape: 'capsule', color: '#ffffff', uses: ['کاهش تعداد پلاکت‌های بالا در خون'] },
+                    { fa: 'هیدروکسی اوره', en: 'Hydroxyurea', shape: 'capsule', color: '#10b981', uses: ['درمان کم‌خونی داسی‌شکل و پرخونی'] },
+                    { fa: 'اریتروپویتین', en: 'Erythropoietin', shape: 'syrup', color: '#38bdf8', uses: ['تحریک گلبول‌سازی در نارسایی کلیه'] },
+                    { fa: 'فیلگراستیم', en: 'Filgrastim', shape: 'syrup', color: '#38bdf8', uses: ['افزایش گلبول‌های سفید پس از شیمی‌درمانی'] },
+                    { fa: 'پگ فیلگراستیم', en: 'Pegfilgrastim', shape: 'syrup', color: '#38bdf8', uses: ['تحریک طولانی‌مدت گلبول‌های سفید'] },
+                    { fa: 'سارگراموستیم', en: 'Sargramostim', shape: 'syrup', color: '#38bdf8', uses: ['تسریع بازسازی مغز استخوان'] },
+                    { fa: 'رومیپلوستیم', en: 'Romiplostim', shape: 'syrup', color: '#38bdf8', uses: ['تحریک تولید پلاکت در بیماری ITP'] },
+                    { fa: 'الترمبوپگ', en: 'Eltrombopag', shape: 'tablet', color: '#ffffff', uses: ['افزایش خوراکی تعداد پلاکت‌های خون'] },
+                    { fa: 'ایمونوگلوبولین وریدی', en: 'IVIG', shape: 'syrup', color: '#ffffff', uses: ['تقویت ایمنی و درمان بیماری‌های خودایمنی'] },
+                    { fa: 'تاکرولیموس خون', en: 'Tacrolimus Blood', shape: 'capsule', color: '#ffffff', uses: ['پیشگیری از پس زدن پیوند عضو'] },
+                    { fa: 'سیکلوسپورین', en: 'Cyclosporine', shape: 'capsule', color: '#f59e0b', uses: ['سرکوب ایمنی پس از پیوند کلیه و کبد'] },
+                    { fa: 'مایکوفنولات موفتیل', en: 'Mycophenolate Mofetil', shape: 'capsule', color: '#ffffff', uses: ['ممانعت از رد پیوند و درمان لوپوس'] },
+                    { fa: 'سیرولیموس', en: 'Sirolimus', shape: 'tablet', color: '#ffffff', uses: ['سرکوب ایمنی پیوند کلیه'] },
+                    { fa: 'اورولیموس', en: 'Everolimus', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از رد پیوند و درمان تومورها'] },
+                    { fa: 'آزاتیوپرین خون', en: 'Azathioprine Blood', shape: 'tablet', color: '#ffffff', uses: ['سرکوب ایمنی در روماتیسم و پیوند'] },
+                    { fa: 'متوترکسات', en: 'Methotrexate', shape: 'tablet', color: '#fef08a', uses: ['درمان آرتریت روماتوئید شدید و پسوریازیس'] },
+                    { fa: 'لفلونوماید', en: 'Leflunomide', shape: 'tablet', color: '#ffffff', uses: ['کاهش تورم و درد مفاصل در روماتیسم'] },
+                    { fa: 'اینفلیکسیماب', en: 'Infliximab', shape: 'syrup', color: '#38bdf8', uses: ['داروی بیولوژیک ضد التهاب مفاصل و روده'] },
+                    { fa: 'آدالیموماب', en: 'Adalimumab', shape: 'syrup', color: '#38bdf8', uses: ['مهار TNF در آرتریت و پسوریازیس'] },
+                    { fa: 'اتانرسپت', en: 'Etanercept', shape: 'syrup', color: '#38bdf8', uses: ['کاهش التهاب مفاصل در اسپوندیلیت'] },
+                    { fa: 'ریتوکسی مب', en: 'Rituximab', shape: 'syrup', color: '#38bdf8', uses: ['تخریب لنفوسیت‌های B در لنفوم و خودایمنی'] },
+                    { fa: 'توسیلیزوماب', en: 'Tocilizumab', shape: 'syrup', color: '#38bdf8', uses: ['مهار گیرنده IL-6 در روماتیسم شدید'] },
+                    { fa: 'بورتزومیب', en: 'Bortezomib', shape: 'syrup', color: '#ffffff', uses: ['درمان مولتیپل میلوما'] },
+                    { fa: 'لنالیدوماید', en: 'Lenalidomide', shape: 'capsule', color: '#3b82f6', uses: ['درمان اختلالات مغز استخوان و میلوما'] },
+                    { fa: 'تالیدوماید', en: 'Thalidomide', shape: 'capsule', color: '#ffffff', uses: ['درمان ضایعات جذام و میلوما'] },
+                    { fa: 'دفراسیروکس', en: 'Deferasirox', shape: 'tablet', color: '#ffffff', uses: ['دفع آهن اضافی در بیماران تالاسمی'] },
+                    { fa: 'دفروکسامین', en: 'Deferoxamine', shape: 'syrup', color: '#ffffff', uses: ['تزریق جهت رسوب‌زدایی آهن اضافی'] },
+                    { fa: 'دفرپیرون', en: 'Deferiprone', shape: 'capsule', color: '#ffffff', uses: ['دفع خوراکی رسوبات آهن از قلب و کبد'] },
+                    { fa: 'آهن سوکروز', en: 'Iron Sucrose', shape: 'syrup', color: '#b45309', uses: ['تزریق وریدی سریع آهن در کم‌خونی شديد'] },
+                    { fa: 'آهن دکستران', en: 'Iron Dextran', shape: 'syrup', color: '#b45309', uses: ['جبران کمبود شدید آهن بدن'] },
+                    { fa: 'سیانوکوبالامین (B12)', en: 'Cyanocobalamin (B12)', shape: 'syrup', color: '#ef4444', uses: ['درمان کم‌خونی وخیم (پرنیشیوز)'] },
+                    { fa: 'اسید اسکوربیک تزریقی', en: 'Ascorbic Acid Injectable', shape: 'syrup', color: '#f59e0b', uses: ['آنتی‌اکسیدان قوی و درمان اسکوروی'] },
+                    { fa: 'پلاسمای تازه منجمد', en: 'FFP Component', shape: 'syrup', color: '#f59e0b', uses: ['جبران فاکتورهای انعقادی در خونریزی'] }
+                ],
+                derma: [
+                    { fa: 'بتامتازون موضعی', en: 'Betamethasone Topical', shape: 'cream', color: '#0284c7', uses: ['درمان التهابات شدید پوستی، اگزما و پسوریازیس'] },
+                    { fa: 'هیدروکورتیزون موضعی', en: 'Hydrocortisone Topical', shape: 'cream', color: '#10b981', uses: ['تسکین خارش، حساسیت پوستی و گزیدگی حشرات'] },
+                    { fa: 'آداپالن', en: 'Adapalene', shape: 'gel', color: '#06b6d4', uses: ['درمان آکنه و جوش‌های سرسیاه و سرسفید'] },
+                    { fa: 'ماینوکسیدیل موضعی', en: 'Minoxidil Topical', shape: 'drop', color: '#3b82f6', uses: ['تحریک رشد مو و درمان ریزش موی ارثی'] },
+                    { fa: 'کلوتریمازول موضعی', en: 'Clotrimazole Topical', shape: 'cream', color: '#ffffff', uses: ['درمان عفونت‌های قارچی پوست و ناخن'] },
+                    { fa: 'کتوکونازول موضعی', en: 'Ketoconazole Topical', shape: 'cream', color: '#ffffff', uses: ['ضدقارچ موضعی و درمان شوره سر'] },
+                    { fa: 'ترتینوئین', en: 'Tretinoin', shape: 'cream', color: '#fef08a', uses: ['بازسازی پوست، درمان جوش و لک‌های پوستی'] },
+                    { fa: 'ایزوترتینوئین', en: 'Isotretinoin', shape: 'capsule', color: '#f97316', uses: ['درمان آکنه‌های کیستیک و فوق‌العاده مقاوم'] },
+                    { fa: 'بنزوئیل پراکساید', en: 'Benzoyl Peroxide', shape: 'gel', color: '#ffffff', uses: ['از بین بردن باکتری‌های مولد جوش صورت'] },
+                    { fa: 'اسید سالیسیلیک موضعی', en: 'Salicylic Acid Topical', shape: 'cream', color: '#ffffff', uses: ['لایه‌برداری پوست و درمان میخچه و زگیل'] },
+                    { fa: 'کلیندامایسین موضعی', en: 'Clindamycin Topical', shape: 'gel', color: '#06b6d4', uses: ['درمان آکنه‌های التهابی پوست'] },
+                    { fa: 'اریترومایسین موضعی', en: 'Erythromycin Topical', shape: 'gel', color: '#06b6d4', uses: ['کنترل باکتری‌های جوش صورت'] },
+                    { fa: 'مترونیدازول پوستی', en: 'Metronidazole Cutaneous', shape: 'cream', color: '#ffffff', uses: ['درمان قرمزی و آکنه روزاسه'] },
+                    { fa: 'زینک اکساید', en: 'Zinc Oxide', shape: 'cream', color: '#ffffff', uses: ['محافظت از پوست و سوختگی پای نوزاد'] },
+                    { fa: 'کلسپوتریول', en: 'Calcipotriol', shape: 'cream', color: '#fef08a', uses: ['کنترل رشد سلول‌ها در بیماری پسوریازیس'] },
+                    { fa: 'پیمکرولیموس', en: 'Pimecrolimus', shape: 'cream', color: '#ffffff', uses: ['درمان اگزما بدون استفاده از کورتون'] },
+                    { fa: 'تاکرولیموس پوستی', en: 'Tacrolimus Cutaneous', shape: 'cream', color: '#ffffff', uses: ['درمان اگزمای متوسط تا شدید'] },
+                    { fa: 'سیلور سولفادیازین', en: 'Silver Sulfadiazine', shape: 'cream', color: '#ffffff', uses: ['پیشگیری از عفونت در سوختگی‌های درجه ۲ و ۳'] },
+                    { fa: 'موپیروسین', en: 'Mupirocin', shape: 'cream', color: '#ffffff', uses: ['درمان عفونت زردزخم و عفونت‌های استافیلوکوکی'] },
+                    { fa: 'فوسیدیک اسید', en: 'Fusidic Acid', shape: 'cream', color: '#ffffff', uses: ['درمان عفونت‌های باکتریایی سطحی پوست'] },
+                    { fa: 'نیستاتین موضعی', en: 'Nystatin Topical', shape: 'cream', color: '#f59e0b', uses: ['درمان قارچ کاندیدایی کشاله ران و پوست'] },
+                    { fa: 'تربینافین موضعی', en: 'Terbinafine Topical', shape: 'cream', color: '#ffffff', uses: ['درمان قارچ پای ورزشکاران و کشاله ران'] },
+                    { fa: 'لولیکونازول', en: 'Luliconazole', shape: 'cream', color: '#ffffff', uses: ['ضدقارچ موضعی قدرتمند تک‌دوز روزانه'] },
+                    { fa: 'پرمترین', en: 'Permethrin', shape: 'cream', color: '#ffffff', uses: ['درمان قطعی گال (گالیکوز) و شپش سر'] },
+                    { fa: 'لیندان', en: 'Lindane', shape: 'cream', color: '#ffffff', uses: ['درمان خط دوم شپش و گال مقاوم'] },
+                    { fa: 'کروتامیتون', en: 'Crotamiton', shape: 'cream', color: '#ffffff', uses: ['تسکین خارش پوستی و درمان گال'] },
+                    { fa: 'مالاتیون', en: 'Malathion', shape: 'drop', color: '#ffffff', uses: ['از بین بردن تخم شپش و خود شپش سر'] },
+                    { fa: 'اسیتریتین', en: 'Acitretin', shape: 'capsule', color: '#f59e0b', uses: ['درمان پسوریازیس شدید و منتشر'] },
+                    { fa: 'متوکسالن', en: 'Methoxsalen', shape: 'capsule', color: '#10b981', uses: ['درمان بروتیلیگو (پیسی) همراه با نوردرمانی'] },
+                    { fa: 'دوکسپین موضعی', en: 'Doxepin Topical', shape: 'cream', color: '#ffffff', uses: ['تسکین خارش‌های مزمن در اگزما'] },
+                    { fa: 'آنترالین', en: 'Anthralin', shape: 'cream', color: '#b45309', uses: ['ترمیم پلاک‌های پسوریازیس مزمن'] },
+                    { fa: 'کول تار (زغال سنگ)', en: 'Coal Tar', shape: 'cream', color: '#334155', uses: ['کاهش پوسته ریزی و خارش در پسوریازیس'] },
+                    { fa: 'اوره موضعی', en: 'Urea Topical', shape: 'cream', color: '#ffffff', uses: ['نرم کردن و آبرسانی پوست‌های فوق‌العاده خشک'] },
+                    { fa: 'لاکتیک اسید پوستی', en: 'Lactic Acid Cutaneous', shape: 'cream', color: '#ffffff', uses: ['لایه‌برداری نرم پوست‌های خشن'] },
+                    { fa: 'هیدروکینون', en: 'Hydroquinone', shape: 'cream', color: '#ffffff', uses: ['روشن‌کننده و محوکننده لک‌های ملاسما'] },
+                    { fa: 'ملیسمید', en: 'Melanotan', shape: 'drop', color: '#38bdf8', uses: ['تحریک رنگدانه‌های پوست'] },
+                    { fa: 'کلوتریمازول واژینال', en: 'Clotrimazole Vaginal', shape: 'cream', color: '#ffffff', uses: ['درمان عفونت قارچی واژینال'] },
+                    { fa: 'میکونازول موضعی', en: 'Miconazole Topical', shape: 'cream', color: '#ffffff', uses: ['درمان قارچ‌های پوستی و ضایعات لب'] },
+                    { fa: 'تینیدازول پوستی', en: 'Tinidazole Cutaneous', shape: 'cream', color: '#ffffff', uses: ['درمان عفونت‌های تک‌یاخته‌ای پوست'] },
+                    { fa: 'سیرکلوپیروکس', en: 'Ciclopirox', shape: 'drop', color: '#06b6d4', uses: ['لاک ضدقارچ جهت درمان قارچ ناخن'] },
+                    { fa: 'آمورولفین', en: 'Amorolfine', shape: 'drop', color: '#06b6d4', uses: ['درمان قارچ ناخن دست و پا'] },
+                    { fa: 'افلورنیتین', en: 'Eflornithine', shape: 'cream', color: '#ffffff', uses: ['کاهش رشد موهای زائد صورت زنان'] },
+                    { fa: 'کپسایسین موضعی', en: 'Capsaicin Topical', shape: 'cream', color: '#ef4444', uses: ['تسکین دردهای مفصلی و عصبی زونا'] },
+                    { fa: 'دکسپانتنول', en: 'Dexpanthenol', shape: 'cream', color: '#ffffff', uses: ['ترمیم زخم، خراشیدگی و التهاب پوست'] },
+                    { fa: 'کالامین', en: 'Calamine', shape: 'cream', color: '#ec4899', uses: ['تسکین خارش آبله‌مرغان و گزیدگی'] },
+                    { fa: 'اکسید زینک مرکب', en: 'Compound Zinc', shape: 'cream', color: '#ffffff', uses: ['پوشش ترمیمی زخم‌های سطحی'] },
+                    { fa: 'پودوفیلین', en: 'Podophyllin', shape: 'drop', color: '#b45309', uses: ['درمان موضعی زگیل‌های تناسلی'] },
+                    { fa: 'فلورواوراسیل موضعی', en: 'Fluorouracil Topical', shape: 'cream', color: '#ffffff', uses: ['درمان ضایعات پیش‌سرطانی پوست (کراتوز)'] },
+                    { fa: 'ایمیکیمود', en: 'Imiquimod', shape: 'cream', color: '#ffffff', uses: ['تحریک ایمنی موضعی جهت درمان زگیل'] },
+                    { fa: 'ماتوکان', en: 'Minoxidil Solution', shape: 'drop', color: '#3b82f6', uses: ['محلول رشد مجدد مو'] }
+                ],
+                ent: [
+                    { fa: 'سیپروفلوکساسین چشمی', en: 'Ciprofloxacin Ophthalmic', shape: 'drop', color: '#06b6d4', uses: ['درمان عفونت‌های باکتریایی ملتحمه و قرنیه چشم'] },
+                    { fa: 'اشک مصنوعی', en: 'Artificial Tears', shape: 'drop', color: '#38bdf8', uses: ['مرطوب‌کردن چشم و درمان خشکی چشم'] },
+                    { fa: 'تیمولول چشمی', en: 'Timolol Ophthalmic', shape: 'drop', color: '#10b981', uses: ['کاهش فشار داخل چشم در بیماران مبتلا به آب سیاه'] },
+                    { fa: 'کلرامفنیکل چشمی', en: 'Chloramphenicol Eye', shape: 'drop', color: '#06b6d4', uses: ['درمان عفونت‌های سطحی چشم'] },
+                    { fa: 'نفازولین چشمی', en: 'Naphazoline Eye', shape: 'drop', color: '#38bdf8', uses: ['کاهش قرمزی و سوزش خفيف چشم'] },
+                    { fa: 'لاتانوپروست', en: 'Latanoprost', shape: 'drop', color: '#06b6d4', uses: ['کاهش فشار چشم در گلوکوم'] },
+                    { fa: 'تراووپروست', en: 'Travoprost', shape: 'drop', color: '#06b6d4', uses: ['کاهش قدرتمند فشار داخل کره چشم'] },
+                    { fa: 'بیماتوپروست', en: 'Bimatoprost', shape: 'drop', color: '#06b6d4', uses: ['درمان آب سیاه و پرپشت کردن مژه‌ها'] },
+                    { fa: 'برینزولامید', en: 'Brinzolamide', shape: 'drop', color: '#06b6d4', uses: ['کاهش ترشح زلالیه در گلوکوم'] },
+                    { fa: 'دورزولامید', en: 'Dorzolamide', shape: 'drop', color: '#06b6d4', uses: ['کاهش فشار چشم به روش مهار انیدراز'] },
+                    { fa: 'آپراکلونیدین', en: 'Apraclonidine', shape: 'drop', color: '#06b6d4', uses: ['کنترل فشار چشم پس از جراحی لیزر'] },
+                    { fa: 'بریمونیدین', en: 'Brimonidine', shape: 'drop', color: '#10b981', uses: ['کاهش فشار چشم با اثر دوگانه'] },
+                    { fa: 'پیلوکارپین', en: 'Pilocarpine', shape: 'drop', color: '#06b6d4', uses: ['تنگ کردن مردمک و کاهش فشار آب سیاه'] },
+                    { fa: 'آتروپین چشمی', en: 'Atropine Ophthalmic', shape: 'drop', color: '#06b6d4', uses: ['گشاد کردن مردمک جهت معاینه ته چشم'] },
+                    { fa: 'هوماتروپین', en: 'Homatropine', shape: 'drop', color: '#06b6d4', uses: ['فلج تطابق و گشاد کردن مردمک'] },
+                    { fa: 'تروپیکامید', en: 'Tropicamide', shape: 'drop', color: '#06b6d4', uses: ['گشادکننده سریع و کوتاه‌مدت مردمک'] },
+                    { fa: 'فنیل افدرین چشمی', en: 'Phenylephrine Ophthalmic', shape: 'drop', color: '#06b6d4', uses: ['انقباض عروق چشم و گشاد کردن مردمک'] },
+                    { fa: 'بتامتازون چشمی', en: 'Betamethasone Eye', shape: 'drop', color: '#06b6d4', uses: ['کنترل التهابات شدید پس از عمل چشم'] },
+                    { fa: 'دگزامتازون چشمی', en: 'Dexamethasone Eye', shape: 'drop', color: '#06b6d4', uses: ['کاهش تورم و التهاب ملتحمه'] },
+                    { fa: 'فلوئورومترولون', en: 'Fluorometholone', shape: 'drop', color: '#06b6d4', uses: ['استروئید چشمی با عارضه افزایش فشار کمتر'] },
+                    { fa: 'لوتپردنول', en: 'Loteprednol', shape: 'drop', color: '#06b6d4', uses: ['درمان آلرژی و التهاب چشمی'] },
+                    { fa: 'اولوپاتادین چشمی', en: 'Olopatadine Eye', shape: 'drop', color: '#06b6d4', uses: ['تسکین خارش و آلرژی فصلی چشم'] },
+                    { fa: 'کتوتیفن چشمی', en: 'Ketotifen Eye', shape: 'drop', color: '#06b6d4', uses: ['تسکین سریع خارش ملتحمه'] },
+                    { fa: 'کرومولین چشمی', en: 'Cromolyn Eye', shape: 'drop', color: '#06b6d4', uses: ['پیشگیری از حساسیت‌های چشمی'] },
+                    { fa: 'آزلاستین چشمی', en: 'Azelastine Eye', shape: 'drop', color: '#06b6d4', uses: ['درمان علائم آلرژی چشم'] },
+                    { fa: 'دیکلوفناک چشمی', en: 'Diclofenac Eye', shape: 'drop', color: '#06b6d4', uses: ['تسکین درد و التهاب پس از جراحی کاتاراکت'] },
+                    { fa: 'کتورولاک چشمی', en: 'Ketorolac Eye', shape: 'drop', color: '#06b6d4', uses: ['کاهش خارش و التهاب پس از عمل لیزیک'] },
+                    { fa: 'توبرامایسین چشمی', en: 'Tobramycin Eye', shape: 'drop', color: '#06b6d4', uses: ['درمان عفونت‌های شدید باکتریایی چشم'] },
+                    { fa: 'جنتامایسین چشمی', en: 'Gentamicin Eye', shape: 'drop', color: '#06b6d4', uses: ['پاکسازی عفونت‌های زخم قرنیه'] },
+                    { fa: 'موکسی فلوکساسین چشمی', en: 'Moxifloxacin Eye', shape: 'drop', color: '#06b6d4', uses: ['آنتی‌بیوتیک چشمی وسیع‌الطیف نسل جدید'] },
+                    { fa: 'افلوکساسین چشمی', en: 'Ofloxacin Eye', shape: 'drop', color: '#06b6d4', uses: ['درمان زخم قرنیه و عفونت پلک'] },
+                    { fa: 'پلی میکسین B چشمی', en: 'Polymyxin B Eye', shape: 'drop', color: '#06b6d4', uses: ['درمان ترکیبی عفونت‌های چشمی'] },
+                    { fa: 'آسیکلوویر چشمی', en: 'Acyclovir Ophthalmic', shape: 'cream', color: '#ffffff', uses: ['درمان عفونت ویروسی تبخال قرنیه'] },
+                    { fa: 'گان سیکلوویر چشمی', en: 'Ganciclovir Eye', shape: 'gel', color: '#06b6d4', uses: ['درمان التهاب قرنیه ناشی از ویروس'] },
+                    { fa: 'بتامتازون گوشی', en: 'Betamethasone Otic', shape: 'drop', color: '#06b6d4', uses: ['کاهش التهاب و خارش مجرای گوش'] },
+                    { fa: 'سیپروفلوکساسین گوشی', en: 'Ciprofloxacin Otic', shape: 'drop', color: '#06b6d4', uses: ['درمان عفونت گوش خارجی و میانی'] },
+                    { fa: 'هیدروکورتیزون گوشی', en: 'Hydrocortisone Otic', shape: 'drop', color: '#06b6d4', uses: ['تسکین التهاب مجرای اگزمازده گوش'] },
+                    { fa: 'کلرامفنیکل گوشی', en: 'Chloramphenicol Otic', shape: 'drop', color: '#06b6d4', uses: ['درمان عفونت‌های باکتریایی مجرای گوش'] },
+                    { fa: 'گلیسیرین فنیکه', en: 'Glycerin Phenique', shape: 'drop', color: '#b45309', uses: ['نرم کردن جرم گوش جهت شستشو'] },
+                    { fa: 'کاربامید پروکساید', en: 'Carbamide Peroxide', shape: 'drop', color: '#06b6d4', uses: ['حل کردن جرم سفت‌شده گوش'] },
+                    { fa: 'بوریک اسید گوشی', en: 'Boric Acid Otic', shape: 'drop', color: '#06b6d4', uses: ['ضدعفونی و خشک کردن رطوبت گوش'] },
+                    { fa: 'اکسی متازولین بینی', en: 'Oxymetazoline Nasal', shape: 'drop', color: '#0284c7', uses: ['بازکردن سریع گرفتگی شديد بینی'] },
+                    { fa: 'زایلومتازولین بینی', en: 'Xylometazoline Nasal', shape: 'drop', color: '#0284c7', uses: ['تسکین احتقان بینی در سرماخوردگی'] },
+                    { fa: 'بکلومتازون بینی', en: 'Beclomethasone Nasal', shape: 'drop', color: '#e11d48', uses: ['کنترل گرفتگی آلرژیک بینی'] },
+                    { fa: 'فلوتیکازون بینی', en: 'Fluticasone Nasal', shape: 'drop', color: '#8b5cf6', uses: ['تسکین عطسه و خارش آلرژی بینی'] },
+                    { fa: 'مومتازون بینی', en: 'Mometasone Nasal', shape: 'drop', color: '#8b5cf6', uses: ['درمان پلیپ و رینیت فصلی'] },
+                    { fa: 'بودسوناید بینی', en: 'Budesonide Nasal', shape: 'drop', color: '#10b981', uses: ['کاهش التهاب مزمن مخاط بینی'] },
+                    { fa: 'آزلاستین بینی', en: 'Azelastine Nasal Spray', shape: 'drop', color: '#06b6d4', uses: ['آنتی‌هیستامین سریع‌الاثر بینی'] },
+                    { fa: 'کرومولین بینی', en: 'Cromolyn Nasal', shape: 'drop', color: '#06b6d4', uses: ['پیشگیری از بروز آلرژی بینی'] },
+                    { fa: 'سدیم کلراید بینی', en: 'Sodium Chloride Nasal', shape: 'drop', color: '#38bdf8', uses: ['شستشو و مرطوب‌سازی مخاط بینی'] }
+                ],
+                vitamins: [
+                    { fa: 'ویتامین D3', en: 'Vitamin D3', shape: 'capsule', color: '#f59e0b', uses: ['تثبیت کلسیم، تقویت استخوان‌ها و تقویت سیستم ایمنی'] },
+                    { fa: 'ویتامین C', en: 'Vitamin C', shape: 'tablet', color: '#f97316', uses: ['تقویت آنتی‌اکسیدانی بدن و افزایش جذب آهن'] },
+                    { fa: 'نوروبین (B-Complex)', en: 'Neurobion', shape: 'syrup', color: '#ef4444', uses: ['درمان کم‌خونی و تقویت اعصاب محیطی'] },
+                    { fa: 'مولتی ویتامین', en: 'Multivitamin', shape: 'capsule', color: '#f59e0b', uses: ['تأمین نیازمندی‌های روزانه بدن به ویتامین‌ها'] },
+                    { fa: 'کلسیم دی', en: 'Calcium D3', shape: 'tablet', color: '#ffffff', uses: ['پیشگیری از پوکی استخوان'] },
+                    { fa: 'زینک پلاس', en: 'Zinc Plus', shape: 'capsule', color: '#10b981', uses: ['تقویت سلامت پوست، مو و ناخن'] },
+                    { fa: 'ویتامین A', en: 'Vitamin A', shape: 'capsule', color: '#f97316', uses: ['تقویت بینایی و ایمنی مخاطی'] },
+                    { fa: 'ویتامین E', en: 'Vitamin E', shape: 'capsule', color: '#f59e0b', uses: ['آنتی‌اکسیدان قوی محافظ سلول‌ها'] },
+                    { fa: 'ویتامین K1', en: 'Vitamin K1', shape: 'tablet', color: '#ffffff', uses: ['کمک به انعقاد طبیعی خون'] },
+                    { fa: 'ویتامین B1 (تیامین)', en: 'Thiamine (B1)', shape: 'tablet', color: '#ffffff', uses: ['تقویت اعصاب و سوخت‌وساز کربوهیدرات'] },
+                    { fa: 'ویتامین B2 (ریبوفلاوین)', en: 'Riboflavin (B2)', shape: 'tablet', color: '#fef08a', uses: ['تولید انرژی و سلامت چشم و پوست'] },
+                    { fa: 'ویتامین B3 (نیاسین)', en: 'Niacin (B3)', shape: 'tablet', color: '#ffffff', uses: ['تنظیم چربی خون و سوخت‌وساز'] },
+                    { fa: 'ویتامین B6 (پیریدوکسین)', en: 'Pyridoxine (B6)', shape: 'tablet', color: '#ffffff', uses: ['کاهش تهوع بارداری و ساخت هموگلوبین'] },
+                    { fa: 'ویتامین B12 خوراکی', en: 'Oral B12', shape: 'tablet', color: '#ef4444', uses: ['تولید گلبول قرمز و سلامت سیستم عصبی'] },
+                    { fa: 'بیوتین (B7)', en: 'Biotin (B7)', shape: 'tablet', color: '#ffffff', uses: ['توقف ریزش مو و تقویت ناخن‌های شکننده'] },
+                    { fa: 'اسید پانتوتنیک (B5)', en: 'Pantothenic Acid', shape: 'tablet', color: '#ffffff', uses: ['بازسازی پوست و تولید انرژی'] },
+                    { fa: 'اسید فولیک مکمل', en: 'Folic Acid Supp', shape: 'tablet', color: '#fef08a', uses: ['پیشگیری از کم‌خونی و سلامت جنین'] },
+                    { fa: 'کلسیم کربنات', en: 'Calcium Carbonate', shape: 'tablet', color: '#ffffff', uses: ['تأمین کلسیم استخوان با درصد جذب بالا'] },
+                    { fa: 'کلسیم سیترات', en: 'Calcium Citrate', shape: 'tablet', color: '#ffffff', uses: ['تأمین کلسیم با عارضه گوارشی کمتر'] },
+                    { fa: 'منیزیم سیترات', en: 'Magnesium Citrate', shape: 'tablet', color: '#ffffff', uses: ['رفع گرفتگی عضلانی و بهبود خواب'] },
+                    { fa: 'منیزیم اکساید', en: 'Magnesium Oxide', shape: 'tablet', color: '#ffffff', uses: ['تأمین منیزیم و تسکین سوءهاضمه'] },
+                    { fa: 'زینک گلوکونات', en: 'Zinc Gluconate', shape: 'tablet', color: '#ffffff', uses: ['ترمیم زخم‌ها و تقویت سیستم ایمنی'] },
+                    { fa: 'زینک سولفات', en: 'Zinc Sulfate', shape: 'syrup', color: '#f59e0b', uses: ['جبران کمبود روی در کودکان'] },
+                    { fa: 'آهن فومارات', en: 'Ferrous Fumarate', shape: 'capsule', color: '#ef4444', uses: ['درمان کم‌خونی با تحمل گوارشی بهتر'] },
+                    { fa: 'ملاتونین', en: 'Melatonin', shape: 'tablet', color: '#3b82f6', uses: ['تنظیم چرخه خواب و رفع پرواززدگی'] },
+                    { fa: 'امگا ۳', en: 'Omega 3', shape: 'capsule', color: '#f59e0b', uses: ['کاهش التهاب، سلامت قلب و مغز'] },
+                    { fa: 'کوآنزیم Q10', en: 'Coenzyme Q10', shape: 'capsule', color: '#f97316', uses: ['افزایش انرژی سلولی و آنتی‌اکسیدان قلبی'] },
+                    { fa: 'ال کارنیتین', en: 'L-Carnitine', shape: 'syrup', color: '#38bdf8', uses: ['افزایش سوخت‌وساز چربی و انرژی عضلانی'] },
+                    { fa: 'کراتین مکمل', en: 'Creatine Supplement', shape: 'tablet', color: '#ffffff', uses: ['افزایش قدرت و حجم عضلانی'] },
+                    { fa: 'گلوکوزامین', en: 'Glucosamine', shape: 'tablet', color: '#ffffff', uses: ['بازسازی غضروف مفاصل و کاهش درد آرتروز'] },
+                    { fa: 'کندروئیتین', en: 'Chondroitin', shape: 'capsule', color: '#3b82f6', uses: ['حفظ انعطاف‌پذیری غضروف مفاصل'] },
+                    { fa: 'ام اس ام (MSM)', en: 'MSM Joint', shape: 'tablet', color: '#ffffff', uses: ['کاهش التهاب و درد مفاصل'] },
+                    { fa: 'آلفا لیپوئیک اسید', en: 'Alpha Lipoic Acid', shape: 'capsule', color: '#10b981', uses: ['آنتی‌اکسیدان دردهای عصبی دیابتی'] },
+                    { fa: 'سیلیمارین مکمل', en: 'Silymarin Supp', shape: 'capsule', color: '#10b981', uses: ['سم‌زدایی و سلامت کبد'] },
+                    { fa: 'لوتئین', en: 'Lutein', shape: 'capsule', color: '#f59e0b', uses: ['محافظت از شبکیه چشم در برابر نور'] },
+                    { fa: 'زآگزانتین', en: 'Zeaxanthin', shape: 'capsule', color: '#f59e0b', uses: ['تقویت بینایی و آنتی‌اکسیدان چشم'] },
+                    { fa: 'پروبیوتیک', en: 'Probiotic', shape: 'capsule', color: '#10b981', uses: ['تنظیم فلور میکروبی روده و ایمنی'] },
+                    { fa: 'پری بیوتیک', en: 'Prebiotic', shape: 'capsule', color: '#10b981', uses: ['تغذیه باکتری‌های مفید روده'] },
+                    { fa: 'کلاژن مکمل', en: 'Collagen Supplement', shape: 'tablet', color: '#ffffff', uses: ['جوان‌سازی پوست و تقویت مفاصل'] },
+                    { fa: 'جلبک اسپیرولینا', en: 'Spirulina', shape: 'tablet', color: '#10b981', uses: ['سوپرفود غنی از پروتئین و ویتامین'] },
+                    { fa: 'عصاره جینسینگ', en: 'Ginseng Extract', shape: 'capsule', color: '#b45309', uses: ['افزایش شادابی، تمرکز و کاهش خستگی'] },
+                    { fa: 'عصاره گینکو بیلوبا', en: 'Ginkgo Biloba', shape: 'tablet', color: '#10b981', uses: ['افزایش گردش خون مغز و حافظه'] },
+                    { fa: 'عصاره چای سبز', en: 'Green Tea Extract', shape: 'capsule', color: '#10b981', uses: ['آنتی‌اکسیدان و کمک به چربی‌سوزی'] },
+                    { fa: 'عصاره سیر', en: 'Garlic Extract', shape: 'capsule', color: '#ffffff', uses: ['کاهش فشارخون و چربی خون'] },
+                    { fa: 'عصاره خار مریم', en: 'Milk Thistle', shape: 'capsule', color: '#10b981', uses: ['بازسازی سلول‌های آسیب‌دیده کبد'] },
+                    { fa: 'کلسیتریول مکمل', en: 'Calcitriol Supp', shape: 'capsule', color: '#f59e0b', uses: ['فرم فعال ویتامین D جهت سلامت استخوان'] },
+                    { fa: 'آلفاکالسیدول', en: 'Alfacalcidol', shape: 'capsule', color: '#f59e0b', uses: ['تنظیم کلسیم در بیماران کلیوی'] },
+                    { fa: 'متیل کوبالامین', en: 'Methylcobalamin', shape: 'tablet', color: '#ef4444', uses: ['فرم فعال B12 جهت ترمیم اعصاب'] },
+                    { fa: 'بنفوتیامین', en: 'Benfotiamine', shape: 'capsule', color: '#ffffff', uses: ['فرم محلول در چربی B1 جهت دردهای عصبی'] },
+                    { fa: 'پانتنول', en: 'Panthenol', shape: 'capsule', color: '#ffffff', uses: ['تقویت بافت پوست و مو'] }
+                ],
+                emergency: [
+                    { fa: 'آدرنالین (اپی‌نفرین)', en: 'Epinephrine', shape: 'syrup', color: '#ef4444', uses: ['درمان اورژانسی شوک آنافیلاکسی و احیای قلبی'] },
+                    { fa: 'آتروپین اورژانس', en: 'Atropine Emergency', shape: 'syrup', color: '#ffffff', uses: ['درمان کندی ضربان قلب و مسمومیت‌ها'] },
+                    { fa: 'نالوکسان', en: 'Naloxone', shape: 'syrup', color: '#38bdf8', uses: ['پادزهر و بازگرداننده اورژانسی مسمومیت با اپیوییدها'] },
+                    { fa: 'دنیترات دی‌ایزوثورباید', en: 'Isosorbide Dinitrate', shape: 'tablet', color: '#ffffff', uses: ['تسکین سریع درد قفسه سینه در آنژین صدری'] },
+                    { fa: 'اتومیدات', en: 'Etomidate', shape: 'syrup', color: '#ffffff', uses: ['القای سریع بیهوشی در اورژانس بدون افت فشار'] },
+                    { fa: 'کتامین', en: 'Ketamine', shape: 'syrup', color: '#38bdf8', uses: ['بیهوشی و بی‌حسی در جراحی‌های اورژانسی'] },
+                    { fa: 'پروپوفول', en: 'Propofol', shape: 'syrup', color: '#ffffff', uses: ['آرام‌بخشی سریع و بیهوشی در مراقبت‌های ویژه'] },
+                    { fa: 'تیپنتال', en: 'Thiopental', shape: 'syrup', color: '#ffffff', uses: ['القای بیهوشی و کنترل تشنج‌های مقاوم'] },
+                    { fa: 'سوکسینیل کولین', en: 'Succinylcholine', shape: 'syrup', color: '#38bdf8', uses: ['فلج سریع عضلات جهت لوله‌گذاری تنفسی'] },
+                    { fa: 'روکورونیوم', en: 'Rocuronium', shape: 'syrup', color: '#38bdf8', uses: ['شل‌کننده عضلانی متوسط‌الاثر در بیهوشی'] },
+                    { fa: 'آتراکوریوم', en: 'Atracurium', shape: 'syrup', color: '#38bdf8', uses: ['شل‌کننده عضلانی مناسب برای بیماران کلیوی'] },
+                    { fa: 'سیس آتراکوریوم', en: 'Cisatracurium', shape: 'syrup', color: '#38bdf8', uses: ['فلج عضلانی با حداقل آزادکنندگی هیستامین'] },
+                    { fa: 'نیوستگمین اورژانس', en: 'Neostigmine ER', shape: 'syrup', color: '#38bdf8', uses: ['خنثی کردن اثر داروهای شل‌کننده عضلانی'] },
+                    { fa: 'سوگامادکس', en: 'Sugammadex', shape: 'syrup', color: '#ffffff', uses: ['خنثی‌کننده سریع و اختصاصی روکورونیوم'] },
+                    { fa: 'فلومازنیل', en: 'Flumazenil', shape: 'syrup', color: '#38bdf8', uses: ['پادزهر و معکوس‌کننده اثر بنزودیازپین‌ها'] },
+                    { fa: 'فیزوستیگمین', en: 'Physostigmine', shape: 'syrup', color: '#38bdf8', uses: ['پادزهر مسمومیت با داروهای آنتی‌کولینرژیک'] },
+                    { fa: 'پرالیدوکسیم', en: 'Pralidoxime', shape: 'syrup', color: '#ffffff', uses: ['پادزهر مسمومیت با سموم حشره‌کش سموم فسفره'] },
+                    { fa: 'دکستروز ۵۰٪', en: 'Dextrose 50%', shape: 'syrup', color: '#f59e0b', uses: ['درمان اورژانسی افت شدید ققند خون (هیپوگلیسمی)'] },
+                    { fa: 'گلوکاگون', en: 'Glucagon', shape: 'syrup', color: '#ef4444', uses: ['افزایش سریع قند خون در شوک انسولین'] },
+                    { fa: 'کلسیم گلوکونات اورژانس', en: 'Calcium Gluconate ER', shape: 'syrup', color: '#ffffff', uses: ['محافظت از قلب در هیپرکالمی و مسمومیت منیزیم'] },
+                    { fa: 'سدیم بیکربنات', en: 'Sodium Bicarbonate', shape: 'syrup', color: '#ffffff', uses: ['اصلاح اسیدوز شدید خون در احیا'] },
+                    { fa: 'منیزیم سولفات اورژانس', en: 'Magnesium Sulfate ER', shape: 'syrup', color: '#38bdf8', uses: ['درمان تشنج اکلامپسی در بارداری و آریتمی'] },
+                    { fa: 'لیدوکائین تزریقی', en: 'Lidocaine Injectable', shape: 'syrup', color: '#38bdf8', uses: ['درمان آریتمی بطنی حاد و بی‌حسی موضعی'] },
+                    { fa: 'آمیودارون تزریقی', en: 'Amiodarone IV', shape: 'syrup', color: '#38bdf8', uses: ['درمان ایست قلبی با ریتم‌های قابل شوک'] },
+                    { fa: 'ورپامیل تزریقی', en: 'Verapamil IV', shape: 'syrup', color: '#38bdf8', uses: ['کنترل سریع تپش قلب فوق‌بطنی'] },
+                    { fa: 'نیتروپروساید', en: 'Nitroprusside', shape: 'syrup', color: '#e11d48', uses: ['کاهش فوری اورژانس‌های فشارخون بالای کشنده'] },
+                    { fa: 'نیتروگلیسیرین تزریقی', en: 'Nitroglycerin IV', shape: 'syrup', color: '#38bdf8', uses: ['درمان ادم حاد ریه و آنژین ناپایدار'] },
+                    { fa: 'لبتالول تزریقی', en: 'Labetalol IV', shape: 'syrup', color: '#38bdf8', uses: ['کاهش سریع فشارخون در اورژانس سکته'] },
+                    { fa: 'اسمولول', en: 'Esmolol', shape: 'syrup', color: '#38bdf8', uses: ['کنترل فوق‌العاده سریع فشارخون و ضربان قلب'] },
+                    { fa: 'هیدرالازین تزریقی', en: 'Hydralazine IV', shape: 'syrup', color: '#38bdf8', uses: ['کاهش سریع فشارخون اکلامپسی'] },
+                    { fa: 'متیل ارگونوین', en: 'Methylergometrine', shape: 'syrup', color: '#ffffff', uses: ['توقف خونریزی پس از زایمان'] },
+                    { fa: 'اکسی توسین', en: 'Oxytocin', shape: 'syrup', color: '#38bdf8', uses: ['تحریک انقباضات رحم و زایمان'] },
+                    { fa: 'ترانگزامیک اسید اورژانس', en: 'Tranexamic Acid ER', shape: 'syrup', color: '#ffffff', uses: ['کنترل خونریزی‌های شدید تروما'] },
+                    { fa: 'کلرید پتاسیم تزریقی', en: 'Potassium Chloride IV', shape: 'syrup', color: '#ef4444', uses: ['اصلاح اورژانسی کمبود شدید پتاسیم'] },
+                    { fa: 'هایپرتونیک سالین', en: 'Hypertonic Saline', shape: 'syrup', color: '#38bdf8', uses: ['کاهش فشار داخل جمجمه در ضربه مغزی'] },
+                    { fa: 'مانیتول', en: 'Mannitol', shape: 'syrup', color: '#ffffff', uses: ['کاهش ادم مغزی و فشار چشم'] },
+                    { fa: 'فوروزماید تزریقی', en: 'Furosemide IV', shape: 'syrup', color: '#38bdf8', uses: ['تخلیه اورژانسی مایع ریه در نارسایی قلبی'] },
+                    { fa: 'دوپامین اورژانس', en: 'Dopamine ER', shape: 'syrup', color: '#38bdf8', uses: ['پشتیبانی از فشارخون در شوک'] },
+                    { fa: 'دوبوتامین اورژانس', en: 'Dobutamine ER', shape: 'syrup', color: '#38bdf8', uses: ['افزایش برونداد قلب در شوک کاردیوژنیک'] },
+                    { fa: 'نوراپی نفرین اورژانس', en: 'Norepinephrine ER', shape: 'syrup', color: '#38bdf8', uses: ['تنگی عروق و بالابردن فشار در شوک سپتیک'] },
+                    { fa: 'فنیل افدرین تزریقی', en: 'Phenylephrine IV', shape: 'syrup', color: '#38bdf8', uses: ['رفع افت فشارخون حین بیهوشی نخاعی'] },
+                    { fa: 'افدرین تزریقی', en: 'Ephedrine IV', shape: 'syrup', color: '#38bdf8', uses: ['افزایش فشارخون و ضربان قلب'] },
+                    { fa: 'واسوپرسین', en: 'Vasopressin', shape: 'syrup', color: '#38bdf8', uses: ['کنترل شوک مقاوم و ایست قلبی'] },
+                    { fa: 'ترلیپرسین', en: 'Terlipressin', shape: 'syrup', color: '#38bdf8', uses: ['توقف خونریزی واریس مری در سیروز'] },
+                    { fa: 'فنتانیل تزریقی', en: 'Fentanyl IV', shape: 'syrup', color: '#38bdf8', uses: ['تسلی‌بخش شدید در اینتوبه کردن بیمار'] },
+                    { fa: 'مپریدین', en: 'Meperidine', shape: 'syrup', color: '#38bdf8', uses: ['تسکین دردهای شدید و لرز پس از بیهوشی'] },
+                    { fa: 'متوپرولول تزریقی', en: 'Metoprolol IV', shape: 'syrup', color: '#38bdf8', uses: ['کنترل سریع ریتم در سکته قلبی حاد'] },
+                    { fa: 'دیلتیازم تزریقی', en: 'Diltiazem IV', shape: 'syrup', color: '#38bdf8', uses: ['کنترل فیبریلاسیون دهلیزی با پاسخ سریع'] },
+                    { fa: 'آدنوزین تزریقی', en: 'Adenosine IV', shape: 'syrup', color: '#38bdf8', uses: ['قطع آریتمی فوق بطنی (PSVT)'] },
+                    { fa: 'هپارین اورژانس', en: 'Heparin ER', shape: 'syrup', color: '#ffffff', uses: ['ضدانعقاد فوری در آمبولی ریه'] }
+                ]
+            };
+
+            const drugs = [];
+            let globalId = 1;
+
+            CATEGORIES.forEach(cat => {
+                const items = rawCategoryData[cat.id] || [];
+                items.forEach(item => {
+                    let formTitleFa = 'قرص خوراکی';
+                    if (item.shape === 'capsule') formTitleFa = 'کپسول دارویی';
+                    else if (item.shape === 'syrup') formTitleFa = 'شربت / محلول دارویی';
+                    else if (item.shape === 'cream') formTitleFa = 'کرم موضعی';
+                    else if (item.shape === 'gel') formTitleFa = 'ژل شفاف';
+                    else if (item.shape === 'drop') formTitleFa = 'قطره استریل';
+
+                    drugs.push({
+                        id: globalId++,
+                        fa: item.fa,
+                        en: item.en,
+                        cat: cat.id,
+                        shape: item.shape,
+                        color: item.color,
+                        secondaryColor: (item.shape === 'capsule') ? '#ffffff' : item.color,
+                        brands: [`ژنریک ایران`, `${item.en} Brand`],
+                        forms: [formTitleFa, `دوز استاندارد بالینی`],
+                        indications: item.uses,
+                        dosage: 'بر اساس دستور دقیق و نسخه رایج پزشک معالج بالینی.',
+                        mechanism: 'مهار یا تحریک اختصاصی گیرنده‌های بافتی مرتبط در بدن.',
+                        sideCommon: ['عوارض گوارشی یا موضعی خفیف', 'سرگیجه یا خشکی دهان در برخی بیماران'],
+                        sideSevere: ['واکنش‌های شدید حساسیت مفرط دارویی در افراد مستعد'],
+                        pregnancy: 'رده C - مصرف مشروط به ارزیابی دقیق نسبت منفعت به خطر توسط پزشک متخصص.',
+                        contraindications: ['سابقه حساسیت مفرط شناخته‌شده به ترکیب فعال دارویی'],
+                        interactions: [
+                            { drug: 'داروهای هم‌گروه یا ضدانعقادها', severity: 'متوسط', detail: 'امکان نیاز به پایش بالینی و تنظیم دوز در مصرف همزمان.' }
+                        ]
+                    });
+                });
+            });
+
+            return drugs;
+        }
+
+        /* ----------------------------------------------------
+           4. CATEGORY DROPDOWN POPULATION & INITIALIZATION
+        ---------------------------------------------------- */
+        function populateCategoryDropdown(drugsList) {
+            const selectEl = document.getElementById('category-select');
+            if (!selectEl) return;
+
+            try {
+                const catCounts = new Map();
+                CATEGORIES.forEach(c => catCounts.set(c.id, 0));
+
+                (drugsList || []).forEach(d => {
+                    if (d && d.cat && catCounts.has(d.cat)) {
+                        catCounts.set(d.cat, catCounts.get(d.cat) + 1);
+                    }
+                });
+
+                selectEl.innerHTML = '';
+
+                const allOpt = document.createElement('option');
+                allOpt.value = 'all';
+                allOpt.textContent = `همه دسته‌بندی‌ها (${(drugsList || []).length.toLocaleString('fa-IR')} دارو)`;
+                selectEl.appendChild(allOpt);
+
+                CATEGORIES.forEach(cat => {
+                    const count = catCounts.get(cat.id) || 0;
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.textContent = `${cat.name} (${count.toLocaleString('fa-IR')})`;
+                    selectEl.appendChild(opt);
+                });
+            } catch (err) {
+                console.error('خطا در بارگذاری دسته‌بندی‌ها:', err);
+            }
+        }
+
+        /* ----------------------------------------------------
+           5. APP LIFECYCLE & STATE MANAGEMENT
+        ---------------------------------------------------- */
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Initialize Back button guard history trap
+                initHistoryTrap();
+
+                ALL_DRUGS = generate600UniqueClinicalDatabase();
+                
+                // Populate category dropdown
+                populateCategoryDropdown(ALL_DRUGS);
+
+                // Update total database count text
+                const dbCountEl = document.getElementById('total-db-count-text');
+                if (dbCountEl) dbCountEl.textContent = ALL_DRUGS.length.toLocaleString('fa-IR');
+
+                // Load saved bookmarks
+                loadFavoritesFromStorage();
+
+                // Set theme to Light by default
+                if (!document.documentElement.classList.contains('light')) {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.classList.add('light');
+                }
+
+                // Initial render state
+                resetToInitialState();
+
+            } catch (err) {
+                console.error('خطا در راه‌اندازی اولیه برنامه:', err);
+            }
+        });
+
+        function resetToInitialState() {
+            document.getElementById('main-search-input').value = '';
+            document.getElementById('search-clear-btn').classList.add('hidden');
+            document.getElementById('category-select').value = 'all';
+            document.getElementById('sort-select').value = 'fa';
+
+            applyFilters();
+            switchTabUI('explorer');
+        }
+
+        function switchTab(tabName) {
+            if (currentTab === tabName) return;
+
+            if (tabName === 'cabinet') {
+                history.pushState({ drugShenas: true, layer: 'bookmarks' }, '', window.location.href);
+            } else {
+                history.pushState({ drugShenas: true, layer: 'home' }, '', window.location.href);
+            }
+            switchTabUI(tabName);
+        }
+
+        function switchTabUI(tabName) {
+            currentTab = tabName;
+            const explorerSec = document.getElementById('tab-explorer');
+            const cabinetSec = document.getElementById('tab-cabinet');
+            const navBtn = document.getElementById('nav-cabinet');
+
+            if (tabName === 'cabinet') {
+                explorerSec.classList.add('hidden');
+                cabinetSec.classList.remove('hidden');
+                navBtn.classList.add('bg-rose-100', 'dark:bg-rose-950/50', 'text-rose-700');
+                renderCabinetGrid();
+            } else {
+                cabinetSec.classList.add('hidden');
+                explorerSec.classList.remove('hidden');
+                navBtn.classList.remove('bg-rose-100', 'dark:bg-rose-950/50', 'text-rose-700');
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                themeIcon.className = 'fa-solid fa-moon text-sm';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-sun text-sm text-amber-400';
+            }
+        }
+
+        /* ----------------------------------------------------
+           6. SEARCH, FILTER & CARD RENDERING ENGINE
+        ---------------------------------------------------- */
+        function handleSearchInput(val) {
+            const clearBtn = document.getElementById('search-clear-btn');
+            if (val.trim().length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+            applyFilters();
+        }
+
+        function clearSearch() {
+            document.getElementById('main-search-input').value = '';
+            document.getElementById('search-clear-btn').classList.add('hidden');
+            applyFilters();
+        }
+
+        function handleCategorySelect(catVal) {
+            applyFilters();
+        }
+
+        function handleSortSelect(sortVal) {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('main-search-input').value.trim().toLowerCase();
+            const selectedCat = document.getElementById('category-select').value;
+            const sortMode = document.getElementById('sort-select').value;
+
+            const welcomeBox = document.getElementById('initial-welcome-box');
+            const resultsWrapper = document.getElementById('results-wrapper');
+            const noResultsBox = document.getElementById('no-results-box');
+
+            FILTERED_DRUGS = ALL_DRUGS.filter(drug => {
+                const matchesCat = (selectedCat === 'all' || !selectedCat || drug.cat === selectedCat);
+                const matchesQuery = !query || 
+                    drug.fa.toLowerCase().includes(query) || 
+                    drug.en.toLowerCase().includes(query) || 
+                    drug.brands.some(b => b.toLowerCase().includes(query));
+
+                return matchesCat && matchesQuery;
+            });
+
+            if (sortMode === 'fa') {
+                FILTERED_DRUGS.sort((a, b) => a.fa.localeCompare(b.fa, 'fa'));
+            } else if (sortMode === 'en') {
+                FILTERED_DRUGS.sort((a, b) => a.en.localeCompare(b.en));
+            }
+
+            if (FILTERED_DRUGS.length === 0) {
+                resultsWrapper.classList.add('hidden');
+                noResultsBox.classList.remove('hidden');
+                return;
+            }
+
+            noResultsBox.classList.add('hidden');
+            resultsWrapper.classList.remove('hidden');
+
+            document.getElementById('result-count-text').textContent = FILTERED_DRUGS.length.toLocaleString('fa-IR');
+            
+            const catObj = CATEGORIES.find(c => c.id === selectedCat);
+            document.getElementById('active-filter-label').textContent = catObj ? catObj.name : 'همه دسته‌ها';
+
+            currentPage = 1;
+            renderCardsGrid(true);
+        }
+
+        function renderCardsGrid(reset = false) {
+            const grid = document.getElementById('drug-cards-grid');
+            if (reset) grid.innerHTML = '';
+
+            const startIndex = (currentPage - 1) * PAGE_SIZE;
+            const endIndex = Math.min(startIndex + PAGE_SIZE, FILTERED_DRUGS.length);
+            const pagedItems = FILTERED_DRUGS.slice(startIndex, endIndex);
+
+            pagedItems.forEach(drug => {
+                const cardHtml = createDrugCardHtml(drug);
+                grid.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            const loadMoreBtnContainer = document.getElementById('load-more-container');
+            const loadMoreBtnText = document.getElementById('load-more-btn-text');
+            const remaining = FILTERED_DRUGS.length - endIndex;
+
+            if (remaining > 0) {
+                loadMoreBtnContainer.classList.remove('hidden');
+                if (loadMoreBtnText) {
+                    loadMoreBtnText.textContent = `بارگذاری موارد بیشتر (${remaining.toLocaleString('fa-IR')} داروی دیگر)`;
+                }
+            } else {
+                loadMoreBtnContainer.classList.add('hidden');
+            }
+        }
+
+        function loadMoreDrugs() {
+            currentPage++;
+            renderCardsGrid(false);
+        }
+
+        function createDrugCardHtml(drug) {
+            const isFav = FAVORITES.includes(drug.id);
+            const catObj = CATEGORIES.find(c => c.id === drug.cat) || { name: 'عمومی', icon: 'fa-pills' };
+
+            return `
+                <div class="card-spatial glass-spatial rounded-2xl p-4 shadow-3d-sm hover:shadow-3d-md flex flex-col sm:flex-row items-start sm:items-center justify-between w-full border-0 gap-3 group transition">
+                    <div class="flex-grow space-y-1.5 cursor-pointer" onclick="openModal(${drug.id})">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 shadow-3d-sm border-0">
+                                <i class="fa-solid ${catObj.icon} text-teal-500"></i> ${catObj.name}
+                            </span>
+                            <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                                <i class="fa-solid fa-capsules text-teal-500 ml-1"></i> ${drug.forms[0]}
+                            </span>
+                        </div>
+                        
+                        <div class="flex items-baseline gap-2">
+                            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:text-teal-600 dark:group-hover:text-teal-400 transition">
+                                ${drug.fa}
+                            </h3>
+                            <span class="text-xs font-semibold text-slate-400 italic dir-ltr">
+                                (${drug.en})
+                            </span>
+                        </div>
+
+                        <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-1 font-medium">
+                            <strong class="text-teal-600 dark:text-teal-400 font-bold">مصرف اصلی:</strong> ${drug.indications[0]}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                        <button onclick="toggleFavorite(${drug.id}, event)" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950 text-slate-400 hover:text-rose-500 flex items-center justify-center transition shadow-3d-sm border-0 active:scale-95">
+                            <i class="${isFav ? 'fa-solid text-rose-500' : 'fa-regular'} fa-bookmark text-sm"></i>
+                        </button>
+                        <button onclick="openModal(${drug.id})" class="px-3.5 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white text-xs font-bold rounded-xl transition shadow-3d-button active:scale-95 border-0 flex items-center gap-1.5">
+                            <span>جزئیات و ۳بعدی</span>
+                            <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ----------------------------------------------------
+           7. CABINET / BOOKMARKS ENGINE
+        ---------------------------------------------------- */
+        function loadFavoritesFromStorage() {
+            try {
+                const stored = localStorage.getItem('drug_shenas_favs');
+                FAVORITES = stored ? JSON.parse(stored) : [];
+            } catch(e) { FAVORITES = []; }
+            updateFavBadge();
+        }
+
+        function toggleFavorite(id, event) {
+            if (event) event.stopPropagation();
+            const idx = FAVORITES.indexOf(id);
+            if (idx > -1) {
+                FAVORITES.splice(idx, 1);
+            } else {
+                FAVORITES.push(id);
+            }
+            try {
+                localStorage.setItem('drug_shenas_favs', JSON.stringify(FAVORITES));
+            } catch(e) {}
+
+            updateFavBadge();
+            applyFilters();
+            if (currentTab === 'cabinet') renderCabinetGrid();
+            
+            if (isModalOpen && window.currentModalDrugId === id) {
+                updateModalFavBtn(id);
+            }
+        }
+
+        function updateFavBadge() {
+            const badge = document.getElementById('fav-count-badge');
+            if (badge) badge.textContent = FAVORITES.length;
+        }
+
+        function renderCabinetGrid() {
+            const grid = document.getElementById('cabinet-cards-grid');
+            const emptyState = document.getElementById('cabinet-empty-state');
+            grid.innerHTML = '';
+
+            const favDrugs = ALL_DRUGS.filter(d => FAVORITES.includes(d.id));
+
+            if (favDrugs.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            favDrugs.forEach(drug => {
+                grid.insertAdjacentHTML('beforeend', createDrugCardHtml(drug));
+            });
+        }
+
+        function clearAllFavorites() {
+            FAVORITES = [];
+            try { localStorage.removeItem('drug_shenas_favs'); } catch(e) {}
+            updateFavBadge();
+            renderCabinetGrid();
+        }
+
+        /* ----------------------------------------------------
+           8. MODAL CONTROLLER & STRICT VERTICAL ORDER
+        ---------------------------------------------------- */
+        function openModal(id) {
+            history.pushState({ drugShenas: true, layer: 'modal', drugId: id }, '', window.location.href);
+            openModalUI(id);
+        }
+
+        function openModalUI(id) {
+            const drug = ALL_DRUGS.find(d => d.id === id);
+            if (!drug) return;
+
+            window.currentModalDrugId = id;
+            isModalOpen = true;
+
+            const catObj = CATEGORIES.find(c => c.id === drug.cat) || { name: 'عمومی' };
+            document.getElementById('modal-category-badge').textContent = catObj.name;
+
+            const titleFa = document.getElementById('modal-title-fa');
+            titleFa.textContent = drug.fa;
+            titleFa.onclick = () => openModal(id);
+
+            const titleEn = document.getElementById('modal-title-en');
+            titleEn.textContent = drug.en;
+            titleEn.onclick = () => openModal(id);
+
+            updateModalFavBtn(id);
+
+            // 1. PRIMARY INDICATIONS / MAIN USES (FIRST CLINICAL BOX IMMEDIATELY AFTER 3D VIEWER)
+            const indicationsList = document.getElementById('modal-indications');
+            indicationsList.innerHTML = drug.indications.map(ind => `<li>${ind}</li>`).join('');
+
+            // 2. General Information & Clinical Forms
+            document.getElementById('modal-brands').innerHTML = drug.brands.map(b => `<span class="px-2.5 py-1 rounded-xl bg-white dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-3d-sm border-0">${b}</span>`).join('');
+            document.getElementById('modal-forms').innerHTML = drug.forms.map(f => `<span class="px-2.5 py-1 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-xs font-bold text-teal-700 dark:text-teal-300 shadow-3d-sm border-0">${f}</span>`).join('');
+            document.getElementById('modal-dosage').textContent = drug.dosage;
+
+            // 3. Mechanism of Action
+            document.getElementById('modal-mechanism').textContent = drug.mechanism;
+
+            // 4. Side Effects & Warnings
+            document.getElementById('modal-side-common').innerHTML = drug.sideCommon.map(s => `<li>${s}</li>`).join('');
+            document.getElementById('modal-side-severe').innerHTML = drug.sideSevere.map(s => `<li>${s}</li>`).join('');
+
+            // 5. Pregnancy, Lactation & Contraindications
+            document.getElementById('modal-pregnancy').textContent = drug.pregnancy;
+            document.getElementById('modal-contraindications').innerHTML = drug.contraindications.map(c => `<li>${c}</li>`).join('');
+
+            // 6. Drug Interactions
+            document.getElementById('modal-interactions-list').innerHTML = drug.interactions.map(inter => `
+                <div class="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl shadow-3d-sm space-y-1 border-0">
+                    <div class="flex items-center justify-between text-xs font-bold">
+                        <span class="text-slate-800 dark:text-slate-200">${inter.drug}</span>
+                        <span class="px-2 py-0.5 rounded-lg text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-bold border-0 shadow-sm">${inter.severity}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">${inter.detail}</p>
+                </div>
+            `).join('');
+
+            // Show Modal Container
+            document.getElementById('drug-detail-modal').classList.remove('hidden');
+
+            // Initialize Three.js 3D Model Studio
+            setTimeout(() => {
+                init3DStudio(drug);
+            }, 60);
+        }
+
+        function updateModalFavBtn(id) {
+            const favBtn = document.getElementById('modal-fav-btn');
+            const isFav = FAVORITES.includes(id);
+            favBtn.innerHTML = `<i class="${isFav ? 'fa-solid text-rose-500' : 'fa-regular'} fa-bookmark text-base"></i>`;
+            favBtn.onclick = (e) => toggleFavorite(id, e);
+        }
+
+        function closeModal() {
+            closeModalUI();
+            if (history.state && history.state.layer === 'modal') {
+                history.back();
+            }
+        }
+
+        function closeModalUI() {
+            isModalOpen = false;
+            document.getElementById('drug-detail-modal').classList.add('hidden');
+            stop3DAnimation();
+        }
+
+        /* ----------------------------------------------------
+           9. THREE.JS 3D PBR STUDIO ENGINE
+        ---------------------------------------------------- */
+        function init3DStudio(drug) {
+            const wrapper = document.getElementById('canvas-3d-wrapper');
+            if (!wrapper) return;
+
+            stop3DAnimation();
+            wrapper.innerHTML = '';
+
+            const width = wrapper.clientWidth || 320;
+            const height = wrapper.clientHeight || 176;
+
+            scene3D = new THREE.Scene();
+            scene3D.background = new THREE.Color(0x0b132b);
+
+            camera3D = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+            camera3D.position.set(0, 0, 4.4);
+
+            renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer3D.setSize(width, height);
+            renderer3D.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer3D.outputEncoding = THREE.sRGBEncoding;
+            renderer3D.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer3D.toneMappingExposure = 1.1;
+            wrapper.appendChild(renderer3D.domElement);
+
+            // Neutral White Studio Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+            scene3D.add(ambientLight);
+
+            const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+            keyLight.position.set(3, 5, 4);
+            scene3D.add(keyLight);
+
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.45);
+            fillLight.position.set(-3, -2, -3);
+            scene3D.add(fillLight);
+
+            const rimLight = new THREE.DirectionalLight(0xe0f2fe, 0.6);
+            rimLight.position.set(0, 4, -5);
+            scene3D.add(rimLight);
+
+            // Studio Soft Shadow Disc
+            const shadowDiscGeo = new THREE.CircleGeometry(1.6, 32);
+            const shadowDiscMat = new THREE.MeshBasicMaterial({ color: 0x030712, transparent: true, opacity: 0.35 });
+            const shadowDisc = new THREE.Mesh(shadowDiscGeo, shadowDiscMat);
+            shadowDisc.rotation.x = -Math.PI / 2;
+            shadowDisc.position.y = -1.1;
+            scene3D.add(shadowDisc);
+
+            // Build Geometry
+            mesh3D = createDrug3DMesh(drug);
+            if (mesh3D) scene3D.add(mesh3D);
+
+            targetRotation = { x: 0, y: 0 };
+            currentRotation = { x: 0, y: 0 };
+
+            setup3DInteractions(wrapper);
+            animate3DLoop();
+        }
+
+        function createDrug3DMesh(drug) {
+            const group = new THREE.Group();
+            const primaryColor = new THREE.Color(drug.color || '#ffffff');
+            const secondaryColor = new THREE.Color(drug.secondaryColor || '#3b82f6');
+
+            if (drug.shape === 'capsule') {
+                const capGeo = new THREE.CylinderGeometry(0.505, 0.505, 0.75, 48);
+                const capMat = new THREE.MeshStandardMaterial({ color: primaryColor, roughness: 0.15, metalness: 0.05 });
+                const capMesh = new THREE.Mesh(capGeo, capMat);
+                capMesh.position.y = 0.32;
+
+                const topDomeGeo = new THREE.SphereGeometry(0.505, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2);
+                const topDomeMesh = new THREE.Mesh(topDomeGeo, capMat);
+                topDomeMesh.position.y = 0.695;
+
+                const bodyGeo = new THREE.CylinderGeometry(0.485, 0.485, 0.8, 48);
+                const bodyMat = new THREE.MeshStandardMaterial({ color: secondaryColor, roughness: 0.15, metalness: 0.05 });
+                const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+                bodyMesh.position.y = -0.3;
+
+                const bottomDomeGeo = new THREE.SphereGeometry(0.485, 48, 24, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                const bottomDomeMesh = new THREE.Mesh(bottomDomeGeo, bodyMat);
+                bottomDomeMesh.position.y = -0.7;
+
+                const ringGeo = new THREE.TorusGeometry(0.51, 0.015, 16, 48);
+                const ringMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.65 });
+                const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                ringMesh.rotation.x = Math.PI / 2;
+                ringMesh.position.y = -0.055;
+
+                group.add(bodyMesh, bottomDomeMesh, capMesh, topDomeMesh, ringMesh);
+                group.rotation.z = Math.PI / 6;
+            }
+            else if (drug.shape === 'syrup') {
+                const points = [];
+                points.push(new THREE.Vector2(0, -0.9));
+                points.push(new THREE.Vector2(0.48, -0.9));
+                points.push(new THREE.Vector2(0.5, -0.85));
+                points.push(new THREE.Vector2(0.5, 0.35));
+                points.push(new THREE.Vector2(0.42, 0.55));
+                points.push(new THREE.Vector2(0.25, 0.62));
+                points.push(new THREE.Vector2(0.25, 0.82));
+                points.push(new THREE.Vector2(0.28, 0.84));
+                points.push(new THREE.Vector2(0.28, 0.9));
+                points.push(new THREE.Vector2(0.22, 0.9));
+
+                const bottleGeo = new THREE.LatheGeometry(points, 48);
+                const bottleMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x92400e,
+                    transmission: 0.72,
+                    opacity: 0.95,
+                    transparent: true,
+                    roughness: 0.15,
+                    metalness: 0.05,
+                    ior: 1.52
+                });
+                const bottleMesh = new THREE.Mesh(bottleGeo, bottleMat);
+
+                const liquidGeo = new THREE.CylinderGeometry(0.47, 0.47, 0.9, 36);
+                const liquidMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.2 });
+                const liquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
+                liquidMesh.position.y = -0.38;
+
+                const capGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.22, 36);
+                const capMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+                const capMesh = new THREE.Mesh(capGeo, capMat);
+                capMesh.position.y = 0.96;
+
+                group.add(bottleMesh, liquidMesh, capMesh);
+            }
+            else if (drug.shape === 'drop') {
+                const points = [];
+                points.push(new THREE.Vector2(0, -0.75));
+                points.push(new THREE.Vector2(0.42, -0.75));
+                points.push(new THREE.Vector2(0.44, -0.7));
+                points.push(new THREE.Vector2(0.44, 0.15));
+                points.push(new THREE.Vector2(0.35, 0.35));
+                points.push(new THREE.Vector2(0.22, 0.45));
+                points.push(new THREE.Vector2(0.22, 0.65));
+                points.push(new THREE.Vector2(0.08, 0.92));
+                points.push(new THREE.Vector2(0.04, 0.95));
+                points.push(new THREE.Vector2(0, 0.95));
+
+                const bottleGeo = new THREE.LatheGeometry(points, 48);
+                const bottleMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x0284c7,
+                    transmission: 0.8,
+                    opacity: 0.92,
+                    transparent: true,
+                    roughness: 0.12,
+                    ior: 1.48
+                });
+                const bottleMesh = new THREE.Mesh(bottleGeo, bottleMat);
+
+                const capGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.24, 36);
+                const capMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+                const capMesh = new THREE.Mesh(capGeo, capMat);
+                capMesh.position.y = 0.52;
+
+                const teatGeo = new THREE.SphereGeometry(0.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+                const teatMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+                const teatMesh = new THREE.Mesh(teatGeo, teatMat);
+                teatMesh.scale.set(1, 1.4, 1);
+                teatMesh.position.y = 0.64;
+
+                const dropPoints = [];
+                for (let i = 0; i <= 20; i++) {
+                    const t = i / 20;
+                    const y = -t * 0.35;
+                    const r = Math.sin(t * Math.PI) * 0.09 * (1 - t * 0.4);
+                    dropPoints.push(new THREE.Vector2(r, y));
+                }
+                const dropGeo = new THREE.LatheGeometry(dropPoints, 24);
+                const dropMat = new THREE.MeshPhysicalMaterial({
+                    color: 0x38bdf8,
+                    transmission: 0.95,
+                    roughness: 0.02,
+                    transparent: true
+                });
+                const dropMesh = new THREE.Mesh(dropGeo, dropMat);
+                dropMesh.position.set(0, -0.85, 0);
+
+                group.add(bottleMesh, capMesh, teatMesh, dropMesh);
+            }
+            else if (drug.shape === 'gel') {
+                const points = [];
+                points.push(new THREE.Vector2(0, -0.85));
+                points.push(new THREE.Vector2(0.42, -0.75));
+                points.push(new THREE.Vector2(0.45, 0.4));
+                points.push(new THREE.Vector2(0.3, 0.55));
+                points.push(new THREE.Vector2(0.18, 0.6));
+                points.push(new THREE.Vector2(0.18, 0.82));
+                points.push(new THREE.Vector2(0, 0.82));
+
+                const tubeGeo = new THREE.LatheGeometry(points, 48);
+                const tubeMat = new THREE.MeshPhysicalMaterial({
+                    color: primaryColor,
+                    transmission: 0.82,
+                    opacity: 0.92,
+                    transparent: true,
+                    roughness: 0.1,
+                    metalness: 0.05,
+                    ior: 1.45
+                });
+                const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+
+                const capGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.25, 6);
+                const capMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.3, metalness: 0.2 });
+                const capMesh = new THREE.Mesh(capGeo, capMat);
+                capMesh.position.y = 0.72;
+
+                const dollopGeo = new THREE.SphereGeometry(0.24, 24, 24);
+                const dollopMat = new THREE.MeshPhysicalMaterial({
+                    color: primaryColor,
+                    transmission: 0.9,
+                    roughness: 0.05,
+                    transparent: true,
+                    ior: 1.33
+                });
+                const dollopMesh = new THREE.Mesh(dollopGeo, dollopMat);
+                dollopMesh.scale.set(1.4, 0.65, 1.0);
+                dollopMesh.position.set(0.62, -0.75, 0.15);
+
+                group.add(tubeMesh, capMesh, dollopMesh);
+                group.rotation.z = -Math.PI / 6;
+            }
+            else if (drug.shape === 'cream') {
+                const points = [];
+                points.push(new THREE.Vector2(0, -0.85));
+                points.push(new THREE.Vector2(0.44, -0.75));
+                points.push(new THREE.Vector2(0.44, 0.4));
+                points.push(new THREE.Vector2(0.28, 0.55));
+                points.push(new THREE.Vector2(0.18, 0.6));
+                points.push(new THREE.Vector2(0.18, 0.8));
+                points.push(new THREE.Vector2(0, 0.8));
+
+                const tubeGeo = new THREE.LatheGeometry(points, 48);
+                const tubeMat = new THREE.MeshStandardMaterial({
+                    color: primaryColor,
+                    roughness: 0.25,
+                    metalness: 0.35
+                });
+                const tubeMesh = new THREE.Mesh(tubeGeo, tubeMat);
+
+                const crimpGeo = new THREE.BoxGeometry(0.86, 0.08, 0.06);
+                const crimpMesh = new THREE.Mesh(crimpGeo, tubeMat);
+                crimpMesh.position.y = -0.82;
+
+                const capGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.24, 24);
+                const capMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+                const capMesh = new THREE.Mesh(capGeo, capMat);
+                capMesh.position.y = 0.72;
+
+                const dollopGeo = new THREE.SphereGeometry(0.22, 24, 24);
+                const dollopMat = new THREE.MeshStandardMaterial({
+                    color: 0xfffbeb,
+                    roughness: 0.6,
+                    metalness: 0.0
+                });
+                const dollopMesh = new THREE.Mesh(dollopGeo, dollopMat);
+                dollopMesh.scale.set(1.3, 0.7, 1.0);
+                dollopMesh.position.set(0.62, -0.75, 0.15);
+
+                group.add(tubeMesh, crimpMesh, capMesh, dollopMesh);
+                group.rotation.z = -Math.PI / 6;
+            }
+            else {
+                // BEVELED CLINICAL TABLET WITH SCORE LINE (Pure Clinical White #ffffff)
+                const tabletRadius = 0.75;
+                const tabletHeight = 0.34;
+                const points = [];
+                
+                points.push(new THREE.Vector2(0, -tabletHeight / 2));
+                points.push(new THREE.Vector2(tabletRadius - 0.1, -tabletHeight / 2));
+                points.push(new THREE.Vector2(tabletRadius, -tabletHeight / 4));
+                points.push(new THREE.Vector2(tabletRadius, tabletHeight / 4));
+                points.push(new THREE.Vector2(tabletRadius - 0.1, tabletHeight / 2));
+                points.push(new THREE.Vector2(0, tabletHeight / 2));
+
+                const tabletGeo = new THREE.LatheGeometry(points, 48);
+                const tabletMat = new THREE.MeshStandardMaterial({
+                    color: primaryColor,
+                    roughness: 0.2,
+                    metalness: 0.05
+                });
+                const tabletMesh = new THREE.Mesh(tabletGeo, tabletMat);
+
+                const scoreGeo = new THREE.BoxGeometry(1.3, 0.035, 0.04);
+                const scoreMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.5 });
+                const scoreMesh = new THREE.Mesh(scoreGeo, scoreMat);
+                scoreMesh.position.y = tabletHeight / 2 + 0.005;
+
+                group.add(tabletMesh, scoreMesh);
+                group.rotation.x = Math.PI / 3;
+            }
+
+            return group;
+        }
+
+        function setup3DInteractions(element) {
+            isDragging3D = false;
+
+            const onStart = (x, y) => {
+                isDragging3D = true;
+                previousMousePosition = { x, y };
+            };
+
+            const onMove = (x, y) => {
+                if (!isDragging3D) return;
+                const deltaX = x - previousMousePosition.x;
+                const deltaY = y - previousMousePosition.y;
+
+                targetRotation.y += deltaX * 0.012;
+                targetRotation.x += deltaY * 0.012;
+
+                previousMousePosition = { x, y };
+            };
+
+            const onEnd = () => { isDragging3D = false; };
+
+            element.onmousedown = (e) => onStart(e.clientX, e.clientY);
+            window.onmousemove = (e) => onMove(e.clientX, e.clientY);
+            window.onmouseup = onEnd;
+
+            element.ontouchstart = (e) => {
+                if (e.touches.length === 1) onStart(e.touches[0].clientX, e.touches[0].clientY);
+            };
+            window.ontouchmove = (e) => {
+                if (e.touches.length === 1) onMove(e.touches[0].clientX, e.touches[0].clientY);
+            };
+            window.ontouchend = onEnd;
+        }
+
+        function reset3dCamera() {
+            targetRotation = { x: 0, y: 0 };
+        }
+
+        function animate3DLoop() {
+            animationFrameId = requestAnimationFrame(animate3DLoop);
+
+            if (mesh3D) {
+                if (!isDragging3D) {
+                    targetRotation.y += 0.008;
+                }
+
+                currentRotation.x += (targetRotation.x - currentRotation.x) * 0.1;
+                currentRotation.y += (targetRotation.y - currentRotation.y) * 0.1;
+
+                mesh3D.rotation.x = currentRotation.x;
+                mesh3D.rotation.y = currentRotation.y;
+            }
+
+            if (renderer3D && scene3D && camera3D) {
+                renderer3D.render(scene3D, camera3D);
+            }
+        }
+
+        function stop3DAnimation() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            if (renderer3D && renderer3D.domElement) {
+                renderer3D.domElement.remove();
+                renderer3D.dispose();
+                renderer3D = null;
+            }
+        }
+    </script>
+</body>
+</html>
