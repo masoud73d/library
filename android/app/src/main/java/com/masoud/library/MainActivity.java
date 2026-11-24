@@ -24,6 +24,9 @@ import android.webkit.JavascriptInterface;
 import android.content.Intent;
 import android.content.ActivityNotFoundException;
 import android.net.Uri;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.webkit.GeolocationPermissions;
 
 public class MainActivity extends Activity {
@@ -31,6 +34,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private WebView popupWebView;
+    private boolean offlineFallbackLoaded = false;
     private ValueCallback<Uri[]> filePathCallback;
     private GeolocationPermissions.Callback pendingGeoCallback;
     private String pendingGeoOrigin;
@@ -94,6 +98,26 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidApp");
 
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request,
+                    android.webkit.WebResourceError error) {
+                if (request.isForMainFrame()
+                        && request.getUrl() != null
+                        && (request.getUrl().getScheme().equals("http")
+                            || request.getUrl().getScheme().equals("https"))
+                        && !offlineFallbackLoaded) {
+                    offlineFallbackLoaded = true;
+                    view.loadUrl("file:///android_asset/offline/index.html");
+                }
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (url != null && url.startsWith(WEBSITE_URL)) {
+                    offlineFallbackLoaded = false;
+                }
+            }
 
             @Override
             public boolean shouldOverrideUrlLoading(
@@ -229,7 +253,26 @@ public class MainActivity extends Activity {
             }
         });
 
-        webView.loadUrl(WEBSITE_URL + "?refresh=" + System.currentTimeMillis());
+        if (isNetworkAvailable()) {
+            webView.loadUrl(WEBSITE_URL + "?refresh=" + System.currentTimeMillis());
+        } else {
+            offlineFallbackLoaded = true;
+            webView.loadUrl("file:///android_asset/offline/index.html");
+        }
+    }
+
+    private boolean isNetworkAvailable() {
+        try {
+            ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (cm == null) return false;
+            Network active = cm.getActiveNetwork();
+            if (active == null) return false;
+            NetworkCapabilities caps = cm.getNetworkCapabilities(active);
+            return caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void openExternalUrl(Uri uri) {
@@ -367,6 +410,11 @@ public class MainActivity extends Activity {
 
         private String firstNonEmpty(String first, String second) {
             return first != null && !first.trim().isEmpty() ? first : (second == null ? "" : second);
+        }
+
+        @JavascriptInterface
+        public boolean isNetworkAvailable() {
+            return MainActivity.this.isNetworkAvailable();
         }
 
         @JavascriptInterface
