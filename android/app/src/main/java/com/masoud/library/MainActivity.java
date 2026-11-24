@@ -521,8 +521,8 @@ public class MainActivity extends Activity {
                     info.put("batteryChargeCounterUah",
                             chargeCounter == Integer.MIN_VALUE ? -1 : chargeCounter);
                 }
-                // Read the design capacity exposed by the Android power-supply driver.
-                // Many manufacturers restrict this sysfs value; -1 means unavailable.
+                // Read the design capacity exposed by common Android power-supply driver paths.
+                // Many manufacturers restrict these sysfs values; -1 means unavailable.
                 info.put("batteryCapacityMah", readBatteryDesignCapacityMah());
 
                 return info.toString();
