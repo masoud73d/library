@@ -29,6 +29,9 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraCharacteristics;
+import android.util.Size;
 import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
@@ -377,6 +380,57 @@ public class MainActivity extends Activity {
     }
 
     private class AndroidBridge {
+
+        @JavascriptInterface
+        public String getCameraHardwareInfo() {
+            org.json.JSONArray result = new org.json.JSONArray();
+            try {
+                CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
+                if (manager == null) return result.toString();
+                for (String logicalId : manager.getCameraIdList()) {
+                    CameraCharacteristics logical = manager.getCameraCharacteristics(logicalId);
+                    java.util.Set<String> physicalIds = Build.VERSION.SDK_INT >=  physicalIdsApiLevel()
+                            ? logical.getPhysicalCameraIds() : java.util.Collections.<String>emptySet();
+                    if (physicalIds != null && !physicalIds.isEmpty()) {
+                        for (String physicalId : physicalIds) {
+                            try {
+                                result.put(cameraInfo(manager.getCameraCharacteristics(physicalId), physicalId, logicalId, true));
+                            } catch (Exception ignored) { }
+                        }
+                    } else {
+                        result.put(cameraInfo(logical, logicalId, logicalId, false));
+                    }
+                }
+            } catch (Exception ignored) { }
+            return result.toString();
+        }
+
+        private int physicalIdsApiLevel() { return Build.VERSION_CODES.P; }
+
+        private JSONObject cameraInfo(CameraCharacteristics c, String id, String parent, boolean physical) throws Exception {
+            JSONObject item = new JSONObject();
+            item.put("id", id);
+            item.put("logicalCameraId", parent);
+            item.put("physical", physical);
+            Integer facing = c.get(CameraCharacteristics.LENS_FACING);
+            item.put("facing", facing == null ? -1 : facing);
+            Size pixels = c.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
+            if (pixels != null) {
+                item.put("width", pixels.getWidth());
+                item.put("height", pixels.getHeight());
+                item.put("megapixels", Math.round((pixels.getWidth() * (double)pixels.getHeight()) / 100000.0) / 10.0);
+            }
+            float[] focal = c.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+            org.json.JSONArray focalArray = new org.json.JSONArray();
+            if (focal != null) for (float value : focal) focalArray.put(Math.round(value * 100.0) / 100.0);
+            item.put("focalLengthsMm", focalArray);
+            android.util.SizeF sensor = c.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+            if (sensor != null) {
+                item.put("sensorWidthMm", Math.round(sensor.getWidth() * 100.0) / 100.0);
+                item.put("sensorHeightMm", Math.round(sensor.getHeight() * 100.0) / 100.0);
+            }
+            return item;
+        }
 
         @JavascriptInterface
         public String getNativeDeviceInfo() {
