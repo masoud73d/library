@@ -67,7 +67,8 @@ jobs:
       # Keep the same visual library and its calendar available from APK assets.
       - name: Prepare offline Android assets
         run: |
-          set -e
+          set -Eeuo pipefail
+          trap 'status=$?; echo "::error::Offline asset preparation failed at line ${LINENO}: ${BASH_COMMAND} (exit ${status})"; exit "$status"' ERR
           ROOT="android/app/src/main/assets/offline"
           mkdir -p "$ROOT/tools" "$ROOT/vendor"
           cp index.html "$ROOT/index.html"
@@ -96,10 +97,10 @@ jobs:
           )
           for slug in "${!TOOLS[@]}"; do
             mkdir -p "$ROOT/tools/$slug"
-            curl -fLsS "https://raw.githubusercontent.com/masoud73d/$slug/HEAD/index.html" -o "$ROOT/tools/$slug/index.html"
+            curl -fLsS "https://raw.githubusercontent.com/masoud73d/$slug/main/index.html" -o "$ROOT/tools/$slug/index.html"
           done
           for file in provinces.json cities.json counties.json county-centers.json; do
-            curl -fLsS "https://raw.githubusercontent.com/masoud73d/fasle-yab/HEAD/$file" -o "$ROOT/tools/fasle-yab/$file"
+            curl -fLsS "https://raw.githubusercontent.com/masoud73d/fasle-yab/main/$file" -o "$ROOT/tools/fasle-yab/$file"
           done
           # Vendor browser libraries so the core tools do not depend on a CDN at runtime.
           curl -fLsS https://cdn.tailwindcss.com -o "$ROOT/vendor/tailwind.js"
