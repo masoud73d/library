@@ -135,14 +135,21 @@ jobs:
           from pathlib import Path
           p = Path("android/app/src/main/assets/offline/tools/Text-reader/index.html")
           s = p.read_text(encoding="utf-8")
-          needle = 'Tesseract.createWorker("fas+eng", 1, {'
+          needle = 'if (!window.Tesseract) throw new Error("موتور OCR در دسترس نیست.");'
           if needle not in s:
-              raise SystemExit("Could not find OCR worker configuration in bundled Text-reader")
-          replacement = """Tesseract.createWorker("fas+eng", 1, {
-                    workerPath: "../../vendor/tesseract/worker.min.js",
-                    corePath: "../../vendor/tesseract",
-                    langPath: "../../vendor/tessdata",
-                    gzip: true,"""
+              raise SystemExit("Could not find OCR initialization point in bundled Text-reader")
+          replacement = """if (!window.Tesseract) throw new Error("موتور OCR در دسترس نیست.");
+                  if (!window.Tesseract.__offlinePathsConfigured) {
+                    const originalCreateWorker = window.Tesseract.createWorker.bind(window.Tesseract);
+                    window.Tesseract.createWorker = (langs, oem, options = {}) => originalCreateWorker(langs, oem, {
+                      ...options,
+                      workerPath: "../../vendor/tesseract/worker.min.js",
+                      corePath: "../../vendor/tesseract",
+                      langPath: "../../vendor/tessdata",
+                      gzip: true
+                    });
+                    window.Tesseract.__offlinePathsConfigured = true;
+                  }"""
           p.write_text(s.replace(needle, replacement, 1), encoding="utf-8")
           PY
           sed -i "s#https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json#./devices.json#g" "$ROOT/tools/etela-ate-system-/index.html"
