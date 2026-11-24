@@ -836,14 +836,17 @@
                 const nativeInfo = readNativeDeviceInfo(true) || {};
                 const modelHints = [
                     nativeInfo.model, nativeInfo.device, nativeInfo.product,
+                    nativeInfo.hardware, nativeInfo.brand, nativeInfo.manufacturer,
                     navigator.userAgent || ''
-                ].join(' ').toUpperCase();
+                ].filter(Boolean).join(' ').toUpperCase()
+                    .replace(/[._-]+/g, ' ').replace(/\\s+/g, ' ').trim();
 
-                // Official specification for Redmi Note 13 Pro 5G, model family 2312DRA50.
+                // Verified manufacturer profile for Redmi Note 13 Pro 5G.
+                // Match both Xiaomi's hardware model code and Android's marketing name.
                 const isRedmiNote13Pro5G =
-                    modelHints.includes('2312DRA50G') ||
-                    modelHints.includes('2312DRA50C') ||
-                    modelHints.includes('REDMI NOTE 13 PRO 5G');
+                    /2312DRA50[GC]/.test(modelHints.replace(/\\s/g, '')) ||
+                    modelHints.includes('REDMI NOTE 13 PRO 5G') ||
+                    (modelHints.includes('REDMI') && modelHints.includes('NOTE 13 PRO') && modelHints.includes('5G'));
 
                 if (isRedmiNote13Pro5G) {
                     const verifiedCameras = [
