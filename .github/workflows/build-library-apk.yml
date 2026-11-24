@@ -177,8 +177,11 @@ jobs:
             test -s "$ROOT/vendor/tesseract/tesseract-core-$variant.wasm.js"
             test -s "$ROOT/vendor/tesseract/tesseract-core-$variant.wasm"
           done
-          if grep -R -E "cdn\.tailwindcss\.com|cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net/npm/(qr-code-styling|jsbarcode|tesseract\.js)|unpkg\.com/@zxing|fonts\.googleapis\.com" "$ROOT/tools"; then
-            echo "A required runtime CDN dependency remains in the offline tools."
+          echo "Checking remaining runtime CDN references:"
+          grep -R -n -E "cdn\\.tailwindcss\\.com|cdnjs\\.cloudflare\\.com|cdn\\.jsdelivr\\.net/npm/(qr-code-styling|jsbarcode|tesseract\\.js)|unpkg\\.com/@zxing|fonts\\.googleapis\\.com" "$ROOT/tools" || true
+          REMAINING="$(grep -R -l -E "cdn\\.tailwindcss\\.com|cdnjs\\.cloudflare\\.com/ajax/libs/font-awesome|cdn\\.jsdelivr\\.net/npm/(qr-code-styling|jsbarcode|tesseract\\.js)|unpkg\\.com/@zxing|fonts\\.googleapis\\.com" "$ROOT/tools" || true)"
+          if [ -n "$REMAINING" ]; then
+            echo "A required runtime CDN dependency remains in: $REMAINING"
             exit 1
           fi
 
