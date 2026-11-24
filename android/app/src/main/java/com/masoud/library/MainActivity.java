@@ -521,11 +521,34 @@ public class MainActivity extends Activity {
                     info.put("batteryChargeCounterUah",
                             chargeCounter == Integer.MIN_VALUE ? -1 : chargeCounter);
                 }
+                // Read the design capacity exposed by the Android power-supply driver.
+                // Many manufacturers restrict this sysfs value; -1 means unavailable.
+                info.put("batteryCapacityMah", readBatteryDesignCapacityMah());
 
                 return info.toString();
             } catch (Exception e) {
                 return "{}";
             }
+        }
+
+        private int readBatteryDesignCapacityMah() {
+            String[] paths = {
+                    "/sys/class/power_supply/battery/charge_full_design",
+                    "/sys/class/power_supply/Battery/charge_full_design",
+                    "/sys/class/power_supply/bms/charge_full_design",
+                    "/sys/class/power_supply/battery/charge_full"
+            };
+            for (String path : paths) {
+                try (java.io.BufferedReader reader =
+                             new java.io.BufferedReader(new java.io.FileReader(path))) {
+                    String raw = reader.readLine();
+                    if (raw == null) continue;
+                    long value = Long.parseLong(raw.trim());
+                    long mah = value > 100000 ? Math.round(value / 1000.0) : value;
+                    if (mah >= 500 && mah <= 30000) return (int) mah;
+                } catch (Exception ignored) { }
+            }
+            return -1;
         }
 
         private String firstNonEmpty(String first, String second) {
