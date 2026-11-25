@@ -707,10 +707,56 @@ function getReader() {
     if (ZXing.DecodeHintType && ZXing.DecodeHintType.ALSO_INVERTED) {
       hints.set(ZXing.DecodeHintType.ALSO_INVERTED, true);
     }
+    // Persian and other non-Latin QR text is commonly stored as UTF-8 bytes.
+    if (ZXing.DecodeHintType && ZXing.DecodeHintType.CHARACTER_SET) {
+      hints.set(ZXing.DecodeHintType.CHARACTER_SET, "UTF-8");
+    }
     scanReader = new ZXing.BrowserMultiFormatReader(hints);
   }
 
   return scanReader;
+}
+
+function getQRDecodedText(result) {
+  const fallbackText = result.getText();
+
+  try {
+    const metadata = typeof result.getResultMetadata === "function"
+      ? result.getResultMetadata()
+      : null;
+    const byteSegmentsKey = ZXing.ResultMetadataType &&
+      ZXing.ResultMetadataType.BYTE_SEGMENTS !== undefined
+        ? ZXing.ResultMetadataType.BYTE_SEGMENTS
+        : 2;
+    const segments = metadata && typeof metadata.get === "function"
+      ? metadata.get(byteSegmentsKey)
+      : null;
+
+    if (!segments || !segments.length || typeof TextDecoder === "undefined") {
+      return fallbackText;
+    }
+
+    // BYTE_SEGMENTS contains the original QR byte-mode payload, before
+    // ZXing converts it to a display string using charset heuristics.
+    const chunks = Array.from(segments, segment =>
+      segment instanceof Uint8Array ? segment : new Uint8Array(segment)
+    );
+    const byteLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    const bytes = new Uint8Array(byteLength);
+    let offset = 0;
+
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    const utf8Text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    return utf8Text || fallbackText;
+  } catch (error) {
+    // Keep compatibility with QR codes that use a legacy/non-UTF-8 charset.
+    console.warn("QR UTF-8 decoding fallback:", error);
+    return fallbackText;
+  }
 }
 
 async function decodeImage(file, kind) {
@@ -764,7 +810,9 @@ async function decodeImage(file, kind) {
       result = await reader.decodeFromCanvas(canvas);
     }
 
-    const text = result.getText();
+    const text = kind === "qr"
+      ? getQRDecodedText(result)
+      : result.getText();
     const format = String(result.getBarcodeFormat());
 
     if (kind === "qr") {
