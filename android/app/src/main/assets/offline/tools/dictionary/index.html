@@ -116,6 +116,7 @@ const pauseSpeakBtn=document.getElementById('pauseSpeakBtn');
 const stopSpeakBtn=document.getElementById('stopSpeakBtn');
 const speechSupported=typeof window!=='undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 let speechAttempt=0;
+window.LibrarySpeechStatus=function(message){setStatus(message)};
 function getAvailableVoices(){
   return new Promise(resolve=>{
     let voices=window.speechSynthesis.getVoices();
@@ -141,10 +142,14 @@ function voiceForLanguage(voices,lang,online){
 async function speakOutput(){
   const spokenText=output.value.trim();
   if(!spokenText){setStatus('ابتدا متن را ترجمه کنید تا خوانده شود.');return}
+  const lang=target.value==='zh'?'zh-CN':target.value;
+  if(window.AndroidApp && typeof window.AndroidApp.speakText==='function'){
+    window.AndroidApp.speakText(spokenText,lang);
+    return;
+  }
   if(!speechSupported){setStatus('موتور خواندن متن در این مرورگر در دسترس نیست.');return}
   window.speechSynthesis.cancel();
   const attempt=++speechAttempt;
-  const lang=target.value==='zh'?'zh-CN':target.value;
   const voices=await getAvailableVoices();
   if(attempt!==speechAttempt)return;
   const localVoice=voiceForLanguage(voices,lang,false);
@@ -184,6 +189,10 @@ function playWithVoice(voice,spokenText,lang,attempt,onFailure,isOnline=false){
 }
 speakBtn.addEventListener('click',speakOutput);
 pauseSpeakBtn.addEventListener('click',()=>{
+  if(window.AndroidApp && typeof window.AndroidApp.toggleSpeechPause==='function'){
+    window.AndroidApp.toggleSpeechPause();
+    return;
+  }
   if(!speechSupported)return;
   if(window.speechSynthesis.paused){window.speechSynthesis.resume();setStatus('خواندن متن ادامه پیدا کرد.')}
   else if(window.speechSynthesis.speaking){window.speechSynthesis.pause();setStatus('خواندن متن موقتاً مکث شد.')}
@@ -191,6 +200,7 @@ pauseSpeakBtn.addEventListener('click',()=>{
 });
 stopSpeakBtn.addEventListener('click',()=>{
   speechAttempt++;
+  if(window.AndroidApp && typeof window.AndroidApp.stopSpeech==='function')window.AndroidApp.stopSpeech();
   if(speechSupported)window.speechSynthesis.cancel();
   setStatus('خواندن متن متوقف شد.');
 });
