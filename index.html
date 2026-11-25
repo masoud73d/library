@@ -1046,6 +1046,7 @@ async function finishStartup() {
 }
 
 /* بازکردن ابزار؛ نسخه اندروید از فایل‌های بسته‌بندی‌شده داخل APK استفاده می‌کند. */
+/* Android Back: each tool starts with an isolated navigation stack. */
 function openBook(index) {
   const book = books[index];
   if (!book) return;
