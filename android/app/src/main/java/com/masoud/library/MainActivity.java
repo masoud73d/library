@@ -555,6 +555,9 @@ public class MainActivity extends Activity {
                         nativeSpeechPaused = true;
                         notifySpeechStatus("خواندن متن موقتاً مکث شد.");
                     } else {
+                        notifySpeechStatus("در حال حاضر متنی برای مکث وجود ندارد.");
+                    }
+                } else {
                     notifySpeechStatus("مکث در این نسخه اندروید پشتیبانی نمی‌شود؛ می‌توانید خواندن را متوقف کنید.");
                 }
             });
