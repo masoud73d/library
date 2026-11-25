@@ -330,6 +330,10 @@
                                 <td class="text-slate-500 dark:text-slate-400 font-medium">NFC / ویبراتور:</td>
                                 <td id="nfc-vibe-status" class="font-semibold text-left">--</td>
                             </tr>
+                            <tr class="table-row-custom even:bg-slate-50/50 dark:even:bg-slate-900/30">
+                                <td class="text-slate-500 dark:text-slate-400 font-medium">فهرست حسگرهای شناسایی‌شده:</td>
+                                <td id="sensor-list-status" class="font-semibold text-[11px] text-right leading-6">در حال بررسی...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -813,11 +817,51 @@
             // GPS
             document.getElementById('geo-status').innerHTML = ('geolocation' in navigator) ? makeBadge('فعال در سیستم', 'success') : makeBadge('غیرفعال', 'danger');
 
-            // Accelerometer & Gyroscope Live Event Listeners
-            const hasAccel = ('DeviceMotionEvent' in window);
-            document.getElementById('accel-status').innerHTML = hasAccel ? makeBadge('سنسور شتاب فعال', 'success') : makeBadge('پشتیبانی نمی‌شود', 'danger');
+            // Android APK: use the real Android SensorManager inventory instead of
+            // guessing sensor availability from browser API support.
+            const nativeInfo = readNativeDeviceInfo();
+            const nativeSensors = nativeInfo && Array.isArray(nativeInfo.sensors) ? nativeInfo.sensors : null;
+            const sensorTypeSet = nativeSensors ? new Set(nativeSensors.map(s => Number(s.type))) : null;
+            const sensorNames = type => nativeSensors
+                ? nativeSensors.filter(s => Number(s.type) === type).map(s => s.name).filter(Boolean)
+                : [];
+            const setSensorStatus = (id, type, fallback, label) => {
+                const el = document.getElementById(id);
+                if (nativeSensors) {
+                    const names = sensorNames(type);
+                    el.innerHTML = names.length
+                        ? makeBadge(`شناسایی شد (${names.length})`, 'success', names.join('؛ '))
+                        : makeBadge('در فهرست سخت‌افزار نیست', 'warning');
+                } else {
+                    el.innerHTML = fallback
+                        ? makeBadge(label + ' (پشتیبانی مرورگر)', 'success')
+                        : makeBadge('مرورگر دسترسی نمی‌دهد', 'warning');
+                }
+            };
 
-            if (hasAccel) {
+            setSensorStatus('accel-status', 1, ('DeviceMotionEvent' in window), 'شتاب‌سنج');
+            setSensorStatus('gyro-status', 4, ('DeviceOrientationEvent' in window), 'ژیروسکوپ');
+            setSensorStatus('mag-status', 2, ('Magnetometer' in window || 'ondeviceorientationabsolute' in window), 'قطب‌نما');
+            setSensorStatus('light-status', 5, ('AmbientLightSensor' in window), 'نور محیط');
+            setSensorStatus('proximity-status', 8, ('ProximitySensor' in window || 'ondeviceproximity' in window), 'مجاورت');
+
+            const sensorListEl = document.getElementById('sensor-list-status');
+            if (sensorListEl) {
+                if (nativeSensors) {
+                    sensorListEl.innerHTML = nativeSensors.length
+                        ? nativeSensors.map(s => {
+                            const safeName = String(s.name || 'سنسور').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+                            const safeVendor = String(s.vendor || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+                            return `<div class="py-0.5">${safeName}${safeVendor ? ' <span class="text-slate-500">— ' + safeVendor + '</span>' : ''}</div>`;
+                        }).join('')
+                        : makeBadge('اندروید هیچ حسگری گزارش نکرد', 'warning');
+                } else {
+                    sensorListEl.textContent = 'فهرست دقیق حسگرها در نسخه مرورگر قابل دریافت نیست؛ در APK از اطلاعات واقعی اندروید استفاده می‌شود.';
+                }
+            }
+
+            // Live values remain available where WebView exposes motion events.
+            if ('DeviceMotionEvent' in window) {
                 window.addEventListener('devicemotion', function(e) {
                     if (e.accelerationIncludingGravity && e.accelerationIncludingGravity.x !== null) {
                         document.getElementById('accel-live-row').classList.remove('hidden');
@@ -826,27 +870,16 @@
                         const az = e.accelerationIncludingGravity.z.toFixed(1);
                         document.getElementById('accel-live-vals').textContent = `X:${ax} Y:${ay} Z:${az} m/s²`;
                     }
-                }, { once: false });
+                });
             }
-
-            const hasGyro = ('DeviceOrientationEvent' in window);
-            document.getElementById('gyro-status').innerHTML = hasGyro ? makeBadge('سنسور ژیروسکوپ فعال', 'success') : makeBadge('پشتیبانی نمی‌شود', 'danger');
-
-            if (hasGyro) {
+            if ('DeviceOrientationEvent' in window) {
                 window.addEventListener('deviceorientation', function(e) {
                     if (e.beta !== null) {
                         document.getElementById('gyro-live-row').classList.remove('hidden');
                         document.getElementById('gyro-live-vals').textContent = `α:${Math.round(e.alpha || 0)}° β:${Math.round(e.beta || 0)}° γ:${Math.round(e.gamma || 0)}°`;
                     }
-                }, { once: false });
+                });
             }
-
-            // Magnetometer / Compass heading
-            document.getElementById('mag-status').innerHTML = ('Magnetometer' in window || 'ondeviceorientationabsolute' in window) ? makeBadge('فعال / قطب‌نما', 'success') : makeBadge('محدود در مرورگر', 'info');
-
-            // Ambient Light & Proximity
-            document.getElementById('light-status').innerHTML = ('AmbientLightSensor' in window) ? makeBadge('پشتیبانی می‌شود', 'success') : makeBadge('محدود شده', 'info');
-            document.getElementById('proximity-status').innerHTML = ('ProximitySensor' in window || 'ondeviceproximity' in window) ? makeBadge('پشتیبانی می‌شود', 'success') : makeBadge('محدود شده', 'info');
 
             // NFC & Vibration
             const hasNFC = 'NDEFReader' in window;
