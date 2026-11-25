@@ -409,6 +409,40 @@ public class MainActivity extends Activity {
     private class AndroidBridge {
 
         @JavascriptInterface
+        public String saveBase64File(String base64, String fileName, String mimeType) {
+            if (!trustedLocalPageLoaded) return "ERROR:UNTRUSTED";
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return "ERROR:UNSUPPORTED";
+            try {
+                if (base64 == null || base64.length() > 40_000_000) return "ERROR:INVALID_DATA";
+                byte[] bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
+                String safeName = (fileName == null ? "Library-file" : fileName)
+                        .replaceAll("[^A-Za-z0-9._-]", "_");
+                if (safeName.isEmpty()) safeName = "Library-file";
+                android.content.ContentValues values = new android.content.ContentValues();
+                values.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, safeName);
+                values.put(android.provider.MediaStore.MediaColumns.MIME_TYPE,
+                        mimeType == null ? "application/octet-stream" : mimeType);
+                values.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH,
+                        android.os.Environment.DIRECTORY_DOWNLOADS + "/Library");
+                values.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1);
+                android.net.Uri uri = getContentResolver().insert(
+                        android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                if (uri == null) return "ERROR:CREATE";
+                try (java.io.OutputStream output = getContentResolver().openOutputStream(uri)) {
+                    if (output == null) throw new java.io.IOException("Cannot open output");
+                    output.write(bytes);
+                    output.flush();
+                }
+                android.content.ContentValues done = new android.content.ContentValues();
+                done.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 0);
+                getContentResolver().update(uri, done, null, null);
+                return "OK";
+            } catch (Exception error) {
+                return "ERROR:" + error.getClass().getSimpleName();
+            }
+        }
+
+        @JavascriptInterface
         public String getNativeDeviceInfo() {
             if (!trustedLocalPageLoaded) return "{}";
             try {
