@@ -640,7 +640,6 @@ let qrGenerator = null;
 let currentBarcode = "";
 let lastQRText = "";
 let lastQRSize = 512;
-let scanReader = null;
 let qrBusy = false;
 let barBusy = false;
 let lastBarcodeText = "";
@@ -699,22 +698,20 @@ function getReader() {
     throw new Error("LIBRARY");
   }
 
-  if (!scanReader) {
-    const hints = new Map();
-    if (ZXing.DecodeHintType && ZXing.DecodeHintType.TRY_HARDER) {
-      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-    }
-    if (ZXing.DecodeHintType && ZXing.DecodeHintType.ALSO_INVERTED) {
-      hints.set(ZXing.DecodeHintType.ALSO_INVERTED, true);
-    }
-    // Persian and other non-Latin QR text is commonly stored as UTF-8 bytes.
-    if (ZXing.DecodeHintType && ZXing.DecodeHintType.CHARACTER_SET) {
-      hints.set(ZXing.DecodeHintType.CHARACTER_SET, "UTF-8");
-    }
-    scanReader = new ZXing.BrowserMultiFormatReader(hints);
+  // Create a clean reader for every selected image. Reusing a ZXing reader
+  // after a successful decode can leave Android WebView in a stale state.
+  const hints = new Map();
+  if (ZXing.DecodeHintType && ZXing.DecodeHintType.TRY_HARDER) {
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
   }
-
-  return scanReader;
+  if (ZXing.DecodeHintType && ZXing.DecodeHintType.ALSO_INVERTED) {
+    hints.set(ZXing.DecodeHintType.ALSO_INVERTED, true);
+  }
+  // Persian and other non-Latin QR text is commonly stored as UTF-8 bytes.
+  if (ZXing.DecodeHintType && ZXing.DecodeHintType.CHARACTER_SET) {
+    hints.set(ZXing.DecodeHintType.CHARACTER_SET, "UTF-8");
+  }
+  return new ZXing.BrowserMultiFormatReader(hints);
 }
 
 function hasPersianText(value) {
@@ -802,6 +799,7 @@ async function decodeImage(file, kind) {
   if (kind === "qr") qrBusy = true;
   else barBusy = true;
 
+  let activeReader = null;
   $(resultId).classList.add("hidden");
   $(statusId).textContent = "در حال خواندن تصویر...";
 
@@ -809,6 +807,7 @@ async function decodeImage(file, kind) {
 
   try {
     const reader = getReader();
+    activeReader = reader;
     const img = $(previewId);
 
     // Wait for the actual image pixels, not only the HTMLImageElement.complete flag.
@@ -871,6 +870,15 @@ async function decodeImage(file, kind) {
 
     $(statusId).textContent = message;
   } finally {
+    // Fully release the decoder after each image so the next scan starts fresh.
+    try {
+      if (activeReader && typeof activeReader.reset === "function") {
+        activeReader.reset();
+      }
+    } catch (resetError) {
+      console.warn("QR reader reset skipped:", resetError);
+    }
+
     if (kind === "qr") qrBusy = false;
     else barBusy = false;
 
@@ -879,11 +887,16 @@ async function decodeImage(file, kind) {
 }
 
 $("qrImage").addEventListener("change", e => {
-  if (e.target.files[0]) decodeImage(e.target.files[0], "qr");
+  const file = e.target.files && e.target.files[0];
+  // Clear immediately so even the same image can be selected again.
+  e.target.value = "";
+  if (file) decodeImage(file, "qr");
 });
 
 $("barImage").addEventListener("change", e => {
-  if (e.target.files[0]) decodeImage(e.target.files[0], "bar");
+  const file = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if (file) decodeImage(file, "bar");
 });
 
 // کپی و بازکردن نتیجه‌ها
