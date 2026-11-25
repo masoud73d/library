@@ -43,6 +43,9 @@
       <textarea id="output" placeholder="نتیجه ترجمه اینجا نمایش داده می‌شود..." readonly></textarea>
       <div class="actions">
         <button class="btn" id="copyBtn">کپی ترجمه</button>
+        <button class="btn" id="speakBtn">🔊 خواندن متن</button>
+        <button class="btn" id="pauseSpeakBtn">⏸ مکث</button>
+        <button class="btn" id="stopSpeakBtn">⏹ توقف</button>
         <button class="btn" id="useBtn">انتقال به متن شما</button>
       </div>
     </div>
@@ -108,6 +111,41 @@ document.getElementById('pasteBtn').addEventListener('click',async()=>{
  catch(e){setStatus('اجازه دسترسی به کلیپ‌بورد داده نشد؛ متن را نگه دارید و چسباندن را انتخاب کنید.')}
 });
 document.getElementById('useBtn').addEventListener('click',()=>{if(!output.value){setStatus('ترجمه‌ای برای انتقال وجود ندارد.');return}input.value=output.value;input.dispatchEvent(new Event('input'));output.value='';resultLabel.textContent='آماده';setStatus('ترجمه به کادر متن منتقل شد.')});
+const speakBtn=document.getElementById('speakBtn');
+const pauseSpeakBtn=document.getElementById('pauseSpeakBtn');
+const stopSpeakBtn=document.getElementById('stopSpeakBtn');
+const speechSupported=typeof window!=='undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+function speakOutput(){
+  const spokenText=output.value.trim();
+  if(!spokenText){setStatus('ابتدا متن را ترجمه کنید تا خوانده شود.');return}
+  if(!speechSupported){setStatus('قابلیت خواندن متن در این مرورگر در دسترس نیست.');return}
+  window.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(spokenText);
+  utterance.lang=target.value==='zh'?'zh-CN':target.value;
+  const voices=window.speechSynthesis.getVoices();
+  const matchingVoice=voices.find(v=>v.lang.toLowerCase()===utterance.lang.toLowerCase()) ||
+    voices.find(v=>v.lang.toLowerCase().startsWith(target.value.toLowerCase()+'-')) ||
+    voices.find(v=>v.lang.toLowerCase().startsWith(target.value.toLowerCase()));
+  if(matchingVoice) utterance.voice=matchingVoice;
+  utterance.rate=1;
+  utterance.onstart=()=>setStatus('در حال خواندن متن ترجمه‌شده…');
+  utterance.onend=()=>setStatus('خواندن متن تمام شد.');
+  utterance.onerror=(event)=>{if(event.error!=='canceled'&&event.error!=='interrupted')setStatus('خواندن متن انجام نشد؛ صدای زبان انتخاب‌شده را در تنظیمات گفتار گوشی بررسی کنید.')};
+  window.speechSynthesis.speak(utterance);
+}
+speakBtn.addEventListener('click',speakOutput);
+pauseSpeakBtn.addEventListener('click',()=>{
+  if(!speechSupported)return;
+  if(window.speechSynthesis.paused){window.speechSynthesis.resume();setStatus('خواندن متن ادامه پیدا کرد.')}
+  else if(window.speechSynthesis.speaking){window.speechSynthesis.pause();setStatus('خواندن متن موقتاً مکث شد.')}
+  else setStatus('در حال حاضر متنی برای مکث وجود ندارد.');
+});
+stopSpeakBtn.addEventListener('click',()=>{
+  if(speechSupported)window.speechSynthesis.cancel();
+  setStatus('خواندن متن متوقف شد.');
+});
+window.addEventListener('beforeunload',()=>{if(speechSupported)window.speechSynthesis.cancel()});
+
 const modal=document.getElementById('aboutModal');
 document.getElementById('aboutBtn').addEventListener('click',()=>modal.classList.add('show'));
 document.getElementById('closeAbout').addEventListener('click',()=>modal.classList.remove('show'));
