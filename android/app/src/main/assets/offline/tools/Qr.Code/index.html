@@ -733,7 +733,7 @@ async function decodeImage(file, kind) {
       });
     }
 
-    const result = reader.decodeFromImageElement(img);
+    const result = await reader.decodeFromImageElement(img);
     const text = result.getText();
     const format = String(result.getBarcodeFormat());
 
@@ -854,12 +854,15 @@ function makeQR() {
 
 $("makeQR").onclick = makeQR;
 
-$("qrDownload").onclick = () => {
-  if (qrGenerator) {
-    qrGenerator.download({
-      name:"QR-Studio",
-      extension:"png"
-    });
+$("qrDownload").onclick = async () => {
+  if (!qrGenerator) return;
+  try {
+    const blob = await qrGenerator.getRawData("png");
+    if (!blob) throw new Error("PNG_EMPTY");
+    downloadBlob(blob, "QR-Studio.png");
+  } catch (error) {
+    console.error("QR export failed:", error);
+    toast("ذخیره تصویر QR انجام نشد.");
   }
 };
 
@@ -936,7 +939,26 @@ $("barDownload").onclick = () => {
   downloadBlob(blob, "Barcode.svg");
 };
 
-function downloadBlob(blob, filename) {
+async function downloadBlob(blob, filename) {
+  try {
+    if (window.AndroidApp && typeof window.AndroidApp.saveBase64File === "function") {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("FILE_READ"));
+        reader.readAsDataURL(blob);
+      });
+      const base64 = String(dataUrl).split(",")[1] || "";
+      const result = window.AndroidApp.saveBase64File(
+        base64, filename, blob.type || "application/octet-stream"
+      );
+      if (result === "OK") { toast("فایل در پوشه Downloads/Library ذخیره شد."); return; }
+      throw new Error(result || "SAVE_FAILED");
+    }
+  } catch (error) {
+    console.error("Native save failed:", error);
+    toast("ذخیره در پوشه دانلود انجام نشد؛ در حال تلاش با روش مرورگر...");
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -944,7 +966,7 @@ function downloadBlob(blob, filename) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 $("barDownloadPNG").onclick = () => {
