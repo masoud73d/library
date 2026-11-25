@@ -44,6 +44,9 @@ public class MainActivity extends Activity {
     private TextToSpeech textToSpeech;
     private volatile boolean textToSpeechReady = false;
     private boolean nativeSpeechPaused = false;
+    private String nativeSpeechText = "";
+    private String nativeSpeechLanguage = "en";
+    private volatile int nativeSpeechCharIndex = 0;
     private boolean offlineFallbackLoaded = false;
     private volatile boolean trustedLocalPageLoaded = false;
     private WebViewAssetLoader assetLoader;
@@ -89,7 +92,13 @@ public class MainActivity extends Activity {
                         notifySpeechStatus("در حال خواندن متن با موتور گفتار اندروید…");
                     }
                     @Override public void onDone(String utteranceId) {
+                        nativeSpeechPaused = false;
+                        nativeSpeechCharIndex = 0;
+                        nativeSpeechText = "";
                         notifySpeechStatus("خواندن متن تمام شد.");
+                    }
+                    @Override public void onRangeStart(String utteranceId, CharSequence text, int start, int end, int frame) {
+                        nativeSpeechCharIndex = Math.max(nativeSpeechCharIndex, end);
                     }
                     @Override public void onError(String utteranceId) {
                         notifySpeechStatus("موتور گفتار اندروید نتوانست متن را بخواند.");
@@ -436,6 +445,20 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void startNativeSpeechFromOffset() {
+        if (textToSpeech == null || !textToSpeechReady || nativeSpeechText == null) return;
+        int offset = Math.min(nativeSpeechCharIndex, nativeSpeechText.length());
+        String remaining = nativeSpeechText.substring(offset);
+        if (remaining.trim().isEmpty()) {
+            nativeSpeechPaused = false;
+            notifySpeechStatus("خواندن متن تمام شد.");
+            return;
+        }
+        int result = textToSpeech.speak(remaining, TextToSpeech.QUEUE_FLUSH, null,
+                "library-speech-" + System.currentTimeMillis());
+        if (result == TextToSpeech.ERROR) notifySpeechStatus("موتور گفتار نتوانست پخش را شروع کند.");
+    }
+
     private void notifySpeechStatus(String message) {
         runOnUiThread(() -> {
             if (webView != null) {
@@ -497,7 +520,10 @@ public class MainActivity extends Activity {
                         }
                     }
                     nativeSpeechPaused = false;
-                    int result = textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null,
+                    nativeSpeechText = text;
+                    nativeSpeechLanguage = tag;
+                    nativeSpeechCharIndex = 0;
+                    int result = textToSpeech.speak(nativeSpeechText, TextToSpeech.QUEUE_FLUSH, null,
                             "library-speech-" + System.currentTimeMillis());
                     if (result == TextToSpeech.ERROR) {
                         notifySpeechStatus("موتور گفتار نتوانست پخش را شروع کند.");
@@ -521,15 +547,14 @@ public class MainActivity extends Activity {
                 if (textToSpeech == null || !textToSpeechReady) return;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if (nativeSpeechPaused) {
-                        textToSpeech.resume();
                         nativeSpeechPaused = false;
+                        startNativeSpeechFromOffset();
                         notifySpeechStatus("خواندن متن ادامه پیدا کرد.");
-                    } else {
-                        textToSpeech.pause();
+                    } else if (textToSpeech.isSpeaking()) {
+                        textToSpeech.stop();
                         nativeSpeechPaused = true;
                         notifySpeechStatus("خواندن متن موقتاً مکث شد.");
-                    }
-                } else {
+                    } else {
                     notifySpeechStatus("مکث در این نسخه اندروید پشتیبانی نمی‌شود؛ می‌توانید خواندن را متوقف کنید.");
                 }
             });
@@ -541,6 +566,8 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 if (textToSpeech != null && textToSpeechReady) textToSpeech.stop();
                 nativeSpeechPaused = false;
+                nativeSpeechText = "";
+                nativeSpeechCharIndex = 0;
                 notifySpeechStatus("خواندن متن متوقف شد.");
             });
         }
