@@ -30,6 +30,10 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.speech.tts.Voice;
+import java.util.Locale;
 import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends Activity {
@@ -37,6 +41,9 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private WebView popupWebView;
+    private TextToSpeech textToSpeech;
+    private volatile boolean textToSpeechReady = false;
+    private boolean nativeSpeechPaused = false;
     private boolean offlineFallbackLoaded = false;
     private volatile boolean trustedLocalPageLoaded = false;
     private WebViewAssetLoader assetLoader;
@@ -73,6 +80,29 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         webView.setBackgroundColor(0xFF160A06);
         setContentView(webView);
+
+        textToSpeech = new TextToSpeech(this, result -> {
+            if (result == TextToSpeech.SUCCESS) {
+                textToSpeechReady = true;
+                textToSpeech.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override public void onStart(String utteranceId) {
+                        notifySpeechStatus("در حال خواندن متن با موتور گفتار اندروید…");
+                    }
+                    @Override public void onDone(String utteranceId) {
+                        notifySpeechStatus("خواندن متن تمام شد.");
+                    }
+                    @Override public void onError(String utteranceId) {
+                        notifySpeechStatus("موتور گفتار اندروید نتوانست متن را بخواند.");
+                    }
+                    @Override public void onError(String utteranceId, int errorCode) {
+                        notifySpeechStatus("خواندن متن انجام نشد؛ موتور گفتار یا صدای زبان را بررسی کنید.");
+                    }
+                });
+            } else {
+                textToSpeechReady = false;
+                notifySpeechStatus("موتور گفتار اندروید راه‌اندازی نشد. تنظیمات تبدیل نوشتار به گفتار گوشی را بررسی کنید.");
+            }
+        });
 
         assetLoader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
@@ -406,7 +436,114 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void notifySpeechStatus(String message) {
+        runOnUiThread(() -> {
+            if (webView != null) {
+                String safe = JSONObject.quote(message == null ? "" : message);
+                webView.evaluateJavascript("if(window.LibrarySpeechStatus)window.LibrarySpeechStatus(" + safe + ");", null);
+            }
+        });
+    }
+
     private class AndroidBridge {
+
+        @JavascriptInterface
+        public void speakText(String text, String languageTag) {
+            if (!trustedLocalPageLoaded) return;
+            if (text == null || text.trim().isEmpty()) {
+                notifySpeechStatus("متنی برای خواندن وجود ندارد.");
+                return;
+            }
+            runOnUiThread(() -> {
+                if (textToSpeech == null || !textToSpeechReady) {
+                    notifySpeechStatus("موتور گفتار اندروید هنوز آماده نیست؛ چند لحظه دیگر دوباره امتحان کنید.");
+                    return;
+                }
+                try {
+                    String tag = (languageTag == null || languageTag.trim().isEmpty()) ? "en" : languageTag.trim();
+                    if ("zh".equalsIgnoreCase(tag)) tag = "zh-CN";
+                    Locale requestedLocale = Locale.forLanguageTag(tag);
+                    Voice selectedVoice = null;
+                    boolean selectedOnlineVoice = false;
+                    java.util.Set<Voice> voices = textToSpeech.getVoices();
+                    if (voices != null) {
+                        for (Voice voice : voices) {
+                            if (voice == null || voice.getLocale() == null
+                                    || !voice.getLocale().getLanguage().equalsIgnoreCase(requestedLocale.getLanguage())) continue;
+                            if (!voice.isNetworkConnectionRequired()) {
+                                selectedVoice = voice;
+                                break;
+                            }
+                            if (selectedVoice == null) {
+                                selectedVoice = voice;
+                                selectedOnlineVoice = true;
+                            }
+                        }
+                    }
+                    if (selectedVoice != null) {
+                        if (selectedOnlineVoice && !MainActivity.this.isNetworkAvailable()) {
+                            notifySpeechStatus("صدای آفلاین این زبان پیدا نشد و برای صدای آنلاین باید اینترنت وصل باشد.");
+                            return;
+                        }
+                        int voiceResult = textToSpeech.setVoice(selectedVoice);
+                        if (voiceResult == TextToSpeech.ERROR) selectedVoice = null;
+                    }
+                    if (selectedVoice == null) {
+                        int languageResult = textToSpeech.setLanguage(requestedLocale);
+                        if (languageResult == TextToSpeech.LANG_MISSING_DATA
+                                || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                            notifySpeechStatus("صدای این زبان روی گوشی در دسترس نیست. صدای زبان را در تنظیمات گفتار اندروید نصب کنید.");
+                            return;
+                        }
+                    }
+                    nativeSpeechPaused = false;
+                    int result = textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null,
+                            "library-speech-" + System.currentTimeMillis());
+                    if (result == TextToSpeech.ERROR) {
+                        notifySpeechStatus("موتور گفتار نتوانست پخش را شروع کند.");
+                    } else if (selectedVoice != null) {
+                        notifySpeechStatus(selectedOnlineVoice
+                                ? "در حال استفاده از صدای آنلاین اندروید…"
+                                : "در حال استفاده از صدای آفلاین اندروید…");
+                    } else {
+                        notifySpeechStatus("در حال خواندن متن با صدای انتخاب‌شده اندروید…");
+                    }
+                } catch (Exception error) {
+                    notifySpeechStatus("خطا در راه‌اندازی خواندن متن: " + error.getClass().getSimpleName());
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void toggleSpeechPause() {
+            if (!trustedLocalPageLoaded) return;
+            runOnUiThread(() -> {
+                if (textToSpeech == null || !textToSpeechReady) return;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if (nativeSpeechPaused) {
+                        textToSpeech.resume();
+                        nativeSpeechPaused = false;
+                        notifySpeechStatus("خواندن متن ادامه پیدا کرد.");
+                    } else {
+                        textToSpeech.pause();
+                        nativeSpeechPaused = true;
+                        notifySpeechStatus("خواندن متن موقتاً مکث شد.");
+                    }
+                } else {
+                    notifySpeechStatus("مکث در این نسخه اندروید پشتیبانی نمی‌شود؛ می‌توانید خواندن را متوقف کنید.");
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopSpeech() {
+            if (!trustedLocalPageLoaded) return;
+            runOnUiThread(() -> {
+                if (textToSpeech != null && textToSpeechReady) textToSpeech.stop();
+                nativeSpeechPaused = false;
+                notifySpeechStatus("خواندن متن متوقف شد.");
+            });
+        }
 
         @JavascriptInterface
         public String saveBase64File(String base64, String fileName, String mimeType) {
@@ -776,6 +913,12 @@ public class MainActivity extends Activity {
             popupWebView.stopLoading();
             popupWebView.destroy();
             popupWebView = null;
+        }
+
+        if (textToSpeech != null) {
+            try { textToSpeech.stop(); textToSpeech.shutdown(); } catch (Exception ignored) { }
+            textToSpeech = null;
+            textToSpeechReady = false;
         }
 
         if (webView != null) {
