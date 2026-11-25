@@ -60,7 +60,7 @@ jobs:
           grep -q 'path.startsWith("/assets/offline/")' "$JAVA"
           grep -q 'boolean trustedAssetPath' "$JAVA"
           grep -q 'allow="clipboard-read; clipboard-write; fullscreen"' index.html
-          grep -q 'corePath: "../../vendor/tesseract"' "$GITHUB_WORKSPACE/android/app/src/main/assets/offline/tools/Text-reader/index.html"
+          grep -q 'langPath: "https://tessdata.projectnaptha.com/4.0.0"' "$GITHUB_WORKSPACE/android/app/src/main/assets/offline/tools/Text-reader/index.html"
           grep -q 'if (!trustedLocalPageLoaded) return "{}";' "$JAVA"
           echo "WebView trust-boundary checks passed."
 
@@ -150,16 +150,6 @@ jobs:
           curl -fLsS https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js -o "$ROOT/vendor/qr-code-styling.js"
           curl -fLsS https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js -o "$ROOT/vendor/JsBarcode.all.min.js"
           curl -fLsS https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js -o "$ROOT/vendor/zxing.min.js"
-          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js -o "$ROOT/vendor/tesseract.min.js"
-          mkdir -p "$ROOT/vendor/tesseract" "$ROOT/vendor/tessdata"
-          curl -fLsS https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js -o "$ROOT/vendor/tesseract/worker.min.js"
-          # Tesseract 5 may select the SIMD+LSTM core at runtime; bundle every supported core variant.
-          for core in tesseract-core tesseract-core-simd tesseract-core-lstm tesseract-core-simd-lstm; do
-            curl -fLsS "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/${core}.wasm.js" -o "$ROOT/vendor/tesseract/${core}.wasm.js"
-            curl -fLsS "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/${core}.wasm" -o "$ROOT/vendor/tesseract/${core}.wasm"
-          done
-          curl -fLsS https://tessdata.projectnaptha.com/4.0.0/fas.traineddata.gz -o "$ROOT/vendor/tessdata/fas.traineddata.gz"
-          curl -fLsS https://tessdata.projectnaptha.com/4.0.0/eng.traineddata.gz -o "$ROOT/vendor/tessdata/eng.traineddata.gz"
           curl -fLsS https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css -o "$ROOT/vendor/all.min.css"
           sed -i 's#../webfonts/#webfonts/#g' "$ROOT/vendor/all.min.css"
           curl -fLsS https://raw.githubusercontent.com/bsthen/device-models/8067dfeb9f9bf3c36643470ba3addaf0b13021da/devices.json -o "$ROOT/tools/etela-ate-system-/devices.json"
@@ -171,7 +161,6 @@ jobs:
           sed -i 's#https://cdn.tailwindcss.com#../../vendor/tailwind.js#g' "$ROOT/tools/jadval-tanavobi/index.html" "$ROOT/tools/darooshenas/index.html" "$ROOT/tools/etela-ate-system-/index.html" "$ROOT/tools/azmayeshgah/index.html"
           sed -i 's#https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js#../../vendor/three.min.js#g' "$ROOT/tools/darooshenas/index.html"
           sed -i 's#https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js#../../vendor/qr-code-styling.js#g; s#https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js#../../vendor/JsBarcode.all.min.js#g; s#https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js#../../vendor/zxing.min.js#g' "$ROOT/tools/Qr.Code/index.html"
-          sed -i 's#https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js#../../vendor/tesseract.min.js#g' "$ROOT/tools/Text-reader/index.html"
 
           sed -i "s#https://cdn.jsdelivr.net/gh/bsthen/device-models/devices.json#./devices.json#g" "$ROOT/tools/etela-ate-system-/index.html"
           # Remove optional remote font imports; Android system fonts are used as fallback.
@@ -199,14 +188,6 @@ jobs:
           test -s "$ROOT/vendor/qr-code-styling.js"
           test -s "$ROOT/vendor/JsBarcode.all.min.js"
           test -s "$ROOT/vendor/zxing.min.js"
-          test -s "$ROOT/vendor/tesseract.min.js"
-          test -s "$ROOT/vendor/tesseract/worker.min.js"
-          test -s "$ROOT/vendor/tessdata/fas.traineddata.gz"
-          test -s "$ROOT/vendor/tessdata/eng.traineddata.gz"
-          for core in tesseract-core tesseract-core-simd tesseract-core-lstm tesseract-core-simd-lstm; do
-            test -s "$ROOT/vendor/tesseract/${core}.wasm.js"
-            test -s "$ROOT/vendor/tesseract/${core}.wasm"
-          done
           python3 - <<'PY'
           from pathlib import Path
           import re
@@ -242,14 +223,13 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle --no-daemon --stacktrace :app:assembleDebug -PappVersionCode=${{ github.run_number }}
 
-      - name: Verify OCR language data is packaged in APK
+      - name: Verify online OCR configuration is packaged in APK
         run: |
           set -Eeuo pipefail
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
           test -s "$APK"
-          unzip -l "$APK" | grep -F "assets/offline/vendor/tessdata/fas.traineddata.gz"
-          unzip -l "$APK" | grep -F "assets/offline/vendor/tessdata/eng.traineddata.gz"
-          echo "OCR Persian and English traineddata are present in the APK."
+          unzip -p "$APK" assets/offline/tools/Text-reader/index.html | grep -F 'https://tessdata.projectnaptha.com/4.0.0'
+          echo "Online OCR configuration is present in the APK."
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
