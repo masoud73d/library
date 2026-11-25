@@ -338,6 +338,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
         // Treat the image as a unified text block instead of searching the
         // portrait/background as sparse unrelated text. This reduces noise
         // around decorative Persian captions and keeps word boxes usable.
+        // PSM 6: one uniform text block, suited to caption-style image text.
         await worker.setParameters({ tessedit_pageseg_mode: "6" });
         return worker;
       })().catch(error => {
