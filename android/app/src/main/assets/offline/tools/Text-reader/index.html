@@ -67,8 +67,10 @@ button:disabled{opacity:.5;cursor:default}
 #photo{display:block;width:100%;height:auto}
 #textLayer{
   position:absolute;inset:0;overflow:hidden;
-  user-select:text;-webkit-user-select:text;
-  cursor:text;line-height:normal
+  user-select:none;-webkit-user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:none;
+  cursor:crosshair;line-height:normal
 }
 .word{
   position:absolute;display:block;
@@ -81,7 +83,8 @@ button:disabled{opacity:.5;cursor:default}
   line-height:1;
   direction:rtl;
   unicode-bidi:plaintext;
-  user-select:text;-webkit-user-select:text;
+  user-select:none;-webkit-user-select:none;
+  pointer-events:none;
   -webkit-tap-highlight-color:transparent;
 }
 .word::selection{
@@ -197,6 +200,9 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
   let token = 0;
   let workerPromise = null;
   let words = [];
+  let selectedWordIndexes = new Set();
+  let dragStart = null;
+  let dragMoved = false;
   let imageData = null;
 
   function message(text, type = "") {
@@ -217,6 +223,9 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
 
   function resetWords() {
     words = [];
+    selectedWordIndexes.clear();
+    dragStart = null;
+    dragMoved = false;
     layer.replaceChildren();
     $("copySelected").disabled = true;
     $("selectAll").disabled = true;
@@ -396,7 +405,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
 
     items.forEach((word, index) => {
       const span = document.createElement("span");
-      span.className = "word";
+      span.className = selectedWordIndexes.has(index) ? "word selected" : "word";
       span.dataset.index = index;
       span.textContent = word.text;
 
@@ -411,22 +420,102 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
       span.style.height = height + "px";
       span.style.fontSize = Math.max(8, height * 0.85) + "px";
 
-      span.addEventListener("click", () => {
-        if (busy) return;
-        copyText(word.text);
-      });
-
       layer.appendChild(span);
     });
   }
 
   function selectedText() {
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return "";
-    if (!layer.contains(selection.anchorNode) ||
-        !layer.contains(selection.focusNode)) return "";
-    return selection.toString().trim();
+    return words
+      .filter((word, index) => selectedWordIndexes.has(index))
+      .map(word => word.text)
+      .join(" ")
+      .trim();
   }
+
+  function imagePoint(event) {
+    const rect = stage.getBoundingClientRect();
+    return {
+      x: (event.clientX - rect.left) * photo.naturalWidth / rect.width,
+      y: (event.clientY - rect.top) * photo.naturalHeight / rect.height
+    };
+  }
+
+  function updateDragSelection(point) {
+    if (!dragStart) return;
+    const scaleX = stage.clientWidth / photo.naturalWidth;
+    const scaleY = stage.clientHeight / photo.naturalHeight;
+    const startX = dragStart.x * scaleX;
+    const startY = dragStart.y * scaleY;
+    const endX = point.x * scaleX;
+    const endY = point.y * scaleY;
+    const left = Math.min(startX, endX);
+    const right = Math.max(startX, endX);
+    const top = Math.min(startY, endY) - 12;
+    const bottom = Math.max(startY, endY) + 12;
+
+    selectedWordIndexes.clear();
+    words.forEach((word, index) => {
+      const x0 = word.x0 * scaleX;
+      const x1 = word.x1 * scaleX;
+      const y0 = word.y0 * scaleY;
+      const y1 = word.y1 * scaleY;
+      if (x1 >= left && x0 <= right && y1 >= top && y0 <= bottom) {
+        selectedWordIndexes.add(index);
+      }
+    });
+
+    Array.from(layer.children).forEach((element, index) => {
+      element.classList.toggle("selected", selectedWordIndexes.has(index));
+    });
+  }
+
+  layer.addEventListener("pointerdown", event => {
+    if (busy || !imageReady || !words.length) return;
+    event.preventDefault();
+    dragStart = imagePoint(event);
+    dragMoved = false;
+    try { layer.setPointerCapture(event.pointerId); } catch (_) {}
+  });
+
+  layer.addEventListener("pointermove", event => {
+    if (!dragStart) return;
+    const point = imagePoint(event);
+    const dx = Math.abs(point.x - dragStart.x) * stage.clientWidth / photo.naturalWidth;
+    const dy = Math.abs(point.y - dragStart.y) * stage.clientHeight / photo.naturalHeight;
+    if (dx > 6 || dy > 6) dragMoved = true;
+    if (dragMoved) {
+      event.preventDefault();
+      updateDragSelection(point);
+    }
+  });
+
+  layer.addEventListener("pointerup", event => {
+    if (!dragStart) return;
+    const point = imagePoint(event);
+    if (dragMoved) {
+      updateDragSelection(point);
+      if (selectedWordIndexes.size) {
+        message(selectedWordIndexes.size + " کلمه از روی تصویر انتخاب شد.", "success");
+      } else {
+        message("در محدوده انتخاب‌شده متنی پیدا نشد.", "error");
+      }
+    } else {
+      const tapped = words.find(word =>
+        point.x >= word.x0 && point.x <= word.x1 &&
+        point.y >= word.y0 && point.y <= word.y1
+      );
+      if (tapped) copyText(tapped.text);
+    }
+    dragStart = null;
+    dragMoved = false;
+  });
+
+  layer.addEventListener("pointercancel", () => {
+    dragStart = null;
+    dragMoved = false;
+  });
+
+  layer.addEventListener("contextmenu", event => event.preventDefault());
 
   async function copyText(text) {
     if (!text) {
@@ -462,12 +551,9 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
   });
 
   $("selectAll").addEventListener("click", () => {
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(layer);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    message("همه متن‌های تشخیص‌داده‌شده انتخاب شدند.");
+    selectedWordIndexes = new Set(words.map((_, index) => index));
+    Array.from(layer.children).forEach(element => element.classList.add("selected"));
+    message("همه متن‌های روی تصویر انتخاب شدند.", "success");
   });
 
   $("copyAll").addEventListener("click", () => copyText(output.value.trim()));
