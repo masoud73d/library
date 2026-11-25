@@ -700,7 +700,14 @@ function getReader() {
   }
 
   if (!scanReader) {
-    scanReader = new ZXing.BrowserMultiFormatReader();
+    const hints = new Map();
+    if (ZXing.DecodeHintType && ZXing.DecodeHintType.TRY_HARDER) {
+      hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    }
+    if (ZXing.DecodeHintType && ZXing.DecodeHintType.ALSO_INVERTED) {
+      hints.set(ZXing.DecodeHintType.ALSO_INVERTED, true);
+    }
+    scanReader = new ZXing.BrowserMultiFormatReader(hints);
   }
 
   return scanReader;
@@ -726,14 +733,37 @@ async function decodeImage(file, kind) {
     const reader = getReader();
     const img = $(previewId);
 
-    if (!img.complete) {
+    // Wait for the actual image pixels, not only the HTMLImageElement.complete flag.
+    if (typeof img.decode === "function") {
+      await img.decode();
+    } else if (!img.complete || !img.naturalWidth) {
       await new Promise((resolve, reject) => {
         img.onload = resolve;
-        img.onerror = reject;
+        img.onerror = () => reject(new Error("IMAGE_LOAD_FAILED"));
       });
     }
+    if (!img.naturalWidth || !img.naturalHeight) {
+      throw new Error("IMAGE_HAS_NO_PIXELS");
+    }
 
-    const result = await reader.decodeFromImageElement(img);
+    let result;
+    let firstDecodeError = null;
+    try {
+      result = await reader.decodeFromImageElement(img);
+    } catch (error) {
+      firstDecodeError = error;
+      // Retry through a real canvas. This avoids WebView-specific image-element
+      // decoding differences for photos selected from Android's gallery.
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) throw firstDecodeError;
+      context.drawImage(img, 0, 0, canvas.width, canvas.height);
+      if (typeof reader.decodeFromCanvas !== "function") throw firstDecodeError;
+      result = await reader.decodeFromCanvas(canvas);
+    }
+
     const text = result.getText();
     const format = String(result.getBarcodeFormat());
 
@@ -752,9 +782,12 @@ async function decodeImage(file, kind) {
       $("barReadStatus").textContent = "بارکد با موفقیت خوانده شد.";
     }
   } catch (error) {
+    console.error("Image barcode decode failed:", error);
     const message = error.message === "LIBRARY"
-      ? "کتابخانه اسکن بارگذاری نشده؛ اتصال اینترنت رو بررسی کن."
-      : "کدی پیدا نشد. عکس واضح‌تر، با نور بهتر و کد کامل انتخاب کن.";
+      ? "کتابخانه اسکن بارگذاری نشده؛ فایل‌های داخلی برنامه را بررسی می‌کنیم."
+      : error.message === "IMAGE_LOAD_FAILED" || error.message === "IMAGE_HAS_NO_PIXELS"
+        ? "تصویر از گالری درست بارگذاری نشد؛ یک عکس دیگر انتخاب کن."
+        : "کدی در تصویر شناسایی نشد. عکس کامل و واضح QR را انتخاب کن.";
 
     $(statusId).textContent = message;
   } finally {
