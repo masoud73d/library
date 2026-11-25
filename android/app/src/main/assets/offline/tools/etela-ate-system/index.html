@@ -842,8 +842,40 @@
             setSensorStatus('accel-status', 1, ('DeviceMotionEvent' in window), 'شتاب‌سنج');
             setSensorStatus('gyro-status', 4, ('DeviceOrientationEvent' in window), 'ژیروسکوپ');
             setSensorStatus('mag-status', 2, ('Magnetometer' in window || 'ondeviceorientationabsolute' in window), 'قطب‌نما');
-            setSensorStatus('light-status', 5, ('AmbientLightSensor' in window), 'نور محیط');
-            setSensorStatus('proximity-status', 8, ('ProximitySensor' in window || 'ondeviceproximity' in window), 'مجاورت');
+
+            // For Android, prefer the explicit SensorManager default-sensor result.
+            // Browser sensor APIs are commonly unavailable inside WebView even when
+            // the physical sensor exists, so they must never override native detection.
+            const lightNativeDetected = nativeInfo && typeof nativeInfo.hasLightSensor === 'boolean'
+                ? nativeInfo.hasLightSensor
+                : (nativeSensors ? sensorNames(5).length > 0 : null);
+            const proximityNativeDetected = nativeInfo && typeof nativeInfo.hasProximitySensor === 'boolean'
+                ? nativeInfo.hasProximitySensor
+                : (nativeSensors ? sensorNames(8).length > 0 : null);
+
+            const setExplicitNativeSensorStatus = (id, detected, sensorName, browserFallback, label) => {
+                const el = document.getElementById(id);
+                if (detected !== null) {
+                    el.innerHTML = detected
+                        ? makeBadge('شناسایی شد', 'success', sensorName || label)
+                        : makeBadge('در سخت‌افزار شناسایی نشد', 'warning');
+                } else {
+                    el.innerHTML = browserFallback
+                        ? makeBadge(label + ' (پشتیبانی مرورگر)', 'success')
+                        : makeBadge('مرورگر دسترسی نمی‌دهد', 'warning');
+                }
+            };
+
+            setExplicitNativeSensorStatus(
+                'light-status', lightNativeDetected,
+                nativeInfo && nativeInfo.lightSensorName,
+                ('AmbientLightSensor' in window), 'نور محیط'
+            );
+            setExplicitNativeSensorStatus(
+                'proximity-status', proximityNativeDetected,
+                nativeInfo && nativeInfo.proximitySensorName,
+                ('ProximitySensor' in window || 'ondeviceproximity' in window), 'مجاورت'
+            );
 
             const sensorListEl = document.getElementById('sensor-list-status');
             if (sensorListEl) {
