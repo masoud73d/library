@@ -60,7 +60,7 @@ jobs:
           grep -q 'path.startsWith("/assets/offline/")' "$JAVA"
           grep -q 'boolean trustedAssetPath' "$JAVA"
           grep -q 'allow="clipboard-read; clipboard-write; fullscreen"' index.html
-          grep -q 'corePath: "../../vendor/tesseract"' "$GITHUB_WORKSPACE/.github/workflows/build-library-apk.yml"
+          grep -q 'corePath: "../../vendor/tesseract"' "$GITHUB_WORKSPACE/android/app/src/main/assets/offline/tools/Text-reader/index.html"
           grep -q 'if (!trustedLocalPageLoaded) return "{}";' "$JAVA"
           echo "WebView trust-boundary checks passed."
 
