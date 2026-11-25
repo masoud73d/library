@@ -1,1 +1,2 @@
 Publish repaired QR, OCR and color tools.
+Fix step-by-step Android Back navigation in embedded tools [publish-apk]
