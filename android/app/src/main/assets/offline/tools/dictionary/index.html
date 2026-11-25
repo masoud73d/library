@@ -115,23 +115,72 @@ const speakBtn=document.getElementById('speakBtn');
 const pauseSpeakBtn=document.getElementById('pauseSpeakBtn');
 const stopSpeakBtn=document.getElementById('stopSpeakBtn');
 const speechSupported=typeof window!=='undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
-function speakOutput(){
+let speechAttempt=0;
+function getAvailableVoices(){
+  return new Promise(resolve=>{
+    let voices=window.speechSynthesis.getVoices();
+    if(voices.length){resolve(voices);return}
+    let settled=false;
+    const finish=()=>{
+      if(settled)return;
+      settled=true;
+      window.speechSynthesis.removeEventListener('voiceschanged',finish);
+      resolve(window.speechSynthesis.getVoices());
+    };
+    window.speechSynthesis.addEventListener('voiceschanged',finish);
+    setTimeout(finish,1200);
+  });
+}
+function voiceForLanguage(voices,lang,online){
+  const code=lang.toLowerCase();
+  const candidates=voices.filter(v=>(v.localService===false)===online);
+  return candidates.find(v=>v.lang.toLowerCase()===code) ||
+    candidates.find(v=>v.lang.toLowerCase().startsWith(code+'-')) ||
+    candidates.find(v=>v.lang.toLowerCase().startsWith(code));
+}
+async function speakOutput(){
   const spokenText=output.value.trim();
   if(!spokenText){setStatus('ابتدا متن را ترجمه کنید تا خوانده شود.');return}
-  if(!speechSupported){setStatus('قابلیت خواندن متن در این مرورگر در دسترس نیست.');return}
+  if(!speechSupported){setStatus('موتور خواندن متن در این مرورگر در دسترس نیست.');return}
   window.speechSynthesis.cancel();
+  const attempt=++speechAttempt;
+  const lang=target.value==='zh'?'zh-CN':target.value;
+  const voices=await getAvailableVoices();
+  if(attempt!==speechAttempt)return;
+  const localVoice=voiceForLanguage(voices,lang,false);
+  const remoteVoice=voiceForLanguage(voices,lang,true);
+  if(localVoice){
+    setStatus('در حال امتحان صدای آفلاین…');
+    playWithVoice(localVoice,spokenText,lang,attempt,()=> {
+      if(remoteVoice){setStatus('صدای آفلاین در دسترس نبود؛ در حال امتحان صدای آنلاین…');playWithVoice(remoteVoice,spokenText,lang,attempt,null,true)}
+      else setStatus('صدای آفلاین این زبان کار نکرد و صدای آنلاین سازگار هم در موتور گفتار گوشی پیدا نشد. اتصال اینترنت و صداهای نصب‌شده را بررسی کنید.');
+    });
+  }else if(remoteVoice){
+    setStatus('صدای آفلاین این زبان پیدا نشد؛ در حال استفاده از صدای آنلاین…');
+    playWithVoice(remoteVoice,spokenText,lang,attempt,null,true);
+  }else{
+    setStatus('برای این زبان نه صدای آفلاین پیدا شد و نه صدای آنلاین سازگار. صدای این زبان را در تنظیمات گفتار گوشی نصب یا فعال کنید.');
+  }
+}
+function playWithVoice(voice,spokenText,lang,attempt,onFailure,isOnline=false){
+  if(attempt!==speechAttempt)return;
   const utterance=new SpeechSynthesisUtterance(spokenText);
-  utterance.lang=target.value==='zh'?'zh-CN':target.value;
-  const voices=window.speechSynthesis.getVoices();
-  const matchingVoice=voices.find(v=>v.lang.toLowerCase()===utterance.lang.toLowerCase()) ||
-    voices.find(v=>v.lang.toLowerCase().startsWith(target.value.toLowerCase()+'-')) ||
-    voices.find(v=>v.lang.toLowerCase().startsWith(target.value.toLowerCase()));
-  if(matchingVoice) utterance.voice=matchingVoice;
+  utterance.lang=lang;
+  utterance.voice=voice;
   utterance.rate=1;
-  utterance.onstart=()=>setStatus('در حال خواندن متن ترجمه‌شده…');
-  utterance.onend=()=>setStatus('خواندن متن تمام شد.');
-  utterance.onerror=(event)=>{if(event.error!=='canceled'&&event.error!=='interrupted')setStatus('خواندن متن انجام نشد؛ صدای زبان انتخاب‌شده را در تنظیمات گفتار گوشی بررسی کنید.')};
-  window.speechSynthesis.speak(utterance);
+  let started=false;
+  utterance.onstart=()=>{
+    started=true;
+    if(attempt===speechAttempt)setStatus(isOnline?'در حال خواندن با صدای آنلاین…':'در حال خواندن با صدای آفلاین…');
+  };
+  utterance.onend=()=>{if(attempt===speechAttempt)setStatus('خواندن متن تمام شد.')};
+  utterance.onerror=(event)=>{
+    if(attempt!==speechAttempt||event.error==='canceled'||event.error==='interrupted')return;
+    if(onFailure)onFailure();
+    else setStatus('خواندن متن با صدای آنلاین انجام نشد. اتصال اینترنت یا موتور گفتار گوشی را بررسی کنید.');
+  };
+  try{window.speechSynthesis.speak(utterance)}
+  catch(error){if(onFailure)onFailure();else setStatus('موتور گفتار نتوانست متن را بخواند.')}
 }
 speakBtn.addEventListener('click',speakOutput);
 pauseSpeakBtn.addEventListener('click',()=>{
@@ -141,10 +190,11 @@ pauseSpeakBtn.addEventListener('click',()=>{
   else setStatus('در حال حاضر متنی برای مکث وجود ندارد.');
 });
 stopSpeakBtn.addEventListener('click',()=>{
+  speechAttempt++;
   if(speechSupported)window.speechSynthesis.cancel();
   setStatus('خواندن متن متوقف شد.');
 });
-window.addEventListener('beforeunload',()=>{if(speechSupported)window.speechSynthesis.cancel()});
+window.addEventListener('beforeunload',()=>{speechAttempt++;if(speechSupported)window.speechSynthesis.cancel()});
 
 const modal=document.getElementById('aboutModal');
 document.getElementById('aboutBtn').addEventListener('click',()=>modal.classList.add('show'));
