@@ -1061,26 +1061,33 @@ function openBook(index) {
     }
   } catch (error) {}
   document.getElementById("appTitle").textContent = book.name;
-  const frame = document.getElementById("appFrame");
-  // Keep the iframe's initial history position so Android Back never exits
-  // the tool just because the iframe was first loaded from about:blank.
+  const previousFrame = document.getElementById("appFrame");
+  // Every tool gets a fresh browsing context; history from the previous tool cannot leak.
+  const frame = previousFrame.cloneNode(false);
+  previousFrame.replaceWith(frame);
   frame.dataset.backBase = "";
   frame.onload = function () {
     try {
       const child = frame.contentWindow;
       if (!child || child.location.href === "about:blank") return;
-      if (!frame.dataset.backBase) {
-        frame.dataset.backBase = String(child.history.length);
+      // Track real navigation depth; history.length never decreases after Back.
+      if (!child.__libraryHistoryTrackerInstalled) {
+        child.__libraryHistoryTrackerInstalled = true;
+        child.__libraryBackDepth = 0;
+        const originalPushState = child.history.pushState.bind(child.history);
+        child.history.pushState = function () {
+          const result = originalPushState.apply(child.history, arguments);
+          child.__libraryBackDepth++;
+          return result;
+        };
+        child.addEventListener("popstate", () => {
+          child.__libraryBackDepth = Math.max(0, child.__libraryBackDepth - 1);
+        });
       }
 
-      // Add a shared back-stack for tools whose own UI opens modal/detail
-      // layers without using the History API. Tools with their own history
-      // handlers are left untouched.
+      // Add modal back entries to every tool, including tools with their own routes.
       if (!child.__libraryBackShimInstalled) {
-        const source = child.document.documentElement
-          ? child.document.documentElement.innerHTML : "";
-        if (!source.includes("history.pushState")) {
-          child.__libraryBackShimInstalled = true;
+        child.__libraryBackShimInstalled = true;
           let modalBackEntry = false;
           let closingViaBack = false;
           const visibleLayers = () => {
@@ -1150,15 +1157,13 @@ function openBook(index) {
             subtree: true, childList: true, attributes: true,
             attributeFilter: ["class", "style", "hidden", "aria-hidden", "open"]
           });
-          child.setTimeout(syncModalHistory, 150);
-        }
+        child.setTimeout(syncModalHistory, 150);
       }
     } catch (error) {}
   };
-  frame.src = "about:blank";
   document.getElementById("appOverlay").classList.add("show");
   document.body.style.overflow = "hidden";
-  requestAnimationFrame(() => { frame.src = targetUrl; });
+  frame.src = targetUrl;
 }
 
 /* بستن ابزار */
