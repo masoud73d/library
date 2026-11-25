@@ -270,3 +270,5 @@ jobs:
       - name: Remove signing key from runner
         if: always()
         run: rm -f android/app/library-signing.jks
+
+# Publish the next verified APK release when the commit message includes [publish-apk].
