@@ -174,7 +174,7 @@ jobs:
           needle = 'return Tesseract.createWorker("fas+eng", 1, {'
           replacement = needle + """
                   workerPath: "../../vendor/tesseract/worker.min.js",
-                  corePath: "../../vendor/tesseract",
+                  corePath: "../../vendor/tesseract/tesseract-core.wasm.js",
                   langPath: "../../vendor/tessdata",
                   gzip: true,"""
           if needle not in s:
