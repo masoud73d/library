@@ -196,7 +196,7 @@ jobs:
               re.compile(r"https?://cdnjs\.cloudflare\.com/ajax/libs/font-awesome/[^\s\"'<>]+/css/all\.min\.css"),
               re.compile(r"https?://cdnjs\.cloudflare\.com/ajax/libs/three\.js/r128/three\.min\.js"),
               re.compile(r"https?://cdn\.tailwindcss\.com"),
-              re.compile(r"https?://cdn\.jsdelivr\.net/npm/(?:qr-code-styling|jsbarcode|tesseract\.js)"),
+              re.compile(r"https?://cdn\.jsdelivr\.net/npm/(?:qr-code-styling|jsbarcode)"),
               re.compile(r"https?://unpkg\.com/@zxing"),
               re.compile(r"https?://fonts\.googleapis\.com"),
           ]
