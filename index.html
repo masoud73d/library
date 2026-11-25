@@ -1062,6 +1062,18 @@ function openBook(index) {
   } catch (error) {}
   document.getElementById("appTitle").textContent = book.name;
   const frame = document.getElementById("appFrame");
+  // Keep the iframe's initial history position so Android Back never exits
+  // the tool just because the iframe was first loaded from about:blank.
+  frame.dataset.backBase = "";
+  frame.onload = function () {
+    try {
+      const child = frame.contentWindow;
+      if (!child || child.location.href === "about:blank") return;
+      if (!frame.dataset.backBase) {
+        frame.dataset.backBase = String(child.history.length);
+      }
+    } catch (error) {}
+  };
   frame.src = "about:blank";
   document.getElementById("appOverlay").classList.add("show");
   document.body.style.overflow = "hidden";
@@ -1070,8 +1082,11 @@ function openBook(index) {
 
 /* بستن ابزار */
 function closeApp() {
+  const frame = document.getElementById("appFrame");
+  frame.onload = null;
+  frame.dataset.backBase = "";
   document.getElementById("appOverlay").classList.remove("show");
-  document.getElementById("appFrame").src = "about:blank";
+  frame.src = "about:blank";
   document.body.style.overflow = "";
 }
 
