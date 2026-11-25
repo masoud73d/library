@@ -486,6 +486,13 @@ public class MainActivity extends Activity {
                     String tag = (languageTag == null || languageTag.trim().isEmpty()) ? "en" : languageTag.trim();
                     if ("zh".equalsIgnoreCase(tag)) tag = "zh-CN";
                     Locale requestedLocale = Locale.forLanguageTag(tag);
+                    // Set the requested language first; never keep the previous language active.
+                    int languageResult = textToSpeech.setLanguage(requestedLocale);
+                    if (languageResult == TextToSpeech.LANG_MISSING_DATA
+                            || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        notifySpeechStatus("صدای این زبان روی گوشی در دسترس نیست. بسته گفتاری همین زبان را در تنظیمات اندروید نصب کنید.");
+                        return;
+                    }
                     Voice selectedVoice = null;
                     boolean selectedOnlineVoice = false;
                     java.util.Set<Voice> voices = textToSpeech.getVoices();
@@ -509,13 +516,8 @@ public class MainActivity extends Activity {
                             return;
                         }
                         int voiceResult = textToSpeech.setVoice(selectedVoice);
-                        if (voiceResult == TextToSpeech.ERROR) selectedVoice = null;
-                    }
-                    if (selectedVoice == null) {
-                        int languageResult = textToSpeech.setLanguage(requestedLocale);
-                        if (languageResult == TextToSpeech.LANG_MISSING_DATA
-                                || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                            notifySpeechStatus("صدای این زبان روی گوشی در دسترس نیست. صدای زبان را در تنظیمات گفتار اندروید نصب کنید.");
+                        if (voiceResult == TextToSpeech.ERROR) {
+                            notifySpeechStatus("صدای انتخاب‌شده برای این زبان قابل استفاده نیست؛ بسته گفتاری زبان را بررسی کنید.");
                             return;
                         }
                     }
