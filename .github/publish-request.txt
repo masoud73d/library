@@ -1,1 +1,1 @@
-Publish the Android build including native SensorManager detection for the system information tool.
+Publish repaired QR, OCR and color tools in Android APK.
