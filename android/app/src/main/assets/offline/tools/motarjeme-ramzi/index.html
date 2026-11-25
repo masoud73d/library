@@ -140,7 +140,6 @@ label,.small{color:#62847c!important}
 <button id="swapBtn">جابجایی جهت</button>
 <button id="sampleBtn">نمونه متن</button>
 <button id="clearBtn">پاک کردن</button>
-<button id="speakBtn">🔊 خواندن متن</button>
 </div>
 
 <div style="margin-top:16px">
@@ -995,48 +994,7 @@ $("detectBtn").addEventListener("click", detect);
 $("compareBtn").addEventListener("click", compare);
 $("chainBtn").addEventListener("click", chain);
 
-$("speakBtn").addEventListener("click", () => {
-    const text = $("result").value || $("source").value;
 
-    if (!text) {
-        setStatus("متنی برای خواندن وجود نداره.");
-        return;
-    }
-
-    // Prefer Android's native text-to-speech engine inside the installed app.
-    // This avoids relying on WebView's often-missing Persian speech voices.
-    try {
-        if (window.AndroidApp && typeof window.AndroidApp.speakText === "function"
-                && window.AndroidApp.speakText(text)) {
-            setStatus("خواندن متن با صدای فارسی آغاز شد.");
-            return;
-        }
-    } catch (error) {
-        // Continue with the browser fallback below.
-    }
-
-    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
-        setStatus("سرویس خواندن صوتی در این دستگاه در دسترس نیست.");
-        return;
-    }
-
-    try {
-        const synth = window.speechSynthesis;
-        synth.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "fa-IR";
-        const voices = synth.getVoices();
-        const persianVoice = voices.find(voice => /^fa([_-]|$)/i.test(voice.lang));
-        if (persianVoice) utterance.voice = persianVoice;
-
-        utterance.onstart = () => setStatus("خواندن متن آغاز شد.");
-        utterance.onerror = () => setStatus("صدای فارسی در این دستگاه فعال نیست؛ سرویس گفتار فارسی را در تنظیمات گوشی بررسی کن.");
-        synth.speak(utterance);
-    } catch (error) {
-        setStatus("امکان پخش صدای متن وجود ندارد.");
-    }
-});
 
 $("clearHistoryBtn").addEventListener("click", () => {
     history = [];
