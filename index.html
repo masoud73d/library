@@ -1072,6 +1072,80 @@ function openBook(index) {
       if (!frame.dataset.backBase) {
         frame.dataset.backBase = String(child.history.length);
       }
+
+      // Add a shared back-stack for tools whose own UI opens modal/detail
+      // layers without using the History API. Tools with their own history
+      // handlers are left untouched.
+      if (!child.__libraryBackShimInstalled) {
+        const source = child.document.documentElement
+          ? child.document.documentElement.innerHTML : "";
+        if (!source.includes("history.pushState")) {
+          child.__libraryBackShimInstalled = true;
+          let modalBackEntry = false;
+          const visibleLayers = () => {
+            const selector = "dialog[open],[role=dialog],[aria-modal=true],.modal,[id*=modal i],[class*=modal i],[id*=overlay i],[class*=overlay i],[class*=fixed][class*=inset-0]";
+            return Array.from(child.document.querySelectorAll(selector)).filter(el => {
+              const style = child.getComputedStyle(el);
+              const rect = el.getBoundingClientRect();
+              return style.display !== "none" && style.visibility !== "hidden" &&
+                Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
+            });
+          };
+          const closeVisibleLayer = () => {
+            const layers = visibleLayers();
+            const layer = layers[layers.length - 1];
+            if (!layer) return;
+            const buttons = Array.from(layer.querySelectorAll("button,[role=button]"));
+            const closeButton = buttons.reverse().find(btn => {
+              const label = ((btn.innerText || "") + " " +
+                (btn.getAttribute("aria-label") || "") + " " + (btn.title || "")).trim();
+              return /^(×|✕|✖|x|close|بستن|انصراف|بازگشت)$/i.test(label) ||
+                /close|بستن/i.test(label);
+            });
+            if (closeButton) closeButton.click();
+            else {
+              layer.dispatchEvent(new child.KeyboardEvent("keydown", {
+                key: "Escape", keyCode: 27, which: 27, bubbles: true
+              }));
+              child.document.dispatchEvent(new child.KeyboardEvent("keydown", {
+                key: "Escape", keyCode: 27, which: 27, bubbles: true
+              }));
+              child.dispatchEvent(new child.KeyboardEvent("keydown", {
+                key: "Escape", keyCode: 27, which: 27, bubbles: true
+              }));
+            }
+          };
+          child.addEventListener("popstate", () => {
+            if (!modalBackEntry) return;
+            modalBackEntry = false;
+            child.setTimeout(closeVisibleLayer, 0);
+          });
+          const syncModalHistory = () => {
+            const isOpen = visibleLayers().length > 0;
+            if (isOpen && !modalBackEntry) {
+              modalBackEntry = true;
+              try {
+                child.history.pushState({ __libraryBackModal: true }, "", child.location.href);
+              } catch (error) {
+                modalBackEntry = false;
+              }
+            } else if (!isOpen && modalBackEntry) {
+              modalBackEntry = false;
+              try {
+                if (child.history.state && child.history.state.__libraryBackModal) {
+                  child.history.back();
+                }
+              } catch (error) {}
+            }
+          };
+          const observer = new child.MutationObserver(syncModalHistory);
+          observer.observe(child.document.documentElement, {
+            subtree: true, childList: true, attributes: true,
+            attributeFilter: ["class", "style", "hidden", "aria-hidden", "open"]
+          });
+          child.setTimeout(syncModalHistory, 150);
+        }
+      }
     } catch (error) {}
   };
   frame.src = "about:blank";
