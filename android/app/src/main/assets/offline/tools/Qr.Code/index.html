@@ -907,6 +907,18 @@ $("qrOpen").onclick = () => {
 };
 
 // ساخت QR
+// qr-code-styling's byte mode can truncate Persian UTF-16 characters.
+// Pass the actual UTF-8 bytes as a binary string instead.
+function toQRUtf8ByteString(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return binary;
+}
+
 function makeQR() {
   const text = $("qrText").value;
 
@@ -930,10 +942,12 @@ function makeQR() {
       width:size,
       height:size,
       type:"canvas",
-      data:text,
+      // Encode Persian and all other Unicode text as real UTF-8 bytes.
+      data:toQRUtf8ByteString(text),
       margin:12,
       qrOptions:{
-        errorCorrectionLevel:$("qrError").value
+        errorCorrectionLevel:$("qrError").value,
+        mode:"Byte"
       },
       dotsOptions:{
         color,
