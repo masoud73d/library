@@ -58,6 +58,7 @@ jobs:
           grep -q 'private boolean isTrustedLocalOrigin(String rawUrl)' "$JAVA"
           grep -q 'private boolean isTrustedLocalPermissionOrigin(String rawOrigin)' "$JAVA"
           grep -q 'path.startsWith("/assets/offline/")' "$JAVA"
+          grep -q 'boolean trustedAssetPath' "$JAVA"
           grep -q 'if (!trustedLocalPageLoaded) return "{}";' "$JAVA"
           echo "WebView trust-boundary checks passed."
 
