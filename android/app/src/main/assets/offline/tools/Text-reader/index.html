@@ -321,7 +321,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
           });
         }
         if (!window.Tesseract) throw new Error("موتور OCR در دسترس نیست.");
-        return Tesseract.createWorker("fas+eng", 1, {
+        const worker = await Tesseract.createWorker("fas+eng", 1, {
           // OCR engine, WASM core, and language data are fetched online.
           // This avoids missing/oversized Persian traineddata inside the APK.
           workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js",
@@ -335,6 +335,11 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
             }
           }
         });
+        // Treat the image as a unified text block instead of searching the
+        // portrait/background as sparse unrelated text. This reduces noise
+        // around decorative Persian captions and keeps word boxes usable.
+        await worker.setParameters({ tessedit_pageseg_mode: "6" });
+        return worker;
       })().catch(error => {
         workerPromise = null;
         throw error;
