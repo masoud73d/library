@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
                         nativeSpeechText = "";
                         notifySpeechStatus("خواندن متن تمام شد.");
                     }
-                    @Override public void onRangeStart(String utteranceId, CharSequence text, int start, int end, int frame) {
+                    @Override public void onRangeStart(String utteranceId, int start, int end, int frame) {
                         nativeSpeechCharIndex = Math.max(nativeSpeechCharIndex, end);
                     }
                     @Override public void onError(String utteranceId) {
