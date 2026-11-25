@@ -273,4 +273,5 @@ jobs:
 
 # Native TextToSpeech bridge is packaged with the pinned dictionary source.
 # Pause and resume are implemented through native utterance range progress.
+# Use the Android API signature onRangeStart(String,int,int,int).
 # Publish the next verified APK release when the commit message includes [publish-apk].
