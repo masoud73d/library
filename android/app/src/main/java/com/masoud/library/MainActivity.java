@@ -325,9 +325,14 @@ public class MainActivity extends Activity {
         try {
             Uri uri = Uri.parse(rawOrigin);
             String path = uri.getPath();
-            return "https".equalsIgnoreCase(uri.getScheme())
-                    && "appassets.androidplatform.net".equalsIgnoreCase(uri.getHost())
-                    && (path == null || path.isEmpty() || "/".equals(path));
+            boolean trustedAssetHost =
+                    "https".equalsIgnoreCase(uri.getScheme())
+                    && "appassets.androidplatform.net".equalsIgnoreCase(uri.getHost());
+            // WebView permission origins can include the requesting iframe's asset path.
+            // Accept only the library's packaged offline assets, never arbitrary remote origins.
+            boolean trustedAssetPath = path == null || path.isEmpty() || "/".equals(path)
+                    || path.startsWith("/assets/offline/");
+            return trustedAssetHost && trustedAssetPath;
         } catch (Exception ignored) { return false; }
     }
 
