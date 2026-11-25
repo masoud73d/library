@@ -41,6 +41,8 @@ public class MainActivity extends Activity {
     private volatile boolean trustedLocalPageLoaded = false;
     private WebViewAssetLoader assetLoader;
     private ValueCallback<Uri[]> filePathCallback;
+    private TextToSpeech textToSpeech;
+    private volatile boolean textToSpeechReady = false;
     private GeolocationPermissions.Callback pendingGeoCallback;
     private String pendingGeoOrigin;
     private PermissionRequest pendingCameraPermissionRequest;
@@ -73,6 +75,21 @@ public class MainActivity extends Activity {
         webView = new WebView(this);
         webView.setBackgroundColor(0xFF160A06);
         setContentView(webView);
+
+        // Initialize Android's native Persian text-to-speech engine for offline tool pages.
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS && textToSpeech != null) {
+                int languageStatus = textToSpeech.setLanguage(new Locale("fa", "IR"));
+                if (languageStatus == TextToSpeech.LANG_MISSING_DATA
+                        || languageStatus == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    languageStatus = textToSpeech.setLanguage(new Locale("fa"));
+                }
+                textToSpeechReady = languageStatus != TextToSpeech.LANG_MISSING_DATA
+                        && languageStatus != TextToSpeech.LANG_NOT_SUPPORTED;
+            } else {
+                textToSpeechReady = false;
+            }
+        });
 
         assetLoader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
@@ -645,6 +662,20 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public boolean speakText(String text) {
+            if (!trustedLocalPageLoaded || text == null || text.length() > 10000
+                    || !textToSpeechReady || textToSpeech == null) {
+                return false;
+            }
+            runOnUiThread(() -> {
+                if (textToSpeechReady && textToSpeech != null) {
+                    textToSpeech.speak(text, TextToSpeech.QUEUE_FLUSH, null, "library_read_text");
+                }
+            });
+            return true;
+        }
+
+        @JavascriptInterface
         public String getAppVersion() {
             if (!trustedLocalPageLoaded) return "";
             try {
@@ -770,6 +801,13 @@ public class MainActivity extends Activity {
             popupWebView.stopLoading();
             popupWebView.destroy();
             popupWebView = null;
+        }
+
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech = null;
+            textToSpeechReady = false;
         }
 
         if (webView != null) {
