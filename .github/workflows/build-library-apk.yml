@@ -271,4 +271,5 @@ jobs:
         if: always()
         run: rm -f android/app/library-signing.jks
 
+# Native TextToSpeech bridge is packaged with the pinned dictionary source.
 # Publish the next verified APK release when the commit message includes [publish-apk].
