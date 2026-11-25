@@ -312,6 +312,10 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
         }
         if (!window.Tesseract) throw new Error("موتور OCR در دسترس نیست.");
         return Tesseract.createWorker("fas+eng", 1, {
+          workerPath: "../../vendor/tesseract/worker.min.js",
+          corePath: "../../vendor/tesseract",
+          langPath: "../../vendor/tessdata",
+          gzip: true,
           logger: info => {
             if (info.status) {
               const p = Math.round((info.progress || 0) * 100);
@@ -486,6 +490,13 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
     });
   }
 
+  window.addEventListener("error", event => {
+    message("خطای اجرای OCR: " + (event.message || "خطای نامشخص"), "error");
+  });
+  window.addEventListener("unhandledrejection", event => {
+    const reason = event.reason;
+    message("خطای موتور تشخیص متن: " + (reason && reason.message ? reason.message : String(reason)), "error");
+  });
   buttons();
 })();
 </script>
