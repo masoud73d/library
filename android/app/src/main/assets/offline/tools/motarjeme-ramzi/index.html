@@ -1003,16 +1003,39 @@ $("speakBtn").addEventListener("click", () => {
         return;
     }
 
-    if (!("speechSynthesis" in window)) {
-        setStatus("خواندن صوتی در این مرورگر پشتیبانی نمی‌شود.");
+    // Prefer Android's native text-to-speech engine inside the installed app.
+    // This avoids relying on WebView's often-missing Persian speech voices.
+    try {
+        if (window.AndroidApp && typeof window.AndroidApp.speakText === "function"
+                && window.AndroidApp.speakText(text)) {
+            setStatus("خواندن متن با صدای فارسی آغاز شد.");
+            return;
+        }
+    } catch (error) {
+        // Continue with the browser fallback below.
+    }
+
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+        setStatus("سرویس خواندن صوتی در این دستگاه در دسترس نیست.");
         return;
     }
 
-    speechSynthesis.cancel();
+    try {
+        const synth = window.speechSynthesis;
+        synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "fa-IR";
-    speechSynthesis.speak(utterance);
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "fa-IR";
+        const voices = synth.getVoices();
+        const persianVoice = voices.find(voice => /^fa([_-]|$)/i.test(voice.lang));
+        if (persianVoice) utterance.voice = persianVoice;
+
+        utterance.onstart = () => setStatus("خواندن متن آغاز شد.");
+        utterance.onerror = () => setStatus("صدای فارسی در این دستگاه فعال نیست؛ سرویس گفتار فارسی را در تنظیمات گوشی بررسی کن.");
+        synth.speak(utterance);
+    } catch (error) {
+        setStatus("امکان پخش صدای متن وجود ندارد.");
+    }
 });
 
 $("clearHistoryBtn").addEventListener("click", () => {
