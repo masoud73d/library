@@ -242,6 +242,15 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle --no-daemon --stacktrace :app:assembleDebug -PappVersionCode=${{ github.run_number }}
 
+      - name: Verify OCR language data is packaged in APK
+        run: |
+          set -Eeuo pipefail
+          APK="android/app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          unzip -l "$APK" | grep -F "assets/offline/vendor/tessdata/fas.traineddata.gz"
+          unzip -l "$APK" | grep -F "assets/offline/vendor/tessdata/eng.traineddata.gz"
+          echo "OCR Persian and English traineddata are present in the APK."
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
