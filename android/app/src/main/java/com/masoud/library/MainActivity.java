@@ -730,8 +730,7 @@ public class MainActivity extends Activity {
             "var frame=document.getElementById('appFrame');" +
             "try{" +
             "var child=frame&&frame.contentWindow;" +
-            "var base=frame?parseInt(frame.dataset.backBase||'0',10):0;" +
-            "if(child&&base>0&&child.history.length>base){" +
+            "if(child&&Number(child.__libraryBackDepth||0)>0){" +
             "child.history.back();return 'handled';}" +
             "}catch(e){}" +
             "try{" +
