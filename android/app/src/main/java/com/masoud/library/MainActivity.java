@@ -454,7 +454,13 @@ public class MainActivity extends Activity {
                 JSONArray sensorArray = new JSONArray();
                 android.hardware.SensorManager sensorManager =
                         (android.hardware.SensorManager) getSystemService(SENSOR_SERVICE);
+                android.hardware.Sensor lightSensor = null;
+                android.hardware.Sensor proximitySensor = null;
                 if (sensorManager != null) {
+                    // Use Android's canonical sensor constants and query default sensors
+                    // separately so OEM-specific implementations are not missed by UI mapping.
+                    lightSensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_LIGHT);
+                    proximitySensor = sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_PROXIMITY);
                     for (android.hardware.Sensor sensor :
                             sensorManager.getSensorList(android.hardware.Sensor.TYPE_ALL)) {
                         JSONObject sensorInfo = new JSONObject();
@@ -471,6 +477,10 @@ public class MainActivity extends Activity {
                     }
                 }
                 info.put("sensors", sensorArray);
+                info.put("hasLightSensor", lightSensor != null);
+                info.put("lightSensorName", lightSensor == null ? "" : lightSensor.getName());
+                info.put("hasProximitySensor", proximitySensor != null);
+                info.put("proximitySensorName", proximitySensor == null ? "" : proximitySensor.getName());
                 info.put("manufacturer", Build.MANUFACTURER);
                 info.put("brand", Build.BRAND);
                 info.put("model", Build.MODEL);
