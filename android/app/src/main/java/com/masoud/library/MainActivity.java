@@ -2,11 +2,6 @@
 package com.masoud.library;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.graphics.Color;
-import android.widget.LinearLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
 import android.app.ActivityManager;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
@@ -167,67 +162,6 @@ public class MainActivity extends Activity {
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
-
-            // Provide a native Android color chooser for HTML input[type=color] inside tool iframes.
-            @Override
-            public boolean onShowColorChooser(
-                    WebView view,
-                    ValueCallback<Integer> callback,
-                    ColorChooserParams params) {
-                int initial = params == null ? Color.WHITE : params.getDefaultColor();
-                if (initial == Color.TRANSPARENT) initial = Color.WHITE;
-                final int[] rgb = {
-                        Color.red(initial), Color.green(initial), Color.blue(initial)
-                };
-
-                LinearLayout layout = new LinearLayout(MainActivity.this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-                int pad = (int) (20 * getResources().getDisplayMetrics().density);
-                layout.setPadding(pad, pad, pad, pad);
-
-                TextView preview = new TextView(MainActivity.this);
-                preview.setText("پیش‌نمایش رنگ");
-                preview.setTextColor(Color.WHITE);
-                preview.setGravity(android.view.Gravity.CENTER);
-                preview.setBackgroundColor(Color.rgb(rgb[0], rgb[1], rgb[2]));
-                preview.setMinHeight((int) (52 * getResources().getDisplayMetrics().density));
-                layout.addView(preview);
-
-                String[] names = {"قرمز", "سبز", "آبی"};
-                SeekBar[] bars = new SeekBar[3];
-                for (int i = 0; i < 3; i++) {
-                    TextView label = new TextView(MainActivity.this);
-                    label.setText(names[i] + ": " + rgb[i]);
-                    layout.addView(label);
-
-                    SeekBar seek = new SeekBar(MainActivity.this);
-                    seek.setMax(255);
-                    seek.setProgress(rgb[i]);
-                    final int channel = i;
-                    seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override public void onProgressChanged(SeekBar bar, int value, boolean fromUser) {
-                            rgb[channel] = value;
-                            label.setText(names[channel] + ": " + value);
-                            preview.setBackgroundColor(Color.rgb(rgb[0], rgb[1], rgb[2]));
-                        }
-                        @Override public void onStartTrackingTouch(SeekBar bar) { }
-                        @Override public void onStopTrackingTouch(SeekBar bar) { }
-                    });
-                    bars[i] = seek;
-                    layout.addView(seek);
-                }
-
-                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("انتخاب رنگ")
-                        .setView(layout)
-                        .setNegativeButton("انصراف", (d, which) -> callback.onReceiveValue(null))
-                        .setPositiveButton("انتخاب", (d, which) ->
-                                callback.onReceiveValue(Color.rgb(rgb[0], rgb[1], rgb[2])))
-                        .create();
-                dialog.setOnCancelListener(d -> callback.onReceiveValue(null));
-                dialog.show();
-                return true;
-            }
 
             // Bridge WebView camera permission requests to Android's runtime permission dialog.
             @Override
