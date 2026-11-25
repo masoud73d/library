@@ -1,1 +1,1 @@
-Temporary release trigger for the verified Android APK build.
+Publish the Android build including native SensorManager detection for the system information tool.
