@@ -717,6 +717,36 @@ function getReader() {
   return scanReader;
 }
 
+function hasPersianText(value) {
+  return /[\\u0600-\\u06FF\\u0750-\\u077F\\u08A0-\\u08FF]/.test(value);
+}
+
+// Repair the common UTF-8-as-Latin-1 mojibake produced by QR decoders.
+function repairUtf8Mojibake(value) {
+  if (!value || hasPersianText(value)) return value;
+
+  try {
+    const codePoints = Array.from(value, char => char.codePointAt(0));
+    // This repair is only valid when every displayed character represents
+    // one original byte. Avoid corrupting legitimate non-Latin text.
+    if (!codePoints.length || codePoints.some(code => code > 0x00FF)) {
+      return value;
+    }
+
+    const bytes = new Uint8Array(codePoints);
+    const repaired = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+
+    // Accept the repair only when it actually restores Persian/Arabic text.
+    if (hasPersianText(repaired) && !repaired.includes("\\uFFFD")) {
+      return repaired;
+    }
+  } catch (error) {
+    console.warn("QR mojibake repair skipped:", error);
+  }
+
+  return value;
+}
+
 function getQRDecodedText(result) {
   const fallbackText = result.getText();
 
@@ -732,31 +762,33 @@ function getQRDecodedText(result) {
       ? metadata.get(byteSegmentsKey)
       : null;
 
-    if (!segments || !segments.length || typeof TextDecoder === "undefined") {
-      return fallbackText;
+    if (segments && segments.length && typeof TextDecoder !== "undefined") {
+      const chunks = Array.from(segments, segment =>
+        segment instanceof Uint8Array ? segment : new Uint8Array(segment)
+      );
+      const byteLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+      const bytes = new Uint8Array(byteLength);
+      let offset = 0;
+
+      for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.length;
+      }
+
+      // First try UTF-8, which is the expected encoding for newly generated QR codes.
+      try {
+        const utf8Text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+        if (utf8Text) return utf8Text;
+      } catch (utf8Error) {
+        // Some older QR codes may use a legacy encoding; use the decoder output below.
+      }
     }
-
-    // BYTE_SEGMENTS contains the original QR byte-mode payload, before
-    // ZXing converts it to a display string using charset heuristics.
-    const chunks = Array.from(segments, segment =>
-      segment instanceof Uint8Array ? segment : new Uint8Array(segment)
-    );
-    const byteLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-    const bytes = new Uint8Array(byteLength);
-    let offset = 0;
-
-    for (const chunk of chunks) {
-      bytes.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    const utf8Text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    return utf8Text || fallbackText;
   } catch (error) {
-    // Keep compatibility with QR codes that use a legacy/non-UTF-8 charset.
-    console.warn("QR UTF-8 decoding fallback:", error);
-    return fallbackText;
+    console.warn("QR byte-segment decoding failed:", error);
   }
+
+  // If ZXing already returned Persian, keep it. Otherwise repair common mojibake.
+  return repairUtf8Mojibake(fallbackText);
 }
 
 async function decodeImage(file, kind) {
