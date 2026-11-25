@@ -1123,6 +1123,34 @@ buildHarmonies();
 renderLibrary();
 renderPresets();
 renderHomePalette();
+
+/* MASOUD_ANDROID_INTERACTION_FIX */
+document.addEventListener('click', event => {
+  const nav = event.target.closest('.nav-btn[data-page]');
+  if (nav) {
+    event.preventDefault();
+    showPage(nav.dataset.page);
+    return;
+  }
+  const swatch = event.target.closest('.temp-colors span');
+  if (swatch) {
+    const color = getComputedStyle(swatch).backgroundColor;
+    const match = color.match(/\d+/g);
+    if (match && match.length >= 3) {
+      copyText(rgbToHex(Number(match[0]), Number(match[1]), Number(match[2])));
+    }
+  }
+});
+document.querySelectorAll('.nav-btn[data-page]').forEach(button => {
+  button.addEventListener('click', () => showPage(button.dataset.page));
+});
+document.querySelectorAll('#color1,#color2,#ratio,#harmonyColor').forEach(control => {
+  control.addEventListener('change', () => {
+    updateMixer();
+    buildHarmonies();
+  });
+});
+
 </script>
 </body>
 </html>
