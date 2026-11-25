@@ -8,6 +8,7 @@ import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.StatFs;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import java.lang.reflect.Method;
 import android.os.Bundle;
 import android.os.Build;
@@ -414,6 +415,28 @@ public class MainActivity extends Activity {
                 JSONObject info = new JSONObject();
 
                 info.put("nativeSource", "Android");
+
+                // Enumerate actual hardware sensors through Android's SensorManager.
+                JSONArray sensorArray = new JSONArray();
+                android.hardware.SensorManager sensorManager =
+                        (android.hardware.SensorManager) getSystemService(SENSOR_SERVICE);
+                if (sensorManager != null) {
+                    for (android.hardware.Sensor sensor :
+                            sensorManager.getSensorList(android.hardware.Sensor.TYPE_ALL)) {
+                        JSONObject sensorInfo = new JSONObject();
+                        sensorInfo.put("type", sensor.getType());
+                        sensorInfo.put("name", sensor.getName());
+                        sensorInfo.put("vendor", sensor.getVendor());
+                        sensorInfo.put("version", sensor.getVersion());
+                        sensorInfo.put("maxRange", sensor.getMaximumRange());
+                        sensorInfo.put("resolution", sensor.getResolution());
+                        sensorInfo.put("power", sensor.getPower());
+                        sensorInfo.put("wakeUp", sensor.isWakeUpSensor());
+                        sensorInfo.put("reportingMode", sensor.getReportingMode());
+                        sensorArray.put(sensorInfo);
+                    }
+                }
+                info.put("sensors", sensorArray);
                 info.put("manufacturer", Build.MANUFACTURER);
                 info.put("brand", Build.BRAND);
                 info.put("model", Build.MODEL);
