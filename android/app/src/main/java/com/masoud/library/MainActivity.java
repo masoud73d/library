@@ -723,37 +723,44 @@ public class MainActivity extends Activity {
 
         webView.evaluateJavascript(
             "(function() {" +
-
             "var app=document.getElementById('appOverlay');" +
             "var list=document.getElementById('listOverlay');" +
             "var about=document.getElementById('aboutOverlay');" +
-
             "if(app&&app.classList.contains('show')){" +
-            "if(typeof closeApp==='function')closeApp();" +
-            "return 'handled';}" +
-
-            "if(list&&list.classList.contains('show')){" +
-            "if(typeof hideList==='function')hideList();" +
-            "return 'handled';}" +
-
-            "if(about&&about.classList.contains('show')){" +
-            "if(typeof hideAbout==='function')hideAbout();" +
-            "return 'handled';}" +
-
+            "var frame=document.getElementById('appFrame');" +
+            "try{" +
+            "var child=frame&&frame.contentWindow;" +
+            "var base=frame?parseInt(frame.dataset.backBase||'0',10):0;" +
+            "if(child&&base>0&&child.history.length>base){" +
+            "child.history.back();return 'handled';}" +
+            "}catch(e){}" +
+            "try{" +
+            "var doc=frame&&frame.contentDocument;" +
+            "if(doc){" +
+            "var selectors='dialog[open],[role=dialog],[aria-modal=true],.modal,[id*=modal i]';" +
+            "var nodes=doc.querySelectorAll(selectors);" +
+            "for(var i=nodes.length-1;i>=0;i--){" +
+            "var el=nodes[i],cs=child.getComputedStyle(el),rect=el.getBoundingClientRect();" +
+            "if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity)===0||rect.width===0||rect.height===0)continue;" +
+            "var btns=el.querySelectorAll('button,[role=button]');" +
+            "for(var b=btns.length-1;b>=0;b--){" +
+            "var btn=btns[b],label=((btn.innerText||'')+' '+(btn.getAttribute('aria-label')||'')+' '+(btn.title||'')).trim();" +
+            "if(/^(×|✕|✖|x|close|بستن|انصراف|بازگشت)$/i.test(label)||/close|بستن/i.test(label)){btn.click();return 'handled';}" +
+            "}" +
+            "doc.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',keyCode:27,which:27,bubbles:true}));" +
+            "child.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',keyCode:27,which:27,bubbles:true}));" +
+            "return 'handled';" +
+            "}" +
+            "}" +
+            "}catch(e){}" +
+            "if(typeof closeApp==='function')closeApp();return 'handled';}" +
+            "if(list&&list.classList.contains('show')){if(typeof hideList==='function')hideList();return 'handled';}" +
+            "if(about&&about.classList.contains('show')){if(typeof hideAbout==='function')hideAbout();return 'handled';}" +
             "return 'none';})();",
-
             value -> {
-
-                if (!"\"none\"".equals(value)
-                        && !"none".equals(value)) {
-                    return;
-                }
-
-                if (webView != null && webView.canGoBack()) {
-                    webView.goBack();
-                } else {
-                    finish();
-                }
+                if (!"\"none\"".equals(value) && !"none".equals(value)) return;
+                if (webView != null && webView.canGoBack()) webView.goBack();
+                else finish();
             }
         );
     }
