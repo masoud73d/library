@@ -360,6 +360,13 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) { return false; }
     }
 
+    // Allow native speech from the official hosted library page too. The dictionary
+    // runs in an iframe while the main WebView URL remains /library/.
+    private boolean isTrustedSpeechPage() {
+        return trustedLocalPageLoaded
+                || (webView != null && isLibraryWebsiteUrl(webView.getUrl()));
+    }
+
     private boolean isTrustedLocalPermissionOrigin(String rawOrigin) {
         if (rawOrigin == null) return false;
         try {
@@ -472,7 +479,7 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void speakText(String text, String languageTag) {
-            if (!trustedLocalPageLoaded) return;
+            if (!isTrustedSpeechPage()) return;
             if (text == null || text.trim().isEmpty()) {
                 notifySpeechStatus("متنی برای خواندن وجود ندارد.");
                 return;
