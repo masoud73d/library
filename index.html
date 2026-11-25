@@ -1082,6 +1082,7 @@ function openBook(index) {
         if (!source.includes("history.pushState")) {
           child.__libraryBackShimInstalled = true;
           let modalBackEntry = false;
+          let closingViaBack = false;
           const visibleLayers = () => {
             const selector = "dialog[open],[role=dialog],[aria-modal=true],.modal,[id*=modal i],[class*=modal i],[id*=overlay i],[class*=overlay i],[class*=fixed][class*=inset-0]";
             return Array.from(child.document.querySelectorAll(selector)).filter(el => {
@@ -1118,9 +1119,15 @@ function openBook(index) {
           child.addEventListener("popstate", () => {
             if (!modalBackEntry) return;
             modalBackEntry = false;
-            child.setTimeout(closeVisibleLayer, 0);
+            closingViaBack = true;
+            child.setTimeout(() => {
+              closeVisibleLayer();
+              closingViaBack = false;
+              syncModalHistory();
+            }, 0);
           });
           const syncModalHistory = () => {
+            if (closingViaBack) return;
             const isOpen = visibleLayers().length > 0;
             if (isOpen && !modalBackEntry) {
               modalBackEntry = true;
