@@ -136,7 +136,7 @@ jobs:
             ref="${TOOL_REFS[$slug]:-}"
             test -n "$ref" || { echo "::error::No pinned source revision for $slug"; exit 1; }
             if [[ "$slug" == "Qr.Code" || "$slug" == "Colors" || "$slug" == "Text-reader" ]]; then
-              cp "android/app/src/main/assets/offline/tools/$slug/index.html" "$ROOT/tools/$slug/index.html"
+              test -s "$ROOT/tools/$slug/index.html" || { echo "::error::Missing reviewed local tool: $slug"; exit 1; }
             else
               curl -fLsS "https://raw.githubusercontent.com/masoud73d/$slug/$ref/index.html" -o "$ROOT/tools/$slug/index.html"
             fi
