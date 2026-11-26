@@ -1,4 +1,5 @@
 name: Build Library APK
+# Release includes the origin-scoped native speech bridge and pinned dictionary source.
 
 on:
   push:
