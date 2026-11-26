@@ -35,6 +35,8 @@ import android.speech.tts.UtteranceProgressListener;
 import android.speech.tts.Voice;
 import java.util.Locale;
 import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 
 public class MainActivity extends Activity {
     // Version-aware update banner release. Camera permission is bridged to Android runtime consent.
@@ -146,6 +148,39 @@ public class MainActivity extends Activity {
         cookieManager.setAcceptThirdPartyCookies(webView, false);
 
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidApp");
+
+        // Native speech uses an origin-scoped message bridge instead of JavaScriptInterface.
+        // This lets us verify the sender origin and retain the official hosted/offline dictionary.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+            WebViewCompat.addWebMessageListener(
+                    webView,
+                    "LibrarySpeech",
+                    new java.util.HashSet<>(java.util.Arrays.asList(
+                            "https://masoud73d.github.io",
+                            "https://appassets.androidplatform.net"
+                    )),
+                    (view, message, sourceOrigin, isMainFrame, replyProxy) -> {
+                        if (!isTrustedSpeechMessageSource(view, sourceOrigin)) return;
+                        try {
+                            JSONObject request = new JSONObject(message.getData());
+                            String action = request.optString("action", "");
+                            AndroidBridge speechBridge = new AndroidBridge();
+                            if ("speak".equals(action)) {
+                                speechBridge.speakText(
+                                        request.optString("text", ""),
+                                        request.optString("language", "en")
+                                );
+                            } else if ("toggle".equals(action)) {
+                                speechBridge.toggleSpeechPause();
+                            } else if ("stop".equals(action)) {
+                                speechBridge.stopSpeech();
+                            }
+                        } catch (Exception ignored) {
+                            // Ignore malformed messages; never expose a native error to page content.
+                        }
+                    }
+            );
+        }
 
         webView.setWebViewClient(new WebViewClient() {
 
@@ -360,11 +395,18 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) { return false; }
     }
 
-    // Allow native speech from the official hosted library page too. The dictionary
-    // runs in an iframe while the main WebView URL remains /library/.
-    private boolean isTrustedSpeechPage() {
-        return trustedLocalPageLoaded
-                || (webView != null && isLibraryWebsiteUrl(webView.getUrl()));
+    // Accept speech messages only from the official library host or packaged offline assets,
+    // while the top-level WebView itself is on a trusted library page.
+    private boolean isTrustedSpeechMessageSource(WebView view, Uri sourceOrigin) {
+        if (view != webView || sourceOrigin == null) return false;
+        if (!"https".equalsIgnoreCase(sourceOrigin.getScheme())) return false;
+        String host = sourceOrigin.getHost();
+        boolean trustedOrigin =
+                "masoud73d.github.io".equalsIgnoreCase(host)
+                || "appassets.androidplatform.net".equalsIgnoreCase(host);
+        if (!trustedOrigin) return false;
+        String topLevelUrl = view.getUrl();
+        return isLibraryWebsiteUrl(topLevelUrl) || isTrustedLocalOrigin(topLevelUrl);
     }
 
     private boolean isTrustedLocalPermissionOrigin(String rawOrigin) {
@@ -477,9 +519,7 @@ public class MainActivity extends Activity {
 
     private class AndroidBridge {
 
-        @JavascriptInterface
         public void speakText(String text, String languageTag) {
-            if (!isTrustedSpeechPage()) return;
             if (text == null || text.trim().isEmpty()) {
                 notifySpeechStatus("متنی برای خواندن وجود ندارد.");
                 return;
@@ -549,9 +589,7 @@ public class MainActivity extends Activity {
             });
         }
 
-        @JavascriptInterface
         public void toggleSpeechPause() {
-            if (!trustedLocalPageLoaded) return;
             runOnUiThread(() -> {
                 if (textToSpeech == null || !textToSpeechReady) return;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -572,9 +610,7 @@ public class MainActivity extends Activity {
             });
         }
 
-        @JavascriptInterface
         public void stopSpeech() {
-            if (!trustedLocalPageLoaded) return;
             runOnUiThread(() -> {
                 if (textToSpeech != null && textToSpeechReady) textToSpeech.stop();
                 nativeSpeechPaused = false;
