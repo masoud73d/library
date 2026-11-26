@@ -512,7 +512,12 @@ public class MainActivity extends Activity {
         runOnUiThread(() -> {
             if (webView != null) {
                 String safe = JSONObject.quote(message == null ? "" : message);
-                webView.evaluateJavascript("if(window.LibrarySpeechStatus)window.LibrarySpeechStatus(" + safe + ");", null);
+                String script = "(function(){var m=" + safe
+                        + ";if(window.LibrarySpeechStatus)window.LibrarySpeechStatus(m);"
+                        + "document.querySelectorAll('iframe').forEach(function(frame){"
+                        + "try{if(frame.contentWindow&&frame.contentWindow.LibrarySpeechStatus)"
+                        + "frame.contentWindow.LibrarySpeechStatus(m);}catch(e){}});})();";
+                webView.evaluateJavascript(script, null);
             }
         });
     }
