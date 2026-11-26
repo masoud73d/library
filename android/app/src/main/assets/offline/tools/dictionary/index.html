@@ -143,8 +143,8 @@ async function speakOutput(){
   const spokenText=output.value.trim();
   if(!spokenText){setStatus('ابتدا متن را ترجمه کنید تا خوانده شود.');return}
   const lang=target.value==='zh'?'zh-CN':target.value;
-  if(window.AndroidApp && typeof window.AndroidApp.speakText==='function'){
-    window.AndroidApp.speakText(spokenText,lang);
+  if(window.LibrarySpeech && typeof window.LibrarySpeech.postMessage==='function'){
+    window.LibrarySpeech.postMessage(JSON.stringify({action:'speak',text:spokenText,language:lang}));
     return;
   }
   if(!speechSupported){setStatus('موتور خواندن متن در این مرورگر در دسترس نیست.');return}
@@ -189,8 +189,8 @@ function playWithVoice(voice,spokenText,lang,attempt,onFailure,isOnline=false){
 }
 speakBtn.addEventListener('click',speakOutput);
 pauseSpeakBtn.addEventListener('click',()=>{
-  if(window.AndroidApp && typeof window.AndroidApp.toggleSpeechPause==='function'){
-    window.AndroidApp.toggleSpeechPause();
+  if(window.LibrarySpeech && typeof window.LibrarySpeech.postMessage==='function'){
+    window.LibrarySpeech.postMessage(JSON.stringify({action:'toggle'}));
     return;
   }
   if(!speechSupported)return;
@@ -200,7 +200,9 @@ pauseSpeakBtn.addEventListener('click',()=>{
 });
 stopSpeakBtn.addEventListener('click',()=>{
   speechAttempt++;
-  if(window.AndroidApp && typeof window.AndroidApp.stopSpeech==='function')window.AndroidApp.stopSpeech();
+  if(window.LibrarySpeech && typeof window.LibrarySpeech.postMessage==='function'){
+    window.LibrarySpeech.postMessage(JSON.stringify({action:'stop'}));
+  }
   if(speechSupported)window.speechSynthesis.cancel();
   setStatus('خواندن متن متوقف شد.');
 });
